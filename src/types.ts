@@ -1,4 +1,9 @@
 export type NavTab = 'education' | 'simulation' | 'realworld'
+
+export interface User {
+  email: string
+  name: string
+}
 export type AssetCategory = 'stock' | 'bond' | 'crypto' | 'forex' | 'commodity' | 'etf'
 export type LevelStatus = 'completed' | 'active' | 'locked'
 

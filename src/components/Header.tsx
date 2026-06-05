@@ -6,14 +6,18 @@ import Avatar from '@mui/material/Avatar'
 import Chip from '@mui/material/Chip'
 import Stack from '@mui/material/Stack'
 import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
-import type { NavTab } from '../types'
+import type { NavTab, User } from '../types'
 
 interface HeaderProps {
   tab: NavTab
   setTab: (tab: NavTab) => void
   xp: number
   streak: number
+  user: User
+  onLogout: () => void
 }
 
 const TABS: { id: NavTab; label: string; icon: string }[] = [
@@ -22,7 +26,7 @@ const TABS: { id: NavTab; label: string; icon: string }[] = [
   { id: 'realworld',  label: 'INVEST',   icon: '🌍' },
 ]
 
-export default function Header({ tab, setTab, xp, streak }: HeaderProps) {
+export default function Header({ tab, setTab, xp, streak, user, onLogout }: HeaderProps) {
   return (
     <AppBar
       position="sticky"
@@ -45,9 +49,20 @@ export default function Header({ tab, setTab, xp, streak }: HeaderProps) {
             </Typography>
           </Box>
         </Stack>
-        <Stack direction="row" sx={{ gap: 1 }}>
+        <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
           <Chip label={`🔥 ${streak}`} sx={{ bgcolor: 'rgba(255,179,0,0.25)', border: '1px solid rgba(255,179,0,0.4)', color: '#FFD54F', fontWeight: 700 }} />
           <Chip label={`⚡ ${xp} XP`} sx={{ bgcolor: 'rgba(255,255,255,0.18)', color: '#fff', fontWeight: 600 }} />
+          <Divider orientation="vertical" flexItem sx={{ bgcolor: 'rgba(255,255,255,0.2)', my: 1 }} />
+          <Avatar sx={{ width: 28, height: 28, bgcolor: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.35)', fontSize: 13, fontWeight: 800 }}>
+            {user.name[0].toUpperCase()}
+          </Avatar>
+          <Button
+            onClick={onLogout}
+            size="small"
+            sx={{ color: 'rgba(255,255,255,0.65)', fontSize: 11, fontWeight: 600, textTransform: 'none', minWidth: 0, px: 0.75, py: 0.5, '&:hover': { color: '#fff', bgcolor: 'rgba(255,255,255,0.1)' } }}
+          >
+            Sign out
+          </Button>
         </Stack>
       </Toolbar>
 
