@@ -1,5 +1,19 @@
 import { useState } from 'react'
 import Button from '@mui/material/Button'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import LinearProgress from '@mui/material/LinearProgress'
+import Alert from '@mui/material/Alert'
+import TextField from '@mui/material/TextField'
+import InputAdornment from '@mui/material/InputAdornment'
+import List from '@mui/material/List'
+import ListItem from '@mui/material/ListItem'
+import ListItemAvatar from '@mui/material/ListItemAvatar'
+import Chip from '@mui/material/Chip'
+import Typography from '@mui/material/Typography'
+import Box from '@mui/material/Box'
+import Stack from '@mui/material/Stack'
+import Paper from '@mui/material/Paper'
 import { PLATFORMS } from '../data/gameData'
 import type { GameState, Platform } from '../types'
 
@@ -22,8 +36,8 @@ export default function RealWorldPage({ gameState }: RealWorldPageProps) {
 
   const riskColor =
     riskScore < 30 ? 'var(--blue-400)' :
-    riskScore < 55 ? 'var(--teal-400)' :
-    riskScore < 80 ? 'var(--gold-500)' : 'var(--red-400)'
+    riskScore < 55 ? '#1D9E75' :
+    riskScore < 80 ? '#FFB300' : '#E24B4A'
 
   const allocation =
     riskScore < 30 ? '70% Bonds · 20% ETFs · 10% Stocks' :
@@ -34,147 +48,176 @@ export default function RealWorldPage({ gameState }: RealWorldPageProps) {
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
     if (!searchQuery.trim()) return
-    const url = `https://finance.yahoo.com/search?p=${encodeURIComponent(searchQuery)}`
-    window.open(url, '_blank')
+    window.open(`https://finance.yahoo.com/search?p=${encodeURIComponent(searchQuery)}`, '_blank')
   }
 
   return (
-    <div>
-      <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Bridge to Real Investing</h2>
-      <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 20 }}>
+    <Box>
+      <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>Bridge to Real Investing</Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
         You've built confidence in the simulator — here's how to start for real
-      </p>
+      </Typography>
 
-      <Card title="🎯 Your Risk Profile">
-        <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>
+      {/* Risk Profile */}
+      <InfoCard title="🎯 Your Risk Profile">
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
           Based on your simulation behavior and {levelsCompleted} completed level{levelsCompleted !== 1 ? 's' : ''}:
-        </p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
-          <span style={{ fontSize: 20, fontFamily: 'var(--font-display)', fontWeight: 800, color: riskColor }}>{riskLabel}</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 11, marginBottom: 4 }}>
-          <span style={{ color: 'var(--teal-400)', fontWeight: 600 }}>Low risk</span>
-          <div style={{ flex: 1, height: 8, background: '#eee', borderRadius: 4, overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${riskScore}%`, background: 'linear-gradient(90deg, #1D9E75, #FFB300, #E24B4A)', borderRadius: 4, transition: 'width 0.8s' }} />
-          </div>
-          <span style={{ color: 'var(--red-400)', fontWeight: 600 }}>High risk</span>
-        </div>
-        <p style={{ fontSize: 12.5, color: 'var(--text)', marginTop: 10 }}>
+        </Typography>
+        <Typography sx={{ fontSize: 20, fontWeight: 800, color: riskColor, mb: 1.25 }}>{riskLabel}</Typography>
+        <Stack direction="row" sx={{ alignItems: 'center', gap: 1.25, mb: 0.5 }}>
+          <Typography variant="caption" color="primary.main" sx={{ fontWeight: 600 }}>Low risk</Typography>
+          <LinearProgress
+            variant="determinate"
+            value={riskScore}
+            sx={{
+              flex: 1, height: 8, borderRadius: 4,
+              '& .MuiLinearProgress-bar': { background: 'linear-gradient(90deg, #1D9E75, #FFB300, #E24B4A)', borderRadius: 4 },
+            }}
+          />
+          <Typography variant="caption" color="error.main" sx={{ fontWeight: 600 }}>High risk</Typography>
+        </Stack>
+        <Typography sx={{ fontSize: 12.5, mt: 1.25 }}>
           Suggested allocation: <strong>{allocation}</strong>
-        </p>
-        <p style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 6 }}>
+        </Typography>
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.75 }}>
           Complete more levels to refine your profile
-        </p>
-      </Card>
+        </Typography>
+      </InfoCard>
 
-      <Card title="🏦 Partner Platforms">
-        <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>
+      {/* Partner Platforms */}
+      <InfoCard title="🏦 Partner Platforms">
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.75 }}>
           Tap a platform to compare features and find the right fit for you.
-        </p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
+        </Typography>
+        <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1, mb: 1.75 }}>
           {PLATFORMS.map(p => (
-            <Button
+            <Chip
               key={p.id}
               onClick={() => setSelectedPlatform(selectedPlatform?.id === p.id ? null : p)}
-              variant="outlined"
-              disableElevation
+              variant={selectedPlatform?.id === p.id ? 'filled' : 'outlined'}
+              label={
+                <Stack direction="row" sx={{ alignItems: 'center', gap: 0.75 }}>
+                  <Box sx={{ width: 18, height: 18, borderRadius: '4px', bgcolor: p.color, border: '1px solid rgba(0,0,0,0.1)', flexShrink: 0 }} />
+                  <span>{p.name}</span>
+                  {p.beginner && (
+                    <Box component="span" sx={{ fontSize: 9, bgcolor: 'var(--teal-50)', color: '#0F6E56', borderRadius: 2, px: '5px', py: '1px', fontWeight: 700 }}>
+                      BEGINNER
+                    </Box>
+                  )}
+                </Stack>
+              }
               sx={{
-                display: 'flex', alignItems: 'center', gap: '6px',
-                bgcolor: selectedPlatform?.id === p.id ? '#E1F5EE' : 'var(--surface2)',
-                borderColor: selectedPlatform?.id === p.id ? '#1D9E75' : 'var(--border)',
+                height: 'auto',
+                py: 0.75,
                 borderRadius: '20px',
-                px: '14px', py: '6px',
-                fontSize: '12px', fontWeight: 500,
-                textTransform: 'none',
-                color: selectedPlatform?.id === p.id ? '#0F6E56' : 'var(--text)',
-                '&:hover': { bgcolor: '#E1F5EE', borderColor: '#1D9E75', color: '#0F6E56' },
+                borderColor: selectedPlatform?.id === p.id ? '#1D9E75' : 'var(--border)',
+                bgcolor: selectedPlatform?.id === p.id ? 'var(--teal-50)' : 'var(--surface2)',
+                color: selectedPlatform?.id === p.id ? '#0F6E56' : 'text.primary',
+                '& .MuiChip-label': { px: 1.75 },
+                '&:hover': { bgcolor: 'var(--teal-50)', borderColor: '#1D9E75' },
               }}
-            >
-              <div style={{ width: 18, height: 18, borderRadius: 4, background: p.color, border: '1px solid rgba(0,0,0,0.1)', flexShrink: 0 }} />
-              {p.name}
-              {p.beginner && <span style={{ fontSize: 9, background: 'var(--teal-50)', color: 'var(--teal-600)', borderRadius: 8, padding: '1px 5px', fontWeight: 700 }}>BEGINNER</span>}
-            </Button>
+            />
           ))}
-        </div>
+        </Stack>
+
         {selectedPlatform && (
-          <div style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 12, padding: 16 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16 }}>{selectedPlatform.name}</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--gold-400)', fontWeight: 700 }}>
-                ★ {selectedPlatform.rating}
-              </div>
-            </div>
+          <Paper variant="outlined" sx={{ borderRadius: 2, p: 2 }}>
+            <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+              <Typography sx={{ fontWeight: 700, fontSize: 16 }}>{selectedPlatform.name}</Typography>
+              <Typography color="warning.dark" sx={{ fontSize: 12, fontWeight: 700 }}>★ {selectedPlatform.rating}</Typography>
+            </Stack>
             {[
               { label: 'Min. deposit', val: selectedPlatform.min },
               { label: 'Setup time',   val: selectedPlatform.time },
               { label: 'Assets',       val: selectedPlatform.assets.join(', ') },
             ].map(r => (
-              <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12.5, marginBottom: 6 }}>
-                <span style={{ color: 'var(--muted)' }}>{r.label}</span>
-                <span style={{ fontWeight: 500, maxWidth: 220, textAlign: 'right' }}>{r.val}</span>
-              </div>
+              <Stack key={r.label} direction="row" sx={{ justifyContent: 'space-between', mb: 0.75 }}>
+                <Typography color="text.secondary" sx={{ fontSize: 12.5 }}>{r.label}</Typography>
+                <Typography sx={{ fontSize: 12.5, fontWeight: 500, maxWidth: 220, textAlign: 'right' }}>{r.val}</Typography>
+              </Stack>
             ))}
-            <div style={{ marginTop: 10, padding: '8px 12px', background: 'var(--teal-50)', border: '1px solid var(--teal-100)', borderRadius: 8, fontSize: 12, color: 'var(--teal-600)', fontWeight: 600 }}>
-              ★ {selectedPlatform.perk}
-            </div>
-          </div>
+            <Box sx={{ mt: 1.25, p: '8px 12px', bgcolor: 'var(--teal-50)', border: '1px solid var(--teal-100)', borderRadius: 2 }}>
+              <Typography color="primary.dark" sx={{ fontSize: 12, fontWeight: 600 }}>★ {selectedPlatform.perk}</Typography>
+            </Box>
+          </Paper>
         )}
-      </Card>
+      </InfoCard>
 
-      <Card title="📋 Step-by-Step Guides">
-        <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>
+      {/* Step Guides */}
+      <InfoCard title="📋 Step-by-Step Guides">
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
           Beginner guides tailored to your risk profile and learning progress.
-        </p>
-        {[
-          { emoji: '1️⃣', title: 'Open a brokerage account', desc: 'Compare Revolut, eToro, or Trade Republic. Choose based on min deposit and assets you want to trade.' },
-          { emoji: '2️⃣', title: 'Start with an ETF', desc: 'A MSCI World or S&P 500 ETF gives instant diversification across 500–1600 companies for as little as €10/month.' },
-          { emoji: '3️⃣', title: 'Set a monthly budget', desc: 'Even €20–50/month invested consistently from age 20 can grow to €50,000+ by age 40 thanks to compounding.' },
-          { emoji: '4️⃣', title: 'Understand your taxes', desc: 'In France, capital gains and dividends are taxed at 30% (Prélèvement Forfaitaire Unique). A PEA account can reduce this.' },
-        ].map(step => (
-          <div key={step.title} style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
-            <span style={{ fontSize: 22, flexShrink: 0 }}>{step.emoji}</span>
-            <div>
-              <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 3 }}>{step.title}</div>
-              <div style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.6 }}>{step.desc}</div>
-            </div>
-          </div>
-        ))}
-      </Card>
+        </Typography>
+        <List disablePadding>
+          {[
+            { emoji: '1️⃣', title: 'Open a brokerage account', desc: 'Compare Revolut, eToro, or Trade Republic. Choose based on min deposit and assets you want to trade.' },
+            { emoji: '2️⃣', title: 'Start with an ETF', desc: 'A MSCI World or S&P 500 ETF gives instant diversification across 500–1600 companies for as little as €10/month.' },
+            { emoji: '3️⃣', title: 'Set a monthly budget', desc: 'Even €20–50/month invested consistently from age 20 can grow to €50,000+ by age 40 thanks to compounding.' },
+            { emoji: '4️⃣', title: 'Understand your taxes', desc: 'In France, capital gains and dividends are taxed at 30% (Prélèvement Forfaitaire Unique). A PEA account can reduce this.' },
+          ].map(step => (
+            <ListItem key={step.title} alignItems="flex-start" disablePadding sx={{ mb: 1.75 }}>
+              <ListItemAvatar sx={{ minWidth: 40, mt: 0.5 }}>
+                <span style={{ fontSize: 22 }}>{step.emoji}</span>
+              </ListItemAvatar>
+              <Box>
+                <Typography sx={{ fontWeight: 600, fontSize: 13, mb: 0.3 }}>{step.title}</Typography>
+                <Typography color="text.secondary" sx={{ fontSize: 12.5, lineHeight: 1.6 }}>{step.desc}</Typography>
+              </Box>
+            </ListItem>
+          ))}
+        </List>
+      </InfoCard>
 
-      <Card title="🔍 Investment Search">
-        <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>
+      {/* Investment Search */}
+      <InfoCard title="🔍 Investment Search">
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
           Look up any stock, ETF, or crypto to find current market data on Yahoo Finance.
-        </p>
-        <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8 }}>
-          <input
-            type="text"
+        </Typography>
+        <form onSubmit={handleSearch}>
+          <TextField
+            fullWidth
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Try: AAPL, Bitcoin, CAC 40 ETF, LVMH..."
-            style={{ flex: 1, padding: '10px 14px', border: '1.5px solid var(--border)', borderRadius: 8, fontSize: 13, outline: 'none', fontFamily: 'var(--font-body)' }}
-            onFocus={e => (e.target.style.borderColor = 'var(--teal-400)')}
-            onBlur={e => (e.target.style.borderColor = 'var(--border)')}
+            size="small"
+            sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: 13 } }}
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      color="primary"
+                      sx={{ borderRadius: '6px', textTransform: 'none', fontWeight: 700, py: '5px', mr: '-8px' }}
+                    >
+                      Search →
+                    </Button>
+                  </InputAdornment>
+                ),
+              },
+            }}
           />
-          <Button type="submit" variant="contained" disableElevation
-            sx={{ px: '18px', py: '10px', bgcolor: '#1D9E75', color: '#fff', borderRadius: '8px', fontSize: '13px', fontWeight: 700, textTransform: 'none', '&:hover': { bgcolor: '#0F6E56' } }}
-          >
-            Search →
-          </Button>
         </form>
-      </Card>
+      </InfoCard>
 
-      <div style={{ marginTop: 8, padding: '12px 16px', background: '#FFF8E1', border: '1px solid #FFD700', borderRadius: 10, fontSize: 11.5, color: '#7A5500', lineHeight: 1.6 }}>
-        ⚠️ <strong>Educational purposes only.</strong> This is not financial advice. Always do your own research and consider speaking with a licensed financial advisor before investing real money.
-      </div>
-    </div>
+      <Alert
+        severity="warning"
+        sx={{ mt: 1, borderRadius: '10px', border: '1px solid #FFD700', bgcolor: '#FFF8E1', color: '#7A5500', '& .MuiAlert-icon': { color: '#C08B00' } }}
+      >
+        <strong>Educational purposes only.</strong> This is not financial advice. Always do your own research and consider speaking with a licensed financial advisor before investing real money.
+      </Alert>
+    </Box>
   )
 }
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
+function InfoCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: 18, marginBottom: 14 }}>
-      <h4 style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>{title}</h4>
-      {children}
-    </div>
+    <Card sx={{ mb: 1.75 }}>
+      <CardContent>
+        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5 }}>{title}</Typography>
+        {children}
+      </CardContent>
+    </Card>
   )
 }

@@ -1,4 +1,12 @@
 import { useState } from 'react'
+import Card from '@mui/material/Card'
+import CardActionArea from '@mui/material/CardActionArea'
+import LinearProgress from '@mui/material/LinearProgress'
+import Chip from '@mui/material/Chip'
+import Typography from '@mui/material/Typography'
+import Box from '@mui/material/Box'
+import Stack from '@mui/material/Stack'
+import Avatar from '@mui/material/Avatar'
 import { LEVELS } from '../data/gameData'
 import LessonPanel from '../components/LessonPanel'
 import type { GameState, Level, LevelStatus } from '../types'
@@ -20,42 +28,30 @@ export default function EducationPage({ gameState, showToast }: EducationPagePro
 
   function handleLevelClick(level: Level) {
     const status = getLevelStatus(level)
-    if (status === 'locked') {
-      showToast('🔒 Complete the previous level first!')
-      return
-    }
-    if (!level.lesson) {
-      showToast('📅 This level is coming soon!')
-      return
-    }
+    if (status === 'locked') { showToast('🔒 Complete the previous level first!'); return }
+    if (!level.lesson)       { showToast('📅 This level is coming soon!'); return }
     setOpenLesson(openLesson === level.id ? null : level.id)
   }
 
   function handleComplete(levelId: number) {
     gameState.completeLevel(levelId)
     setOpenLesson(null)
-    showToast(`🎉 Level complete! +50 XP · €100 virtual cash added!`)
+    showToast('🎉 Level complete! +50 XP · €100 virtual cash added!')
   }
 
   return (
-    <div>
-      <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Your Learning Path</h2>
-      <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 24 }}>
+    <Box>
+      <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>Your Learning Path</Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
         Complete lessons to unlock investment instruments in the Simulator
-      </p>
+      </Typography>
 
       {LEVELS.map(level => {
         const status = getLevelStatus(level)
         const isOpen = openLesson === level.id
-
         return (
-          <div key={level.id}>
-            <LevelCard
-              level={level}
-              status={status}
-              isOpen={isOpen}
-              onClick={() => handleLevelClick(level)}
-            />
+          <Box key={level.id}>
+            <LevelCard level={level} status={status} isOpen={isOpen} onClick={() => handleLevelClick(level)} />
             {isOpen && level.lesson && (
               <LessonPanel
                 lesson={level.lesson}
@@ -65,10 +61,10 @@ export default function EducationPage({ gameState, showToast }: EducationPagePro
                 showToast={showToast}
               />
             )}
-          </div>
+          </Box>
         )
       })}
-    </div>
+    </Box>
   )
 }
 
@@ -82,60 +78,59 @@ interface LevelCardProps {
 function LevelCard({ level, status, isOpen, onClick }: LevelCardProps) {
   const pct = status === 'completed' ? 100 : status === 'active' ? 45 : 0
 
-  const numStyleMap: Record<LevelStatus, React.CSSProperties> = {
-    completed: { background: 'var(--teal-400)', color: '#fff' },
-    active:    { background: 'var(--gold-50)', color: 'var(--gold-400)', border: '2px solid var(--gold-500)' },
-    locked:    { background: '#f0f0f0', color: '#aaa' },
-  }
-  const numStyle = numStyleMap[status]
-
-  const cardStyle: React.CSSProperties = {
-    background: status === 'completed' ? 'var(--teal-50)' : status === 'active' ? '#fffdf5' : 'var(--surface)',
-    border: isOpen
-      ? '2px solid var(--teal-400)'
-      : status === 'active'
-        ? '1.5px solid var(--gold-500)'
-        : '1px solid var(--border)',
-    borderRadius: 'var(--radius)',
-    padding: '14px 16px',
-    marginBottom: 10,
-    cursor: status === 'locked' ? 'default' : 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    gap: 14,
-    transition: 'all 0.18s',
-    opacity: status === 'locked' ? 0.55 : 1,
+  const avatarStyles: Record<LevelStatus, object> = {
+    completed: { bgcolor: '#1D9E75', color: '#fff' },
+    active:    { bgcolor: 'var(--gold-50)', color: 'var(--gold-400)', border: '2px solid var(--gold-500)' },
+    locked:    { bgcolor: '#f0f0f0', color: '#aaa' },
   }
 
-  const badge = {
-    completed: { label: '✓ Done',      bg: 'var(--teal-50)', color: 'var(--teal-600)' },
-    active:    { label: 'In Progress',  bg: 'var(--gold-50)', color: 'var(--gold-400)' },
-    locked:    { label: '🔒 Locked',    bg: '#f5f5f5',        color: '#aaa'            },
-  }[status]
+  const chipProps: Record<LevelStatus, { label: string; sx: object }> = {
+    completed: { label: '✓ Done',      sx: { bgcolor: 'var(--teal-50)',  color: 'var(--teal-600)', fontWeight: 700 } },
+    active:    { label: 'In Progress', sx: { bgcolor: 'var(--gold-50)',  color: 'var(--gold-400)', fontWeight: 700 } },
+    locked:    { label: '🔒 Locked',   sx: { bgcolor: '#f5f5f5',         color: '#aaa',            fontWeight: 700 } },
+  }
 
+  const chip = { ...chipProps[status] }
   if (level.isAI && status === 'locked') {
-    badge.bg = 'var(--purple-50)'
-    badge.color = 'var(--purple-600)'
-    badge.label = '✦ AI Level'
+    chip.label = '✦ AI Level'
+    chip.sx = { ...chip.sx, bgcolor: 'var(--purple-50)', color: 'var(--purple-600)', fontWeight: 700 }
   }
 
   return (
-    <div style={cardStyle} onClick={onClick}>
-      <div style={{ width: 42, height: 42, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: status === 'completed' ? 18 : 15, flexShrink: 0, ...numStyle }}>
-        {status === 'completed' ? '✓' : level.isAI ? level.icon : level.id}
-      </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, marginBottom: 2 }}>
-          {level.icon} {level.name} — {level.subtitle}
-        </div>
-        <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 6 }}>{level.desc}</div>
-        <div style={{ height: 4, background: '#e8e8e8', borderRadius: 2, overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg, var(--teal-100), var(--teal-400))', borderRadius: 2, transition: 'width 0.6s' }} />
-        </div>
-      </div>
-      <span style={{ fontSize: 11, padding: '4px 10px', borderRadius: 20, fontWeight: 700, background: badge.bg, color: badge.color, flexShrink: 0, fontFamily: 'var(--font-display)' }}>
-        {badge.label}
-      </span>
-    </div>
+    <Card
+      sx={{
+        mb: 1.25,
+        bgcolor: status === 'completed' ? 'var(--teal-50)' : status === 'active' ? '#fffdf5' : 'background.paper',
+        border: isOpen ? '2px solid #1D9E75' : status === 'active' ? '1.5px solid var(--gold-500)' : '1px solid var(--border)',
+        opacity: status === 'locked' ? 0.55 : 1,
+        transition: 'all 0.18s',
+      }}
+    >
+      <CardActionArea
+        onClick={onClick}
+        disabled={status === 'locked'}
+        sx={{ p: '14px 16px', display: 'flex', alignItems: 'center', gap: 1.75, cursor: status === 'locked' ? 'default' : 'pointer' }}
+      >
+        <Avatar sx={{ width: 42, height: 42, borderRadius: '10px', fontWeight: 700, fontSize: status === 'completed' ? 18 : 15, flexShrink: 0, ...avatarStyles[status] }}>
+          {status === 'completed' ? '✓' : level.isAI ? level.icon : level.id}
+        </Avatar>
+
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="body2" sx={{ fontWeight: 700, fontSize: 14, mb: 0.25 }}>
+            {level.icon} {level.name} — {level.subtitle}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.75 }}>
+            {level.desc}
+          </Typography>
+          <LinearProgress
+            variant="determinate"
+            value={pct}
+            sx={{ height: 4, '& .MuiLinearProgress-bar': { background: 'linear-gradient(90deg, var(--teal-100), #1D9E75)', borderRadius: 2 } }}
+          />
+        </Box>
+
+        <Chip label={chip.label} sx={chip.sx} />
+      </CardActionArea>
+    </Card>
   )
 }
