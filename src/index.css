@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -40,8 +40,8 @@
   --radius:    14px;
   --radius-lg: 20px;
 
-  --font-display: 'Syne', sans-serif;
-  --font-body:    'DM Sans', sans-serif;
+  --font-display: 'Roboto', sans-serif;
+  --font-body:    'Roboto', sans-serif;
 
   --shadow-sm: 0 1px 3px rgba(15,110,86,0.08);
   --shadow:    0 4px 16px rgba(15,110,86,0.10);

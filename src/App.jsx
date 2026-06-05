@@ -13,7 +13,7 @@ export default function App() {
   const gameState = useGameState()
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Header tab={tab} setTab={setTab} xp={gameState.xp} streak={gameState.streak} />
       <main style={{ flex: 1, padding: '20px 16px 40px' }}>
         {tab === 'education'  && <EducationPage  gameState={gameState} showToast={showToast} />}
