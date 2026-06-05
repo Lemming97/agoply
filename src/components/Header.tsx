@@ -37,9 +37,12 @@ export default function Header({ tab, setTab, xp, streak, user, onLogout }: Head
     >
       <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 2.5 } }}>
         <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
-          <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.15)', borderRadius: '12px', width: 42, height: 42, fontSize: 22 }}>
-            🌊
-          </Avatar>
+          <Box
+            component="img"
+            src="/agoplylogo.svg"
+            alt="Agoply"
+            sx={{ width: 40, height: 40, objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
+          />
           <Box>
             <Typography variant="subtitle1" color="#fff" sx={{ fontWeight: 800, letterSpacing: '-0.5px', lineHeight: 1.2 }}>
               AGOPLY

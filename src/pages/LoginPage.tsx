@@ -48,22 +48,12 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
       <Box sx={{ width: '100%', maxWidth: 400 }}>
         {/* Branding */}
         <Box sx={{ textAlign: 'center', mb: 3 }}>
-          <Avatar
-            sx={{
-              width: 72, height: 72,
-              bgcolor: '#085041',
-              borderRadius: '20px',
-              fontSize: 38,
-              mx: 'auto',
-              mb: 1.5,
-              boxShadow: '0 8px 24px rgba(8,80,65,0.25)',
-            }}
-          >
-            🌊
-          </Avatar>
-          <Typography sx={{ fontWeight: 900, fontSize: 28, letterSpacing: '-0.5px', color: '#085041' }}>
-            AGOPLY
-          </Typography>
+          <Box
+            component="img"
+            src="/agoplylogo.svg"
+            alt="Agoply"
+            sx={{ width: 96, height: 96, objectFit: 'contain', mx: 'auto', mb: 1, display: 'block' }}
+          />
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             Experience real-time investing through learning & play
           </Typography>

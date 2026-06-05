@@ -65,6 +65,22 @@ export function useGameState(): GameState {
     })
   }
 
+  function sellAsset(holdingId: string, quantity: number): void {
+    setState(s => {
+      const holding = s.portfolio.holdings.find(h => h.id === holdingId)
+      if (!holding) return s
+      const proceeds = holding.price * quantity
+      const newShares = holding.shares - quantity
+      const newHoldings = newShares <= 0
+        ? s.portfolio.holdings.filter(h => h.id !== holdingId)
+        : s.portfolio.holdings.map(h => h.id === holdingId ? { ...h, shares: newShares } : h)
+      return {
+        ...s,
+        portfolio: { cash: s.portfolio.cash + proceeds, holdings: newHoldings },
+      }
+    })
+  }
+
   function resetState(): void {
     setState(INITIAL_STATE)
   }
@@ -73,5 +89,5 @@ export function useGameState(): GameState {
     (sum, h) => sum + h.price * h.shares, 0
   ) + state.portfolio.cash
 
-  return { ...state, portfolioValue, completeLevel, buyAsset, resetState }
+  return { ...state, portfolioValue, completeLevel, buyAsset, sellAsset, resetState }
 }

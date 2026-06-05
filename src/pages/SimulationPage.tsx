@@ -12,7 +12,6 @@ import Avatar from '@mui/material/Avatar'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
-import Divider from '@mui/material/Divider'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
@@ -39,6 +38,7 @@ type AssetFilter = 'all' | 'stock' | 'bond' | 'crypto' | 'forex' | 'commodity' |
 export default function SimulationPage({ gameState, showToast }: SimulationPageProps) {
   const [view, setView] = useState<SimView>('portfolio')
   const [buyModal, setBuyModal] = useState<MarketAsset | null>(null)
+  const [sellModal, setSellModal] = useState<typeof gameState.portfolio.holdings[0] | null>(null)
   const [qty, setQty] = useState(1)
 
   const totalValue = gameState.portfolioValue
@@ -60,6 +60,14 @@ export default function SimulationPage({ gameState, showToast }: SimulationPageP
     gameState.buyAsset(buyModal, qty)
     showToast(`✅ Bought ${qty}× ${buyModal.ticker} for €${cost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}!`)
     setBuyModal(null)
+  }
+
+  function confirmSell() {
+    if (!sellModal) return
+    const proceeds = sellModal.price * qty
+    gameState.sellAsset(sellModal.id, qty)
+    showToast(`✅ Sold ${qty}× ${sellModal.ticker} for €${proceeds.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}!`)
+    setSellModal(null)
   }
 
   return (
@@ -86,8 +94,8 @@ export default function SimulationPage({ gameState, showToast }: SimulationPageP
         <MuiTab label="🏆 Rankings"   value="leaderboard"  />
       </Tabs>
 
-      {view === 'portfolio'   && <PortfolioView gameState={gameState} totalValue={totalValue} />}
-      {view === 'market'      && <MarketView assets={MARKET_ASSETS} onBuy={handleBuy} completedLevels={gameState.completedLevels} />}
+      {view === 'portfolio'   && <PortfolioView gameState={gameState} totalValue={totalValue} onSell={(h: Holding) => { setSellModal(h); setQty(1) }} />}
+      {view === 'market'      && <MarketView assets={MARKET_ASSETS} onBuy={handleBuy} completedLevels={gameState.completedLevels} cash={gameState.portfolio.cash} />}
       {view === 'leaderboard' && <LeaderboardView data={LEADERBOARD} myValue={Math.round(totalValue)} />}
 
       <Dialog
@@ -148,11 +156,69 @@ export default function SimulationPage({ gameState, showToast }: SimulationPageP
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Dialog
+        open={!!sellModal}
+        onClose={() => setSellModal(null)}
+        slotProps={{ paper: { sx: { borderRadius: '20px', width: '100%', maxWidth: 360 } } }}
+      >
+        <DialogTitle sx={{ fontWeight: 700, fontSize: 18, pb: 1 }}>
+          Sell {sellModal?.icon} {sellModal?.name}
+        </DialogTitle>
+        <DialogContent>
+          <Stack direction="row" sx={{ justifyContent: 'space-between', mb: 2 }}>
+            <Typography color="text.secondary" sx={{ fontSize: 13 }}>Price per unit</Typography>
+            <Typography sx={{ fontSize: 13, fontWeight: 700 }}>€{sellModal?.price.toLocaleString()}</Typography>
+          </Stack>
+          <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5, mb: 2 }}>
+            <IconButton
+              onClick={() => setQty(q => Math.max(1, q - 1))}
+              sx={{ border: '1.5px solid var(--border)', bgcolor: 'var(--surface2)', width: 36, height: 36, borderRadius: '50%' }}
+            >
+              −
+            </IconButton>
+            <Typography sx={{ flex: 1, textAlign: 'center', fontSize: 22, fontWeight: 700 }}>{qty}</Typography>
+            <IconButton
+              onClick={() => setQty(q => Math.min(sellModal?.shares ?? 1, q + 1))}
+              sx={{ border: '1.5px solid var(--border)', bgcolor: 'var(--surface2)', width: 36, height: 36, borderRadius: '50%' }}
+            >
+              +
+            </IconButton>
+          </Stack>
+          <Paper variant="outlined" sx={{ display: 'flex', justifyContent: 'space-between', p: '10px 14px', mb: 2, borderRadius: 2, bgcolor: 'var(--teal-50)', borderColor: 'var(--teal-100)' }}>
+            <Typography sx={{ fontSize: 14 }}>Total proceeds</Typography>
+            <Typography color="primary.dark" sx={{ fontSize: 14, fontWeight: 700 }}>
+              €{sellModal ? (sellModal.price * qty).toLocaleString('fr-FR', { minimumFractionDigits: 2 }) : '0'}
+            </Typography>
+          </Paper>
+          <Typography color="text.secondary" sx={{ fontSize: 12 }}>
+            You own {sellModal?.shares} share{sellModal && sellModal.shares !== 1 ? 's' : ''}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
+          <Button
+            onClick={() => setSellModal(null)}
+            variant="outlined"
+            fullWidth
+            sx={{ py: 1.375, borderRadius: '10px', textTransform: 'none', borderColor: 'var(--border)', color: 'text.primary' }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={confirmSell}
+            variant="contained"
+            fullWidth
+            sx={{ py: 1.375, borderRadius: '10px', textTransform: 'none', fontWeight: 700, bgcolor: '#c0392b', '&:hover': { bgcolor: '#a93226' } }}
+          >
+            Confirm Sell
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }
 
-function PortfolioView({ gameState, totalValue }: { gameState: GameState; totalValue: number }) {
+function PortfolioView({ gameState, totalValue, onSell }: { gameState: GameState; totalValue: number; onSell: (h: Holding) => void }) {
   const gain = totalValue - 1000
   const gainPct = ((gain / 1000) * 100).toFixed(2)
   const isUp = gain >= 0
@@ -214,13 +280,13 @@ function PortfolioView({ gameState, totalValue }: { gameState: GameState; totalV
           No holdings yet — head to Markets to buy your first asset!
         </Typography>
       ) : (
-        gameState.portfolio.holdings.map(h => <HoldingRow key={h.id} holding={h} />)
+        gameState.portfolio.holdings.map(h => <HoldingRow key={h.id} holding={h} onSell={onSell} />)
       )}
     </>
   )
 }
 
-function HoldingRow({ holding }: { holding: Holding }) {
+function HoldingRow({ holding, onSell }: { holding: Holding; onSell: (h: Holding) => void }) {
   const value = holding.price * holding.shares
   const isUp = holding.change >= 0
   return (
@@ -230,23 +296,45 @@ function HoldingRow({ holding }: { holding: Holding }) {
         <Typography sx={{ fontWeight: 600, fontSize: 13 }}>{holding.name}</Typography>
         <Typography variant="caption" color="text.secondary">{holding.ticker} · {holding.shares} shares</Typography>
       </Box>
-      <Box sx={{ textAlign: 'right' }}>
+      <Box sx={{ textAlign: 'right', mr: 1.5 }}>
         <Typography sx={{ fontWeight: 700, fontSize: 14 }}>€{value.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}</Typography>
         <Typography sx={{ fontSize: 11, fontWeight: 600 }} color={isUp ? 'primary.main' : 'error.main'}>
           {isUp ? '+' : ''}{holding.change}%
         </Typography>
       </Box>
+      <Button
+        onClick={() => onSell(holding)}
+        variant="outlined"
+        size="small"
+        sx={{
+          bgcolor: '#fff5f5',
+          color: '#c0392b',
+          borderColor: '#f5c6c6',
+          borderRadius: '6px',
+          fontWeight: 700,
+          textTransform: 'none',
+          '&:hover': { bgcolor: '#fde8e8', borderColor: '#c0392b' },
+        }}
+      >
+        SELL
+      </Button>
     </Paper>
   )
 }
 
-function MarketView({ assets, onBuy, completedLevels }: { assets: MarketAsset[]; onBuy: (a: MarketAsset) => void; completedLevels: number[] }) {
+function MarketView({ assets, onBuy, completedLevels, cash }: { assets: MarketAsset[]; onBuy: (a: MarketAsset) => void; completedLevels: number[]; cash: number }) {
   const [filter, setFilter] = useState<AssetFilter>('all')
   const cats: AssetFilter[] = ['all', 'stock', 'bond', 'crypto', 'forex', 'commodity', 'etf']
   const filtered = filter === 'all' ? assets : assets.filter(a => a.category === filter)
 
   return (
     <>
+      <Paper variant="outlined" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: '10px 14px', mb: 2, borderRadius: 2, bgcolor: 'var(--teal-50)', borderColor: 'var(--teal-100)' }}>
+        <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>Available cash</Typography>
+        <Typography sx={{ fontSize: 15, fontWeight: 700, color: '#0F6E56' }}>
+          €{cash.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}
+        </Typography>
+      </Paper>
       <ToggleButtonGroup
         value={filter}
         exclusive

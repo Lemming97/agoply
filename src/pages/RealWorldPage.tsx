@@ -5,7 +5,6 @@ import CardContent from '@mui/material/CardContent'
 import LinearProgress from '@mui/material/LinearProgress'
 import Alert from '@mui/material/Alert'
 import TextField from '@mui/material/TextField'
-import InputAdornment from '@mui/material/InputAdornment'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemAvatar from '@mui/material/ListItemAvatar'
@@ -174,30 +173,24 @@ export default function RealWorldPage({ gameState }: RealWorldPageProps) {
           Look up any stock, ETF, or crypto to find current market data on Yahoo Finance.
         </Typography>
         <form onSubmit={handleSearch}>
-          <TextField
-            fullWidth
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Try: AAPL, Bitcoin, CAC 40 ETF, LVMH..."
-            size="small"
-            sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: 13 } }}
-            slotProps={{
-              input: {
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      color="primary"
-                      sx={{ borderRadius: '6px', textTransform: 'none', fontWeight: 700, py: '5px', mr: '-8px' }}
-                    >
-                      Search →
-                    </Button>
-                  </InputAdornment>
-                ),
-              },
-            }}
-          />
+          <Stack direction="row" sx={{ gap: 1, alignItems: 'stretch' }}>
+            <TextField
+              fullWidth
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Try: AAPL, Bitcoin, CAC 40 ETF, LVMH..."
+              size="small"
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: 13 } }}
+            />
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              sx={{ borderRadius: '8px', textTransform: 'none', fontWeight: 700, whiteSpace: 'nowrap', flexShrink: 0 }}
+            >
+              Search →
+            </Button>
+          </Stack>
         </form>
       </InfoCard>
 

@@ -85,6 +85,7 @@ export interface GameState extends GameStateData {
   portfolioValue: number
   completeLevel: (levelId: number) => void
   buyAsset: (asset: MarketAsset, quantity: number) => void
+  sellAsset: (holdingId: string, quantity: number) => void
   resetState: () => void
 }
 
