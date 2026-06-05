@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Button from '@mui/material/Button'
 import { PLATFORMS } from '../data/gameData.js'
 
 export default function RealWorldPage({ gameState, showToast }) {
@@ -68,18 +69,27 @@ export default function RealWorldPage({ gameState, showToast }) {
         </p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
           {PLATFORMS.map(p => (
-            <button key={p.id} onClick={() => setSelectedPlatform(selectedPlatform?.id === p.id ? null : p)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                background: selectedPlatform?.id === p.id ? 'var(--teal-50)' : 'var(--surface2)',
-                border: `1px solid ${selectedPlatform?.id === p.id ? 'var(--teal-400)' : 'var(--border)'}`,
-                borderRadius: 20, padding: '6px 14px', fontSize: 12, fontWeight: 500, cursor: 'pointer',
-                color: selectedPlatform?.id === p.id ? 'var(--teal-600)' : 'var(--text)', transition: 'all 0.15s',
-              }}>
+            <Button
+              key={p.id}
+              onClick={() => setSelectedPlatform(selectedPlatform?.id === p.id ? null : p)}
+              variant="outlined"
+              disableElevation
+              sx={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                bgcolor: selectedPlatform?.id === p.id ? '#E1F5EE' : 'var(--surface2)',
+                borderColor: selectedPlatform?.id === p.id ? '#1D9E75' : 'var(--border)',
+                borderRadius: '20px',
+                px: '14px', py: '6px',
+                fontSize: '12px', fontWeight: 500,
+                textTransform: 'none',
+                color: selectedPlatform?.id === p.id ? '#0F6E56' : 'var(--text)',
+                '&:hover': { bgcolor: '#E1F5EE', borderColor: '#1D9E75', color: '#0F6E56' },
+              }}
+            >
               <div style={{ width: 18, height: 18, borderRadius: 4, background: p.color, border: '1px solid rgba(0,0,0,0.1)', flexShrink: 0 }} />
               {p.name}
               {p.beginner && <span style={{ fontSize: 9, background: 'var(--teal-50)', color: 'var(--teal-600)', borderRadius: 8, padding: '1px 5px', fontWeight: 700 }}>BEGINNER</span>}
-            </button>
+            </Button>
           ))}
         </div>
         {selectedPlatform && (
@@ -143,9 +153,23 @@ export default function RealWorldPage({ gameState, showToast }) {
             onFocus={e => e.target.style.borderColor = 'var(--teal-400)'}
             onBlur={e => e.target.style.borderColor = 'var(--border)'}
           />
-          <button type="submit" style={{ padding: '10px 18px', background: 'var(--teal-400)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-display)', cursor: 'pointer' }}>
+          <Button
+            type="submit"
+            variant="contained"
+            disableElevation
+            sx={{
+              px: '18px', py: '10px',
+              bgcolor: '#1D9E75',
+              color: '#fff',
+              borderRadius: '8px',
+              fontSize: '13px',
+              fontWeight: 700,
+              textTransform: 'none',
+              '&:hover': { bgcolor: '#0F6E56' },
+            }}
+          >
             Search →
-          </button>
+          </Button>
         </form>
       </Card>
 

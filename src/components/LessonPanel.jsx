@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Button from '@mui/material/Button'
 
 function renderText(raw) {
   return raw.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
@@ -64,34 +65,40 @@ export default function LessonPanel({ lesson, levelId, completed, onComplete, sh
       </div>
 
       {lesson.quiz.options.map((opt, i) => {
-        let bg = 'var(--surface)', border = 'var(--border)', color = 'var(--text)'
+        let bg = 'var(--surface)', borderColor = 'var(--border)', color = 'var(--text)'
         if (answered !== null) {
-          if (i === lesson.quiz.correct) { bg = 'var(--teal-50)'; border = 'var(--teal-400)'; color = 'var(--teal-600)' }
-          else if (i === answered && answered !== lesson.quiz.correct) { bg = 'var(--red-50)'; border = 'var(--red-400)'; color = '#A32D2D' }
+          if (i === lesson.quiz.correct) { bg = 'var(--teal-50)'; borderColor = '#1D9E75'; color = 'var(--teal-600)' }
+          else if (i === answered && answered !== lesson.quiz.correct) { bg = 'var(--red-50)'; borderColor = '#E24B4A'; color = '#A32D2D' }
         }
         return (
-          <button
+          <Button
             key={i}
             onClick={() => handleAnswer(i)}
             disabled={answered !== null}
-            style={{
-              display: 'block',
+            variant="outlined"
+            disableElevation
+            sx={{
+              display: 'flex',
               width: '100%',
+              justifyContent: 'flex-start',
               textAlign: 'left',
-              padding: '10px 14px',
-              marginBottom: 8,
-              border: `1.5px solid ${border}`,
-              borderRadius: 8,
-              background: bg,
+              py: '10px',
+              px: '14px',
+              mb: '8px',
+              borderColor,
+              borderWidth: '1.5px',
+              borderRadius: '8px',
+              bgcolor: bg,
               color,
-              fontSize: 13,
+              fontSize: '13px',
               fontWeight: answered !== null && i === lesson.quiz.correct ? 600 : 400,
-              cursor: answered !== null ? 'default' : 'pointer',
-              transition: 'all 0.15s',
+              textTransform: 'none',
+              '&:hover': { bgcolor: bg, borderColor, borderWidth: '1.5px' },
+              '&.Mui-disabled': { bgcolor: bg, color, borderColor, borderWidth: '1.5px', opacity: 1 },
             }}
           >
             {opt}
-          </button>
+          </Button>
         )
       })}
 
@@ -114,26 +121,25 @@ export default function LessonPanel({ lesson, levelId, completed, onComplete, sh
 
       {/* Complete button */}
       {canComplete && (
-        <button
+        <Button
           onClick={onComplete}
-          style={{
-            marginTop: 16,
-            background: 'var(--teal-400)',
+          variant="contained"
+          disableElevation
+          sx={{
+            mt: 2,
+            bgcolor: '#1D9E75',
             color: '#fff',
-            border: 'none',
-            borderRadius: 10,
-            padding: '12px 24px',
-            fontFamily: 'var(--font-display)',
-            fontSize: 13,
+            borderRadius: '10px',
+            px: '24px',
+            py: '12px',
+            fontSize: '13px',
             fontWeight: 700,
-            cursor: 'pointer',
-            transition: 'background 0.2s',
+            textTransform: 'none',
+            '&:hover': { bgcolor: '#0F6E56' },
           }}
-          onMouseOver={e => e.target.style.background = 'var(--teal-600)'}
-          onMouseOut={e => e.target.style.background = 'var(--teal-400)'}
         >
           Complete Level & Earn Rewards 🎉
-        </button>
+        </Button>
       )}
 
       {completed && (

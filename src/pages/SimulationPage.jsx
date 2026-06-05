@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Button from '@mui/material/Button'
 import { MARKET_ASSETS, LEADERBOARD } from '../data/gameData.js'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
@@ -46,14 +47,28 @@ export default function SimulationPage({ gameState, showToast }) {
       {/* Sub-tabs */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
         {['portfolio', 'market', 'leaderboard'].map(v => (
-          <button key={v} onClick={() => setView(v)} style={{
-            flex: 1, padding: '9px 8px', border: `1.5px solid ${view === v ? 'var(--teal-400)' : 'var(--border)'}`,
-            background: view === v ? 'var(--teal-50)' : 'var(--surface)', color: view === v ? 'var(--teal-600)' : 'var(--muted)',
-            borderRadius: 8, fontFamily: 'var(--font-display)', fontSize: 11, fontWeight: 700, cursor: 'pointer',
-            letterSpacing: '0.5px', transition: 'all 0.15s', textTransform: 'uppercase',
-          }}>
+          <Button
+            key={v}
+            onClick={() => setView(v)}
+            variant={view === v ? 'contained' : 'outlined'}
+            disableElevation
+            sx={{
+              flex: 1,
+              py: '9px',
+              px: '8px',
+              borderRadius: '8px',
+              fontSize: '11px',
+              fontWeight: 700,
+              letterSpacing: '0.5px',
+              textTransform: 'uppercase',
+              borderColor: view === v ? '#1D9E75' : 'var(--border)',
+              bgcolor: view === v ? '#E1F5EE' : 'var(--surface)',
+              color: view === v ? '#0F6E56' : 'var(--muted)',
+              '&:hover': { borderColor: '#1D9E75', bgcolor: '#E1F5EE', color: '#0F6E56' },
+            }}
+          >
             {{ portfolio: '📂 Portfolio', market: '📈 Markets', leaderboard: '🏆 Rankings' }[v]}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -73,9 +88,35 @@ export default function SimulationPage({ gameState, showToast }) {
               <span style={{ fontWeight: 700, color: 'var(--text)' }}>€{buyModal.price.toLocaleString()}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-              <button onClick={() => setQty(q => Math.max(1, q - 1))} style={{ width: 36, height: 36, borderRadius: '50%', border: '1.5px solid var(--border)', background: 'var(--surface2)', fontSize: 18, cursor: 'pointer' }}>−</button>
+              <Button
+                onClick={() => setQty(q => Math.max(1, q - 1))}
+                variant="outlined"
+                sx={{
+                  width: 36, height: 36, minWidth: 36,
+                  borderRadius: '50%',
+                  border: '1.5px solid var(--border)',
+                  bgcolor: 'var(--surface2)',
+                  fontSize: '18px',
+                  p: 0,
+                  color: 'var(--text)',
+                  '&:hover': { bgcolor: 'var(--gray-200)', borderColor: 'var(--border)' },
+                }}
+              >−</Button>
               <span style={{ flex: 1, textAlign: 'center', fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700 }}>{qty}</span>
-              <button onClick={() => setQty(q => q + 1)} style={{ width: 36, height: 36, borderRadius: '50%', border: '1.5px solid var(--border)', background: 'var(--surface2)', fontSize: 18, cursor: 'pointer' }}>+</button>
+              <Button
+                onClick={() => setQty(q => q + 1)}
+                variant="outlined"
+                sx={{
+                  width: 36, height: 36, minWidth: 36,
+                  borderRadius: '50%',
+                  border: '1.5px solid var(--border)',
+                  bgcolor: 'var(--surface2)',
+                  fontSize: '18px',
+                  p: 0,
+                  color: 'var(--text)',
+                  '&:hover': { bgcolor: 'var(--gray-200)', borderColor: 'var(--border)' },
+                }}
+              >+</Button>
             </div>
             <div style={{ background: 'var(--teal-50)', border: '1px solid var(--teal-100)', borderRadius: 10, padding: '10px 14px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
               <span>Total cost</span>
@@ -85,8 +126,38 @@ export default function SimulationPage({ gameState, showToast }) {
               Available cash: €{gameState.portfolio.cash.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={() => setBuyModal(null)} style={{ flex: 1, padding: '11px', border: '1.5px solid var(--border)', borderRadius: 10, background: 'transparent', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-              <button onClick={confirmBuy} style={{ flex: 1, padding: '11px', border: 'none', borderRadius: 10, background: 'var(--teal-400)', color: '#fff', fontSize: 14, fontFamily: 'var(--font-display)', fontWeight: 700, cursor: 'pointer' }}>Confirm Buy</button>
+              <Button
+                onClick={() => setBuyModal(null)}
+                variant="outlined"
+                disableElevation
+                sx={{
+                  flex: 1,
+                  py: '11px',
+                  borderRadius: '10px',
+                  border: '1.5px solid var(--border)',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  color: 'var(--text)',
+                  '&:hover': { borderColor: 'var(--gray-600)', bgcolor: 'var(--gray-100)' },
+                }}
+              >Cancel</Button>
+              <Button
+                onClick={confirmBuy}
+                variant="contained"
+                disableElevation
+                sx={{
+                  flex: 1,
+                  py: '11px',
+                  borderRadius: '10px',
+                  bgcolor: '#1D9E75',
+                  color: '#fff',
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  textTransform: 'none',
+                  '&:hover': { bgcolor: '#0F6E56' },
+                }}
+              >Confirm Buy</Button>
             </div>
           </div>
         </div>
@@ -187,12 +258,27 @@ function MarketView({ assets, onBuy, completedLevels }) {
     <>
       <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
         {cats.map(c => (
-          <button key={c} onClick={() => setFilter(c)} style={{
-            padding: '5px 12px', borderRadius: 20, fontSize: 11, fontWeight: 700, fontFamily: 'var(--font-display)',
-            border: `1.5px solid ${filter === c ? 'var(--teal-400)' : 'var(--border)'}`,
-            background: filter === c ? 'var(--teal-50)' : 'var(--surface)',
-            color: filter === c ? 'var(--teal-600)' : 'var(--muted)', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.5px',
-          }}>{c}</button>
+          <Button
+            key={c}
+            onClick={() => setFilter(c)}
+            variant={filter === c ? 'contained' : 'outlined'}
+            size="small"
+            disableElevation
+            sx={{
+              px: '12px',
+              borderRadius: '20px',
+              fontSize: '11px',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              borderColor: filter === c ? '#1D9E75' : 'var(--border)',
+              bgcolor: filter === c ? '#E1F5EE' : 'var(--surface)',
+              color: filter === c ? '#0F6E56' : 'var(--muted)',
+              '&:hover': { borderColor: '#1D9E75', bgcolor: '#E1F5EE', color: '#0F6E56' },
+            }}
+          >
+            {c}
+          </Button>
         ))}
       </div>
       {filtered.map(asset => {
@@ -209,15 +295,24 @@ function MarketView({ assets, onBuy, completedLevels }) {
               <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14 }}>€{asset.price.toLocaleString()}</div>
               <div style={{ fontSize: 11, fontWeight: 600, color: isUp ? 'var(--teal-400)' : 'var(--red-400)' }}>{isUp ? '+' : ''}{asset.change}%</div>
             </div>
-            <button onClick={() => onBuy(asset)} style={{
-              background: unlocked ? 'var(--teal-50)' : '#f5f5f5',
-              color: unlocked ? 'var(--teal-600)' : '#aaa',
-              border: `1px solid ${unlocked ? 'var(--teal-100)' : '#ddd'}`,
-              borderRadius: 6, padding: '6px 14px', fontSize: 12, fontWeight: 700,
-              fontFamily: 'var(--font-display)', cursor: 'pointer', transition: 'all 0.15s',
-            }}>
+            <Button
+              onClick={() => onBuy(asset)}
+              variant="outlined"
+              size="small"
+              disableElevation
+              sx={{
+                bgcolor: unlocked ? '#E1F5EE' : '#f5f5f5',
+                color: unlocked ? '#0F6E56' : '#aaa',
+                borderColor: unlocked ? '#9FE1CB' : '#ddd',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: 700,
+                textTransform: 'none',
+                '&:hover': { bgcolor: unlocked ? '#9FE1CB' : '#f5f5f5', borderColor: unlocked ? '#1D9E75' : '#ddd' },
+              }}
+            >
               {unlocked ? 'BUY' : '🔒'}
-            </button>
+            </Button>
           </div>
         )
       })}

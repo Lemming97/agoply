@@ -1,3 +1,4 @@
+import Button from '@mui/material/Button'
 import styles from './Header.module.css'
 
 const TABS = [
@@ -24,14 +25,15 @@ export default function Header({ tab, setTab, xp, streak }) {
       </div>
       <nav className={styles.nav}>
         {TABS.map(t => (
-          <button
+          <Button
             key={t.id}
             className={`${styles.navBtn} ${tab === t.id ? styles.active : ''}`}
             onClick={() => setTab(t.id)}
+            sx={{ minWidth: 0, borderRadius: 0 }}
           >
             <span className={styles.navIcon}>{t.icon}</span>
             {t.label}
-          </button>
+          </Button>
         ))}
       </nav>
     </header>
