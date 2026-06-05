@@ -1,9 +1,15 @@
 import { useState } from 'react'
 import Button from '@mui/material/Button'
-import { PLATFORMS } from '../data/gameData.js'
+import { PLATFORMS } from '../data/gameData'
+import type { GameState, Platform } from '../types'
 
-export default function RealWorldPage({ gameState, showToast }) {
-  const [selectedPlatform, setSelectedPlatform] = useState(null)
+interface RealWorldPageProps {
+  gameState: GameState
+  showToast: (msg: string) => void
+}
+
+export default function RealWorldPage({ gameState }: RealWorldPageProps) {
+  const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
 
   const levelsCompleted = gameState.completedLevels.length
@@ -25,7 +31,7 @@ export default function RealWorldPage({ gameState, showToast }) {
     riskScore < 80 ? '50% Stocks · 35% ETFs · 15% Crypto' :
     '60% Stocks · 25% Crypto · 15% Commodities'
 
-  function handleSearch(e) {
+  function handleSearch(e: React.FormEvent) {
     e.preventDefault()
     if (!searchQuery.trim()) return
     const url = `https://finance.yahoo.com/search?p=${encodeURIComponent(searchQuery)}`
@@ -39,7 +45,6 @@ export default function RealWorldPage({ gameState, showToast }) {
         You've built confidence in the simulator — here's how to start for real
       </p>
 
-      {/* Risk Profile */}
       <Card title="🎯 Your Risk Profile">
         <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>
           Based on your simulation behavior and {levelsCompleted} completed level{levelsCompleted !== 1 ? 's' : ''}:
@@ -50,7 +55,7 @@ export default function RealWorldPage({ gameState, showToast }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 11, marginBottom: 4 }}>
           <span style={{ color: 'var(--teal-400)', fontWeight: 600 }}>Low risk</span>
           <div style={{ flex: 1, height: 8, background: '#eee', borderRadius: 4, overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${riskScore}%`, background: `linear-gradient(90deg, #1D9E75, #FFB300, #E24B4A)`, borderRadius: 4, transition: 'width 0.8s' }} />
+            <div style={{ height: '100%', width: `${riskScore}%`, background: 'linear-gradient(90deg, #1D9E75, #FFB300, #E24B4A)', borderRadius: 4, transition: 'width 0.8s' }} />
           </div>
           <span style={{ color: 'var(--red-400)', fontWeight: 600 }}>High risk</span>
         </div>
@@ -62,7 +67,6 @@ export default function RealWorldPage({ gameState, showToast }) {
         </p>
       </Card>
 
-      {/* Platforms */}
       <Card title="🏦 Partner Platforms">
         <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 14 }}>
           Tap a platform to compare features and find the right fit for you.
@@ -117,7 +121,6 @@ export default function RealWorldPage({ gameState, showToast }) {
         )}
       </Card>
 
-      {/* How-to guides */}
       <Card title="📋 Step-by-Step Guides">
         <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>
           Beginner guides tailored to your risk profile and learning progress.
@@ -138,7 +141,6 @@ export default function RealWorldPage({ gameState, showToast }) {
         ))}
       </Card>
 
-      {/* Search */}
       <Card title="🔍 Investment Search">
         <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>
           Look up any stock, ETF, or crypto to find current market data on Yahoo Finance.
@@ -150,30 +152,17 @@ export default function RealWorldPage({ gameState, showToast }) {
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Try: AAPL, Bitcoin, CAC 40 ETF, LVMH..."
             style={{ flex: 1, padding: '10px 14px', border: '1.5px solid var(--border)', borderRadius: 8, fontSize: 13, outline: 'none', fontFamily: 'var(--font-body)' }}
-            onFocus={e => e.target.style.borderColor = 'var(--teal-400)'}
-            onBlur={e => e.target.style.borderColor = 'var(--border)'}
+            onFocus={e => (e.target.style.borderColor = 'var(--teal-400)')}
+            onBlur={e => (e.target.style.borderColor = 'var(--border)')}
           />
-          <Button
-            type="submit"
-            variant="contained"
-            disableElevation
-            sx={{
-              px: '18px', py: '10px',
-              bgcolor: '#1D9E75',
-              color: '#fff',
-              borderRadius: '8px',
-              fontSize: '13px',
-              fontWeight: 700,
-              textTransform: 'none',
-              '&:hover': { bgcolor: '#0F6E56' },
-            }}
+          <Button type="submit" variant="contained" disableElevation
+            sx={{ px: '18px', py: '10px', bgcolor: '#1D9E75', color: '#fff', borderRadius: '8px', fontSize: '13px', fontWeight: 700, textTransform: 'none', '&:hover': { bgcolor: '#0F6E56' } }}
           >
             Search →
           </Button>
         </form>
       </Card>
 
-      {/* Disclaimer */}
       <div style={{ marginTop: 8, padding: '12px 16px', background: '#FFF8E1', border: '1px solid #FFD700', borderRadius: 10, fontSize: 11.5, color: '#7A5500', lineHeight: 1.6 }}>
         ⚠️ <strong>Educational purposes only.</strong> This is not financial advice. Always do your own research and consider speaking with a licensed financial advisor before investing real money.
       </div>
@@ -181,7 +170,7 @@ export default function RealWorldPage({ gameState, showToast }) {
   )
 }
 
-function Card({ title, children }) {
+function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: 18, marginBottom: 14 }}>
       <h4 style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>{title}</h4>

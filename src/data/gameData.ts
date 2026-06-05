@@ -1,4 +1,6 @@
-export const LEVELS = [
+import type { Level, MarketAsset, LeaderboardEntry, Platform } from '../types'
+
+export const LEVELS: Level[] = [
   {
     id: 1,
     name: 'Bonds',
@@ -83,28 +85,28 @@ export const LEVELS = [
       },
     },
   },
-  { id: 4, name: 'Forex', subtitle: 'Currency Markets',    icon: '💱', desc: 'Exchange rates, pairs & macro drivers',         unlocks: 'FX pairs in Simulator',    lesson: null },
-  { id: 5, name: 'Commodities', subtitle: 'Real Assets',   icon: '🛢️', desc: 'Gold, oil, agriculture & futures',              unlocks: 'commodities in Simulator', lesson: null },
-  { id: 6, name: 'ETFs',        subtitle: 'Passive Funds', icon: '📊', desc: 'Index funds, expense ratios & passive investing', unlocks: 'ETFs in Simulator',         lesson: null },
-  { id: 7, name: 'Mutual Funds', subtitle: 'Managed Portfolios', icon: '🏦', desc: 'Active management, NAV & fund selection',  unlocks: 'mutual funds in Simulator', lesson: null },
-  { id: 8, name: 'Topicality',  subtitle: 'AI Live News', icon: '✦',  desc: 'Real market events turned into adaptive lessons',  unlocks: 'full market access',       lesson: null, isAI: true },
+  { id: 4, name: 'Forex',        subtitle: 'Currency Markets',     icon: '💱', desc: 'Exchange rates, pairs & macro drivers',          unlocks: 'FX pairs in Simulator',    lesson: null },
+  { id: 5, name: 'Commodities',  subtitle: 'Real Assets',          icon: '🛢️', desc: 'Gold, oil, agriculture & futures',               unlocks: 'commodities in Simulator', lesson: null },
+  { id: 6, name: 'ETFs',         subtitle: 'Passive Funds',        icon: '📊', desc: 'Index funds, expense ratios & passive investing',  unlocks: 'ETFs in Simulator',         lesson: null },
+  { id: 7, name: 'Mutual Funds', subtitle: 'Managed Portfolios',   icon: '🏦', desc: 'Active management, NAV & fund selection',         unlocks: 'mutual funds in Simulator', lesson: null },
+  { id: 8, name: 'Topicality',   subtitle: 'AI Live News',         icon: '✦',  desc: 'Real market events turned into adaptive lessons',  unlocks: 'full market access',        lesson: null, isAI: true },
 ]
 
-export const MARKET_ASSETS = [
-  { id: 'aapl',   name: 'Apple Inc.',       ticker: 'AAPL',  icon: '🍎', price: 215.40, change: 2.3,   category: 'stock',     requiredLevel: 2 },
-  { id: 'nvda',   name: 'NVIDIA Corp.',     ticker: 'NVDA',  icon: '🟢', price: 847.20, change: 3.8,   category: 'stock',     requiredLevel: 2 },
-  { id: 'mc',     name: 'LVMH',             ticker: 'MC',    icon: '💎', price: 694.50, change: -1.1,  category: 'stock',     requiredLevel: 2 },
-  { id: 'eurgb',  name: 'EUR Gov Bond 2027',ticker: 'EURGB', icon: '🏛️', price: 102.40, change: 0.4,   category: 'bond',      requiredLevel: 1 },
-  { id: 'fr10y',  name: 'France 10Y Bond',  ticker: 'OAT10', icon: '🇫🇷', price: 98.70,  change: -0.2,  category: 'bond',      requiredLevel: 1 },
-  { id: 'btc',    name: 'Bitcoin',          ticker: 'BTC',   icon: '₿',  price: 61200,  change: -1.4,  category: 'crypto',    requiredLevel: 3 },
-  { id: 'eth',    name: 'Ethereum',         ticker: 'ETH',   icon: '⬡',  price: 3240,   change: 2.1,   category: 'crypto',    requiredLevel: 3 },
-  { id: 'eurusd', name: 'EUR/USD',          ticker: 'EURUSD',icon: '💱', price: 1.0842, change: 0.15,  category: 'forex',     requiredLevel: 4 },
-  { id: 'gold',   name: 'Gold',             ticker: 'XAU',   icon: '🥇', price: 2340,   change: 0.8,   category: 'commodity', requiredLevel: 5 },
-  { id: 'msci',   name: 'MSCI World ETF',   ticker: 'IWDA',  icon: '🌍', price: 87.30,  change: 1.2,   category: 'etf',       requiredLevel: 6 },
-  { id: 'sp500',  name: 'S&P 500 ETF',      ticker: 'VOO',   icon: '🇺🇸', price: 475.20, change: 0.9,   category: 'etf',       requiredLevel: 6 },
+export const MARKET_ASSETS: MarketAsset[] = [
+  { id: 'aapl',   name: 'Apple Inc.',        ticker: 'AAPL',   icon: '🍎', price: 215.40, change: 2.3,   category: 'stock',     requiredLevel: 2 },
+  { id: 'nvda',   name: 'NVIDIA Corp.',      ticker: 'NVDA',   icon: '🟢', price: 847.20, change: 3.8,   category: 'stock',     requiredLevel: 2 },
+  { id: 'mc',     name: 'LVMH',              ticker: 'MC',     icon: '💎', price: 694.50, change: -1.1,  category: 'stock',     requiredLevel: 2 },
+  { id: 'eurgb',  name: 'EUR Gov Bond 2027', ticker: 'EURGB',  icon: '🏛️', price: 102.40, change: 0.4,   category: 'bond',      requiredLevel: 1 },
+  { id: 'fr10y',  name: 'France 10Y Bond',   ticker: 'OAT10',  icon: '🇫🇷', price: 98.70,  change: -0.2,  category: 'bond',      requiredLevel: 1 },
+  { id: 'btc',    name: 'Bitcoin',           ticker: 'BTC',    icon: '₿',  price: 61200,  change: -1.4,  category: 'crypto',    requiredLevel: 3 },
+  { id: 'eth',    name: 'Ethereum',          ticker: 'ETH',    icon: '⬡',  price: 3240,   change: 2.1,   category: 'crypto',    requiredLevel: 3 },
+  { id: 'eurusd', name: 'EUR/USD',           ticker: 'EURUSD', icon: '💱', price: 1.0842, change: 0.15,  category: 'forex',     requiredLevel: 4 },
+  { id: 'gold',   name: 'Gold',              ticker: 'XAU',    icon: '🥇', price: 2340,   change: 0.8,   category: 'commodity', requiredLevel: 5 },
+  { id: 'msci',   name: 'MSCI World ETF',    ticker: 'IWDA',   icon: '🌍', price: 87.30,  change: 1.2,   category: 'etf',       requiredLevel: 6 },
+  { id: 'sp500',  name: 'S&P 500 ETF',       ticker: 'VOO',    icon: '🇺🇸', price: 475.20, change: 0.9,   category: 'etf',       requiredLevel: 6 },
 ]
 
-export const LEADERBOARD = [
+export const LEADERBOARD: LeaderboardEntry[] = [
   { rank: 1, name: 'Sophie M.',  school: 'Sciences Po',    value: 1847, me: false },
   { rank: 2, name: 'Khalid A.',  school: 'HEC Paris',      value: 1731, me: false },
   { rank: 3, name: 'Lucie B.',   school: 'Paris Dauphine', value: 1689, me: false },
@@ -114,7 +116,7 @@ export const LEADERBOARD = [
   { rank: 7, name: 'Léa V.',     school: 'Paris Saclay',   value:  987, me: false },
 ]
 
-export const PLATFORMS = [
+export const PLATFORMS: Platform[] = [
   {
     id: 'revolut',
     name: 'Revolut',

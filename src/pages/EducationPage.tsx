@@ -1,18 +1,24 @@
 import { useState } from 'react'
-import { LEVELS } from '../data/gameData.js'
-import LessonPanel from '../components/LessonPanel.jsx'
+import { LEVELS } from '../data/gameData'
+import LessonPanel from '../components/LessonPanel'
+import type { GameState, Level, LevelStatus } from '../types'
 
-export default function EducationPage({ gameState, showToast }) {
-  const [openLesson, setOpenLesson] = useState(null)
+interface EducationPageProps {
+  gameState: GameState
+  showToast: (msg: string) => void
+}
 
-  function getLevelStatus(level) {
+export default function EducationPage({ gameState, showToast }: EducationPageProps) {
+  const [openLesson, setOpenLesson] = useState<number | null>(null)
+
+  function getLevelStatus(level: Level): LevelStatus {
     if (gameState.completedLevels.includes(level.id)) return 'completed'
     if (gameState.activeLesson === level.id) return 'active'
     if (level.id < gameState.activeLesson) return 'active'
     return 'locked'
   }
 
-  function handleLevelClick(level) {
+  function handleLevelClick(level: Level) {
     const status = getLevelStatus(level)
     if (status === 'locked') {
       showToast('🔒 Complete the previous level first!')
@@ -25,7 +31,7 @@ export default function EducationPage({ gameState, showToast }) {
     setOpenLesson(openLesson === level.id ? null : level.id)
   }
 
-  function handleComplete(levelId) {
+  function handleComplete(levelId: number) {
     gameState.completeLevel(levelId)
     setOpenLesson(null)
     showToast(`🎉 Level complete! +50 XP · €100 virtual cash added!`)
@@ -66,16 +72,24 @@ export default function EducationPage({ gameState, showToast }) {
   )
 }
 
-function LevelCard({ level, status, isOpen, onClick }) {
+interface LevelCardProps {
+  level: Level
+  status: LevelStatus
+  isOpen: boolean
+  onClick: () => void
+}
+
+function LevelCard({ level, status, isOpen, onClick }: LevelCardProps) {
   const pct = status === 'completed' ? 100 : status === 'active' ? 45 : 0
 
-  const numStyle = {
+  const numStyleMap: Record<LevelStatus, React.CSSProperties> = {
     completed: { background: 'var(--teal-400)', color: '#fff' },
     active:    { background: 'var(--gold-50)', color: 'var(--gold-400)', border: '2px solid var(--gold-500)' },
     locked:    { background: '#f0f0f0', color: '#aaa' },
-  }[status]
+  }
+  const numStyle = numStyleMap[status]
 
-  const cardStyle = {
+  const cardStyle: React.CSSProperties = {
     background: status === 'completed' ? 'var(--teal-50)' : status === 'active' ? '#fffdf5' : 'var(--surface)',
     border: isOpen
       ? '2px solid var(--teal-400)'
@@ -94,9 +108,9 @@ function LevelCard({ level, status, isOpen, onClick }) {
   }
 
   const badge = {
-    completed: { label: '✓ Done',     bg: 'var(--teal-50)',   color: 'var(--teal-600)' },
-    active:    { label: 'In Progress', bg: 'var(--gold-50)',   color: 'var(--gold-400)' },
-    locked:    { label: '🔒 Locked',   bg: '#f5f5f5',          color: '#aaa'            },
+    completed: { label: '✓ Done',      bg: 'var(--teal-50)', color: 'var(--teal-600)' },
+    active:    { label: 'In Progress',  bg: 'var(--gold-50)', color: 'var(--gold-400)' },
+    locked:    { label: '🔒 Locked',    bg: '#f5f5f5',        color: '#aaa'            },
   }[status]
 
   if (level.isAI && status === 'locked') {

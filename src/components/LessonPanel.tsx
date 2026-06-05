@@ -1,14 +1,23 @@
 import { useState } from 'react'
 import Button from '@mui/material/Button'
+import type { Lesson } from '../types'
 
-function renderText(raw) {
+interface LessonPanelProps {
+  lesson: Lesson
+  levelId: number
+  completed: boolean
+  onComplete: () => void
+  showToast: (msg: string) => void
+}
+
+function renderText(raw: string): string {
   return raw.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
 }
 
-export default function LessonPanel({ lesson, levelId, completed, onComplete, showToast }) {
-  const [answered, setAnswered] = useState(null)
+export default function LessonPanel({ lesson, completed, onComplete }: LessonPanelProps) {
+  const [answered, setAnswered] = useState<number | null>(null)
 
-  function handleAnswer(idx) {
+  function handleAnswer(idx: number) {
     if (answered !== null) return
     setAnswered(idx)
   }
@@ -29,7 +38,6 @@ export default function LessonPanel({ lesson, levelId, completed, onComplete, sh
         📖 {lesson.title}
       </h3>
 
-      {/* Content blocks */}
       {lesson.content.map((block, i) => {
         if (block.type === 'text') {
           return (
@@ -56,10 +64,8 @@ export default function LessonPanel({ lesson, levelId, completed, onComplete, sh
         return null
       })}
 
-      {/* Divider */}
       <div style={{ height: 1, background: 'var(--border)', margin: '16px 0' }} />
 
-      {/* Quiz */}
       <div style={{ fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>
         🧠 Challenge: {lesson.quiz.question}
       </div>
@@ -102,7 +108,6 @@ export default function LessonPanel({ lesson, levelId, completed, onComplete, sh
         )
       })}
 
-      {/* Result message */}
       {answered !== null && (
         <div style={{
           padding: '12px 16px',
@@ -119,7 +124,6 @@ export default function LessonPanel({ lesson, levelId, completed, onComplete, sh
         </div>
       )}
 
-      {/* Complete button */}
       {canComplete && (
         <Button
           onClick={onComplete}

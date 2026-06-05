@@ -1,13 +1,22 @@
 import Button from '@mui/material/Button'
 import styles from './Header.module.css'
 
-const TABS = [
+type Tab = 'education' | 'simulation' | 'realworld'
+
+interface HeaderProps {
+  tab: Tab
+  setTab: (tab: Tab) => void
+  xp: number
+  streak: number
+}
+
+const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'education',  label: 'LEARN',    icon: '🎓' },
   { id: 'simulation', label: 'SIMULATE', icon: '📊' },
   { id: 'realworld',  label: 'INVEST',   icon: '🌍' },
 ]
 
-export default function Header({ tab, setTab, xp, streak }) {
+export default function Header({ tab, setTab, xp, streak }: HeaderProps) {
   return (
     <header className={styles.header}>
       <div className={styles.top}>

@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
 
-export default function Toast({ message }) {
+interface ToastProps {
+  message: string | null
+}
+
+export default function Toast({ message }: ToastProps) {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {

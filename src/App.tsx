@@ -1,14 +1,16 @@
 import { useState } from 'react'
-import Header from './components/Header.jsx'
-import EducationPage from './pages/EducationPage.jsx'
-import SimulationPage from './pages/SimulationPage.jsx'
-import RealWorldPage from './pages/RealWorldPage.jsx'
-import Toast from './components/Toast.jsx'
-import { useToast } from './hooks/useToast.js'
-import { useGameState } from './hooks/useGameState.js'
+import Header from './components/Header'
+import EducationPage from './pages/EducationPage'
+import SimulationPage from './pages/SimulationPage'
+import RealWorldPage from './pages/RealWorldPage'
+import Toast from './components/Toast'
+import { useToast } from './hooks/useToast'
+import { useGameState } from './hooks/useGameState'
+
+type Tab = 'education' | 'simulation' | 'realworld'
 
 export default function App() {
-  const [tab, setTab] = useState('education')
+  const [tab, setTab] = useState<Tab>('education')
   const { toast, showToast } = useToast()
   const gameState = useGameState()
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
+import type { GameStateData, GameState, MarketAsset } from '../types'
 
-const INITIAL_STATE = {
+const INITIAL_STATE: GameStateData = {
   xp: 340,
   streak: 5,
   completedLevels: [1],
@@ -8,19 +9,19 @@ const INITIAL_STATE = {
   portfolio: {
     cash: 200,
     holdings: [
-      { id: 'aapl',    name: 'Apple Inc.',       ticker: 'AAPL',  icon: '🍎', shares: 2,  price: 215.40, change: 2.3,  category: 'stock' },
-      { id: 'eurgb',   name: 'EUR Gov Bond 2027', ticker: 'EURGB', icon: '🏛️', shares: 5,  price: 102.40, change: 0.4,  category: 'bond'  },
-      { id: 'lvmh',    name: 'LVMH',              ticker: 'MC',    icon: '💎', shares: 1,  price: 694.50, change: -1.1, category: 'stock' },
+      { id: 'aapl',  name: 'Apple Inc.',        ticker: 'AAPL',  icon: '🍎', shares: 2, price: 215.40, change: 2.3,  category: 'stock' },
+      { id: 'eurgb', name: 'EUR Gov Bond 2027',  ticker: 'EURGB', icon: '🏛️', shares: 5, price: 102.40, change: 0.4,  category: 'bond'  },
+      { id: 'lvmh',  name: 'LVMH',              ticker: 'MC',    icon: '💎', shares: 1, price: 694.50, change: -1.1, category: 'stock' },
     ],
   },
   riskProfile: 'Balanced Growth',
 }
 
-export function useGameState() {
-  const [state, setState] = useState(() => {
+export function useGameState(): GameState {
+  const [state, setState] = useState<GameStateData>(() => {
     try {
       const saved = localStorage.getItem('agoply_state')
-      return saved ? JSON.parse(saved) : INITIAL_STATE
+      return saved ? (JSON.parse(saved) as GameStateData) : INITIAL_STATE
     } catch {
       return INITIAL_STATE
     }
@@ -30,7 +31,7 @@ export function useGameState() {
     localStorage.setItem('agoply_state', JSON.stringify(state))
   }, [state])
 
-  function completeLevel(levelId) {
+  function completeLevel(levelId: number): void {
     setState(s => ({
       ...s,
       xp: s.xp + 50,
@@ -44,7 +45,7 @@ export function useGameState() {
     }))
   }
 
-  function buyAsset(asset, quantity) {
+  function buyAsset(asset: MarketAsset, quantity: number): void {
     const cost = asset.price * quantity
     setState(s => {
       if (s.portfolio.cash < cost) return s
@@ -64,7 +65,7 @@ export function useGameState() {
     })
   }
 
-  function resetState() {
+  function resetState(): void {
     setState(INITIAL_STATE)
   }
 

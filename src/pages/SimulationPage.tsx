@@ -1,7 +1,13 @@
 import { useState } from 'react'
 import Button from '@mui/material/Button'
-import { MARKET_ASSETS, LEADERBOARD } from '../data/gameData.js'
+import { MARKET_ASSETS, LEADERBOARD } from '../data/gameData'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import type { GameState, MarketAsset, Holding, LeaderboardEntry } from '../types'
+
+interface SimulationPageProps {
+  gameState: GameState
+  showToast: (msg: string) => void
+}
 
 const CHART_DATA = [
   { day: 'Day 1', value: 1000 }, { day: 'Day 2', value: 1023 }, { day: 'Day 3', value: 1008 },
@@ -9,14 +15,16 @@ const CHART_DATA = [
   { day: 'Day 7', value: 1143 },
 ]
 
-export default function SimulationPage({ gameState, showToast }) {
-  const [view, setView] = useState('portfolio')
-  const [buyModal, setBuyModal] = useState(null)
+type SimView = 'portfolio' | 'market' | 'leaderboard'
+
+export default function SimulationPage({ gameState, showToast }: SimulationPageProps) {
+  const [view, setView] = useState<SimView>('portfolio')
+  const [buyModal, setBuyModal] = useState<MarketAsset | null>(null)
   const [qty, setQty] = useState(1)
 
   const totalValue = gameState.portfolioValue
 
-  function handleBuy(asset) {
+  function handleBuy(asset: MarketAsset) {
     if (!gameState.completedLevels.includes(asset.requiredLevel)) {
       const lvlName = ['', 'Bonds', 'Stocks', 'Crypto', 'Forex', 'Commodities', 'ETFs', 'Mutual Funds'][asset.requiredLevel]
       showToast(`🔒 Complete Level ${asset.requiredLevel}: ${lvlName} to unlock this!`)
@@ -27,6 +35,7 @@ export default function SimulationPage({ gameState, showToast }) {
   }
 
   function confirmBuy() {
+    if (!buyModal) return
     const cost = buyModal.price * qty
     if (cost > gameState.portfolio.cash) {
       showToast('❌ Not enough virtual cash!')
@@ -37,6 +46,12 @@ export default function SimulationPage({ gameState, showToast }) {
     setBuyModal(null)
   }
 
+  const viewLabels: Record<SimView, string> = {
+    portfolio: '📂 Portfolio',
+    market: '📈 Markets',
+    leaderboard: '🏆 Rankings',
+  }
+
   return (
     <div>
       <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Portfolio Simulator</h2>
@@ -44,9 +59,8 @@ export default function SimulationPage({ gameState, showToast }) {
         Practice with virtual money — zero real risk
       </p>
 
-      {/* Sub-tabs */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-        {['portfolio', 'market', 'leaderboard'].map(v => (
+        {(['portfolio', 'market', 'leaderboard'] as SimView[]).map(v => (
           <Button
             key={v}
             onClick={() => setView(v)}
@@ -67,16 +81,15 @@ export default function SimulationPage({ gameState, showToast }) {
               '&:hover': { borderColor: '#1D9E75', bgcolor: '#E1F5EE', color: '#0F6E56' },
             }}
           >
-            {{ portfolio: '📂 Portfolio', market: '📈 Markets', leaderboard: '🏆 Rankings' }[v]}
+            {viewLabels[v]}
           </Button>
         ))}
       </div>
 
-      {view === 'portfolio' && <PortfolioView gameState={gameState} totalValue={totalValue} />}
-      {view === 'market'    && <MarketView assets={MARKET_ASSETS} onBuy={handleBuy} completedLevels={gameState.completedLevels} />}
-      {view === 'leaderboard' && <LeaderboardView data={LEADERBOARD} myValue={Math.round(totalValue)} />}
+      {view === 'portfolio'    && <PortfolioView gameState={gameState} totalValue={totalValue} />}
+      {view === 'market'       && <MarketView assets={MARKET_ASSETS} onBuy={handleBuy} completedLevels={gameState.completedLevels} />}
+      {view === 'leaderboard'  && <LeaderboardView data={LEADERBOARD} myValue={Math.round(totalValue)} />}
 
-      {/* Buy Modal */}
       {buyModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 500, padding: 20 }}>
           <div style={{ background: 'var(--surface)', borderRadius: 20, padding: 24, width: '100%', maxWidth: 360, boxShadow: '0 8px 40px rgba(0,0,0,0.2)' }}>
@@ -91,31 +104,13 @@ export default function SimulationPage({ gameState, showToast }) {
               <Button
                 onClick={() => setQty(q => Math.max(1, q - 1))}
                 variant="outlined"
-                sx={{
-                  width: 36, height: 36, minWidth: 36,
-                  borderRadius: '50%',
-                  border: '1.5px solid var(--border)',
-                  bgcolor: 'var(--surface2)',
-                  fontSize: '18px',
-                  p: 0,
-                  color: 'var(--text)',
-                  '&:hover': { bgcolor: 'var(--gray-200)', borderColor: 'var(--border)' },
-                }}
+                sx={{ width: 36, height: 36, minWidth: 36, borderRadius: '50%', border: '1.5px solid var(--border)', bgcolor: 'var(--surface2)', fontSize: '18px', p: 0, color: 'var(--text)', '&:hover': { bgcolor: 'var(--gray-200)', borderColor: 'var(--border)' } }}
               >−</Button>
               <span style={{ flex: 1, textAlign: 'center', fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700 }}>{qty}</span>
               <Button
                 onClick={() => setQty(q => q + 1)}
                 variant="outlined"
-                sx={{
-                  width: 36, height: 36, minWidth: 36,
-                  borderRadius: '50%',
-                  border: '1.5px solid var(--border)',
-                  bgcolor: 'var(--surface2)',
-                  fontSize: '18px',
-                  p: 0,
-                  color: 'var(--text)',
-                  '&:hover': { bgcolor: 'var(--gray-200)', borderColor: 'var(--border)' },
-                }}
+                sx={{ width: 36, height: 36, minWidth: 36, borderRadius: '50%', border: '1.5px solid var(--border)', bgcolor: 'var(--surface2)', fontSize: '18px', p: 0, color: 'var(--text)', '&:hover': { bgcolor: 'var(--gray-200)', borderColor: 'var(--border)' } }}
               >+</Button>
             </div>
             <div style={{ background: 'var(--teal-50)', border: '1px solid var(--teal-100)', borderRadius: 10, padding: '10px 14px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
@@ -126,37 +121,11 @@ export default function SimulationPage({ gameState, showToast }) {
               Available cash: €{gameState.portfolio.cash.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
-              <Button
-                onClick={() => setBuyModal(null)}
-                variant="outlined"
-                disableElevation
-                sx={{
-                  flex: 1,
-                  py: '11px',
-                  borderRadius: '10px',
-                  border: '1.5px solid var(--border)',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  color: 'var(--text)',
-                  '&:hover': { borderColor: 'var(--gray-600)', bgcolor: 'var(--gray-100)' },
-                }}
+              <Button onClick={() => setBuyModal(null)} variant="outlined" disableElevation
+                sx={{ flex: 1, py: '11px', borderRadius: '10px', border: '1.5px solid var(--border)', fontSize: '14px', fontWeight: 600, textTransform: 'none', color: 'var(--text)', '&:hover': { borderColor: 'var(--gray-600)', bgcolor: 'var(--gray-100)' } }}
               >Cancel</Button>
-              <Button
-                onClick={confirmBuy}
-                variant="contained"
-                disableElevation
-                sx={{
-                  flex: 1,
-                  py: '11px',
-                  borderRadius: '10px',
-                  bgcolor: '#1D9E75',
-                  color: '#fff',
-                  fontSize: '14px',
-                  fontWeight: 700,
-                  textTransform: 'none',
-                  '&:hover': { bgcolor: '#0F6E56' },
-                }}
+              <Button onClick={confirmBuy} variant="contained" disableElevation
+                sx={{ flex: 1, py: '11px', borderRadius: '10px', bgcolor: '#1D9E75', color: '#fff', fontSize: '14px', fontWeight: 700, textTransform: 'none', '&:hover': { bgcolor: '#0F6E56' } }}
               >Confirm Buy</Button>
             </div>
           </div>
@@ -166,14 +135,18 @@ export default function SimulationPage({ gameState, showToast }) {
   )
 }
 
-function PortfolioView({ gameState, totalValue }) {
+interface PortfolioViewProps {
+  gameState: GameState
+  totalValue: number
+}
+
+function PortfolioView({ gameState, totalValue }: PortfolioViewProps) {
   const gain = totalValue - 1000
   const gainPct = ((gain / 1000) * 100).toFixed(2)
   const isUp = gain >= 0
 
   return (
     <>
-      {/* Summary card */}
       <div style={{ background: 'linear-gradient(135deg, #085041, #1D9E75)', borderRadius: 'var(--radius)', padding: 20, color: '#fff', marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', right: -30, top: -30, width: 140, height: 140, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
         <div style={{ fontSize: 12, opacity: 0.75, marginBottom: 4 }}>Total Portfolio Value</div>
@@ -183,7 +156,7 @@ function PortfolioView({ gameState, totalValue }) {
         <div style={{ fontSize: 13, opacity: 0.85, marginBottom: 16 }}>
           {isUp ? '+' : ''}€{gain.toFixed(2)} · {isUp ? '+' : ''}{gainPct}% since start
         </div>
-        <div style={{ display: 'grid', gridColumns: 'repeat(3,1fr)', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
           {[
             { label: 'Stocks', val: `€${gameState.portfolio.holdings.filter(h => h.category === 'stock').reduce((s, h) => s + h.price * h.shares, 0).toFixed(0)}` },
             { label: 'Bonds',  val: `€${gameState.portfolio.holdings.filter(h => h.category === 'bond').reduce((s, h) => s + h.price * h.shares, 0).toFixed(0)}` },
@@ -197,7 +170,6 @@ function PortfolioView({ gameState, totalValue }) {
         </div>
       </div>
 
-      {/* Chart */}
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '16px 16px 8px', marginBottom: 16 }}>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 12, fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.8px', marginBottom: 12 }}>PORTFOLIO PERFORMANCE</div>
         <ResponsiveContainer width="100%" height={130}>
@@ -209,29 +181,26 @@ function PortfolioView({ gameState, totalValue }) {
               </linearGradient>
             </defs>
             <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#5a7a6e' }} axisLine={false} tickLine={false} />
-            <YAxis domain={[950, 1200]} tick={{ fontSize: 11, fill: '#5a7a6e' }} axisLine={false} tickLine={false} width={50} tickFormatter={v => `€${v}`} />
-            <Tooltip formatter={v => [`€${v}`, 'Value']} contentStyle={{ borderRadius: 8, border: '1px solid var(--border)', fontSize: 12 }} />
+            <YAxis domain={[950, 1200]} tick={{ fontSize: 11, fill: '#5a7a6e' }} axisLine={false} tickLine={false} width={50} tickFormatter={(v) => `€${v}`} />
+            <Tooltip formatter={(v) => [`€${v}`, 'Value']} contentStyle={{ borderRadius: 8, border: '1px solid var(--border)', fontSize: 12 }} />
             <Area type="monotone" dataKey="value" stroke="#1D9E75" strokeWidth={2} fill="url(#tealGrad)" />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Holdings */}
       <div style={{ fontFamily: 'var(--font-display)', fontSize: 12, fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.8px', marginBottom: 10 }}>YOUR HOLDINGS</div>
       {gameState.portfolio.holdings.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '32px 16px', color: 'var(--muted)', fontSize: 14 }}>
           No holdings yet — head to Markets to buy your first asset!
         </div>
       ) : (
-        gameState.portfolio.holdings.map(h => (
-          <HoldingRow key={h.id} holding={h} />
-        ))
+        gameState.portfolio.holdings.map(h => <HoldingRow key={h.id} holding={h} />)
       )}
     </>
   )
 }
 
-function HoldingRow({ holding }) {
+function HoldingRow({ holding }: { holding: Holding }) {
   const value = holding.price * holding.shares
   const isUp = holding.change >= 0
   return (
@@ -249,9 +218,17 @@ function HoldingRow({ holding }) {
   )
 }
 
-function MarketView({ assets, onBuy, completedLevels }) {
-  const [filter, setFilter] = useState('all')
-  const cats = ['all', 'stock', 'bond', 'crypto', 'forex', 'commodity', 'etf']
+interface MarketViewProps {
+  assets: MarketAsset[]
+  onBuy: (asset: MarketAsset) => void
+  completedLevels: number[]
+}
+
+type AssetFilter = 'all' | 'stock' | 'bond' | 'crypto' | 'forex' | 'commodity' | 'etf'
+
+function MarketView({ assets, onBuy, completedLevels }: MarketViewProps) {
+  const [filter, setFilter] = useState<AssetFilter>('all')
+  const cats: AssetFilter[] = ['all', 'stock', 'bond', 'crypto', 'forex', 'commodity', 'etf']
   const filtered = filter === 'all' ? assets : assets.filter(a => a.category === filter)
 
   return (
@@ -320,7 +297,12 @@ function MarketView({ assets, onBuy, completedLevels }) {
   )
 }
 
-function LeaderboardView({ data, myValue }) {
+interface LeaderboardViewProps {
+  data: LeaderboardEntry[]
+  myValue: number
+}
+
+function LeaderboardView({ data, myValue }: LeaderboardViewProps) {
   const updated = data.map(r => r.me ? { ...r, value: myValue } : r)
     .sort((a, b) => b.value - a.value)
     .map((r, i) => ({ ...r, rank: i + 1 }))
@@ -331,7 +313,7 @@ function LeaderboardView({ data, myValue }) {
         🏆 Weekly Challenge: <strong>Best Diversified Portfolio</strong> — ends Sunday
       </div>
       {updated.map(r => {
-        const rankColors = ['#FFD700','#C0C0C0','#CD7F32']
+        const rankColors = ['#FFD700', '#C0C0C0', '#CD7F32']
         const rankBg = r.rank <= 3 ? rankColors[r.rank - 1] : '#f0f0f0'
         const rankColor = r.rank === 1 ? '#7A5500' : r.rank <= 3 ? '#444' : '#888'
         return (
