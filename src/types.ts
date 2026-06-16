@@ -4,6 +4,14 @@ export interface User {
   email: string
   name: string
 }
+
+export interface UserProfile {
+  firstName: string
+  lastName: string
+  email: string
+  avatarType: 'initials' | 'icon' | 'upload'
+  avatarValue: string | null
+}
 export type AssetCategory = 'stock' | 'bond' | 'crypto' | 'forex' | 'commodity' | 'etf'
 export type LevelStatus = 'completed' | 'active' | 'locked'
 

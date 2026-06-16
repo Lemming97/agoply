@@ -1,24 +1,26 @@
-import type { ReactElement } from 'react'
+import { useState, type ReactElement } from 'react'
 import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import Tabs from '@mui/material/Tabs'
 import { Tab as MuiTab } from '@mui/material'
 import Avatar from '@mui/material/Avatar'
 import Chip from '@mui/material/Chip'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
 import Stack from '@mui/material/Stack'
 import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
-import { IconSchool, IconChartLine, IconWorld, IconFlame, IconBolt } from '@tabler/icons-react'
-import type { NavTab, User } from '../types'
+import { IconSchool, IconChartLine, IconWorld, IconFlame, IconBolt, IconEdit } from '@tabler/icons-react'
+import type { NavTab, UserProfile } from '../types'
 
 interface HeaderProps {
   tab: NavTab
   setTab: (tab: NavTab) => void
   xp: number
   streak: number
-  user: User
+  profile: UserProfile
+  onEditProfile: () => void
   onLogout: () => void
 }
 
@@ -28,7 +30,18 @@ const TABS: { id: NavTab; label: string; icon: ReactElement }[] = [
   { id: 'realworld',  label: 'INVEST',   icon: <IconWorld     size={20} strokeWidth={1.5} /> },
 ]
 
-export default function Header({ tab, setTab, xp, streak, user, onLogout }: HeaderProps) {
+function avatarSrc(profile: UserProfile): string | undefined {
+  if (profile.avatarType === 'upload') return profile.avatarValue ?? undefined
+  if (profile.avatarType === 'icon') return `https://api.dicebear.com/7.x/micah/svg?seed=${profile.avatarValue}`
+  return undefined
+}
+
+export default function Header({ tab, setTab, xp, streak, profile, onEditProfile, onLogout }: HeaderProps) {
+  const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null)
+
+  const displayName = [profile.firstName, profile.lastName].filter(Boolean).join(' ')
+  const src = avatarSrc(profile)
+
   return (
     <AppBar
       position="sticky"
@@ -75,16 +88,55 @@ export default function Header({ tab, setTab, xp, streak, user, onLogout }: Head
             sx={{ bgcolor: 'rgba(255,255,255,0.18)', color: '#fff', fontWeight: 600 }}
           />
           <Divider orientation="vertical" flexItem sx={{ bgcolor: 'rgba(255,255,255,0.2)', my: 1 }} />
-          <Avatar sx={{ width: 28, height: 28, bgcolor: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.35)', fontSize: 13, fontWeight: 800 }}>
-            {user.name[0].toUpperCase()}
-          </Avatar>
-          <Button
-            onClick={onLogout}
-            size="small"
-            sx={{ color: 'rgba(255,255,255,0.65)', fontSize: 11, fontWeight: 600, textTransform: 'none', minWidth: 0, px: 0.75, py: 0.5, '&:hover': { color: '#fff', bgcolor: 'rgba(255,255,255,0.1)' } }}
+
+          {/* Clickable avatar */}
+          <Box
+            onClick={e => setMenuAnchor(e.currentTarget as HTMLElement)}
+            sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
           >
-            Sign out
-          </Button>
+            <Avatar
+              src={src}
+              sx={{
+                width: 32, height: 32,
+                bgcolor: 'rgba(255,255,255,0.22)',
+                border: '1.5px solid rgba(255,255,255,0.45)',
+                fontSize: 14, fontWeight: 800,
+              }}
+            >
+              {profile.avatarType === 'initials' ? (profile.firstName[0]?.toUpperCase() ?? '?') : undefined}
+            </Avatar>
+          </Box>
+
+          {/* Profile menu */}
+          <Menu
+            anchorEl={menuAnchor}
+            open={Boolean(menuAnchor)}
+            onClose={() => setMenuAnchor(null)}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            slotProps={{ paper: { sx: { minWidth: 220, mt: 1, borderRadius: '10px', boxShadow: '0 4px 24px rgba(0,0,0,0.13)' } } }}
+          >
+            {/* Name / email header — non-interactive */}
+            <Box sx={{ px: 2, py: 1.5, pointerEvents: 'none' }}>
+              <Typography sx={{ fontWeight: 700, fontSize: 14, lineHeight: 1.35 }}>{displayName || 'User'}</Typography>
+              <Typography sx={{ fontSize: 12, color: 'text.secondary', mt: 0.25 }}>{profile.email}</Typography>
+            </Box>
+            <Divider />
+            <MenuItem
+              onClick={() => { setMenuAnchor(null); onEditProfile() }}
+              sx={{ gap: 1.25, fontSize: 14, py: 1.25 }}
+            >
+              <IconEdit size={16} strokeWidth={1.5} />
+              Edit Profile
+            </MenuItem>
+            <Divider />
+            <MenuItem
+              onClick={() => { setMenuAnchor(null); onLogout() }}
+              sx={{ fontSize: 14, py: 1.25, color: 'text.secondary' }}
+            >
+              Sign out
+            </MenuItem>
+          </Menu>
         </Stack>
       </Toolbar>
 
