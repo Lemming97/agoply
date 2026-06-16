@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -24,6 +24,13 @@ interface RealWorldPageProps {
 export default function RealWorldPage({ gameState }: RealWorldPageProps) {
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const guideRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (selectedPlatform) {
+      guideRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+  }, [selectedPlatform])
 
   const levelsCompleted = gameState.completedLevels.length
   const riskScore = Math.min(100, levelsCompleted * 14)
@@ -44,7 +51,7 @@ export default function RealWorldPage({ gameState }: RealWorldPageProps) {
     riskScore < 80 ? '50% Stocks · 35% ETFs · 15% Crypto' :
     '60% Stocks · 25% Crypto · 15% Commodities'
 
-  function handleSearch(e: React.FormEvent) {
+  function handleSearch(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!searchQuery.trim()) return
     window.open(`https://finance.yahoo.com/search?p=${encodeURIComponent(searchQuery)}`, '_blank')
@@ -143,29 +150,75 @@ export default function RealWorldPage({ gameState }: RealWorldPageProps) {
       </InfoCard>
 
       {/* Step Guides */}
-      <InfoCard title="📋 Step-by-Step Guides">
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          Beginner guides tailored to your risk profile and learning progress.
-        </Typography>
-        <List disablePadding>
-          {[
-            { emoji: '1️⃣', title: 'Open a brokerage account', desc: 'Compare Revolut, eToro, or Trade Republic. Choose based on min deposit and assets you want to trade.' },
-            { emoji: '2️⃣', title: 'Start with an ETF', desc: 'A MSCI World or S&P 500 ETF gives instant diversification across 500–1600 companies for as little as €10/month.' },
-            { emoji: '3️⃣', title: 'Set a monthly budget', desc: 'Even €20–50/month invested consistently from age 20 can grow to €50,000+ by age 40 thanks to compounding.' },
-            { emoji: '4️⃣', title: 'Understand your taxes', desc: 'In France, capital gains and dividends are taxed at 30% (Prélèvement Forfaitaire Unique). A PEA account can reduce this.' },
-          ].map(step => (
-            <ListItem key={step.title} alignItems="flex-start" disablePadding sx={{ mb: 1.75 }}>
-              <ListItemAvatar sx={{ minWidth: 40, mt: 0.5 }}>
-                <span style={{ fontSize: 22 }}>{step.emoji}</span>
-              </ListItemAvatar>
-              <Box>
-                <Typography sx={{ fontWeight: 600, fontSize: 13, mb: 0.3 }}>{step.title}</Typography>
-                <Typography color="text.secondary" sx={{ fontSize: 12.5, lineHeight: 1.6 }}>{step.desc}</Typography>
-              </Box>
-            </ListItem>
-          ))}
-        </List>
-      </InfoCard>
+      <div ref={guideRef}>
+        <InfoCard title={selectedPlatform ? `📋 How to Start Investing on ${selectedPlatform.name}` : '📋 Getting Started with Investing'}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+            {selectedPlatform
+              ? `Step-by-step instructions for getting started on ${selectedPlatform.name}.`
+              : 'Beginner guides tailored to your risk profile and learning progress.'}
+          </Typography>
+          <List disablePadding>
+            {selectedPlatform
+              ? selectedPlatform.steps.map((desc, i) => (
+                  <ListItem key={i} alignItems="flex-start" disablePadding sx={{ mb: 1.75 }}>
+                    <ListItemAvatar sx={{ minWidth: 40, mt: 0.25 }}>
+                      <Box sx={{ width: 26, height: 26, borderRadius: '6px', bgcolor: 'var(--teal-50)', border: '1px solid var(--teal-100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Typography sx={{ fontSize: 12, fontWeight: 700, color: '#0F6E56' }}>{i + 1}</Typography>
+                      </Box>
+                    </ListItemAvatar>
+                    <Typography color="text.secondary" sx={{ fontSize: 12.5, lineHeight: 1.6, pt: 0.25 }}>{desc}</Typography>
+                  </ListItem>
+                ))
+              : [
+                  { n: 1, title: 'Open a brokerage account', desc: 'Compare Revolut, eToro, or Trade Republic. Choose based on min deposit and assets you want to trade.' },
+                  { n: 2, title: 'Start with an ETF', desc: 'A MSCI World or S&P 500 ETF gives instant diversification across 500–1600 companies for as little as €10/month.' },
+                  { n: 3, title: 'Set a monthly budget', desc: 'Even €20–50/month invested consistently from age 20 can grow to €50,000+ by age 40 thanks to compounding.' },
+                  { n: 4, title: 'Understand your taxes', desc: 'In France, capital gains and dividends are taxed at 30% (Prélèvement Forfaitaire Unique). A PEA account can reduce this.' },
+                ].map(step => (
+                  <ListItem key={step.n} alignItems="flex-start" disablePadding sx={{ mb: 1.75 }}>
+                    <ListItemAvatar sx={{ minWidth: 40, mt: 0.25 }}>
+                      <Box sx={{ width: 26, height: 26, borderRadius: '6px', bgcolor: 'var(--teal-50)', border: '1px solid var(--teal-100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Typography sx={{ fontSize: 12, fontWeight: 700, color: '#0F6E56' }}>{step.n}</Typography>
+                      </Box>
+                    </ListItemAvatar>
+                    <Box>
+                      <Typography sx={{ fontWeight: 600, fontSize: 13, mb: 0.3 }}>{step.title}</Typography>
+                      <Typography color="text.secondary" sx={{ fontSize: 12.5, lineHeight: 1.6 }}>{step.desc}</Typography>
+                    </Box>
+                  </ListItem>
+                ))
+            }
+          </List>
+          {selectedPlatform?.article && (
+            <Box
+              component="a"
+              href={selectedPlatform.article.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                display: 'block',
+                mt: 0.5,
+                p: '12px 14px',
+                borderRadius: 2,
+                bgcolor: '#F0F7FF',
+                border: '1px solid #C5DBFF',
+                textDecoration: 'none',
+                '&:hover': { bgcolor: '#E3F0FF' },
+              }}
+            >
+              <Typography sx={{ fontSize: 11, fontWeight: 700, color: '#1a4fa0', mb: 0.5 }}>
+                📄 Want more detail?
+              </Typography>
+              <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#1a4fa0' }}>
+                {selectedPlatform.article.title} →
+              </Typography>
+              <Typography sx={{ fontSize: 11, color: '#5a7fa8', mt: 0.25 }}>
+                via {selectedPlatform.article.source}
+              </Typography>
+            </Box>
+          )}
+        </InfoCard>
+      </div>
 
       {/* Investment Search */}
       <InfoCard title="🔍 Investment Search">

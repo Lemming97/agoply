@@ -127,6 +127,17 @@ export const PLATFORMS: Platform[] = [
     perk: 'No commission on 3 trades/month',
     beginner: true,
     rating: 4.5,
+    steps: [
+      'Download the Revolut app and create an account with your phone number.',
+      'Complete identity verification (passport or ID card — usually instant).',
+      'Go to "Invest" in the bottom nav, tap "Stocks" or "ETFs" to browse.',
+      'Start with as little as €1 — tap any asset and hit "Buy" to make your first trade.',
+    ],
+    article: {
+      title: 'How to buy stocks on Revolut',
+      source: 'Revolut',
+      url: 'https://www.revolut.com/fr-FR/stock-trading/',
+    },
   },
   {
     id: 'etoro',
@@ -138,6 +149,17 @@ export const PLATFORMS: Platform[] = [
     perk: 'Free demo account · Copy trading',
     beginner: true,
     rating: 4.3,
+    steps: [
+      'Go to etoro.com and click "Join Now" — registration takes under 5 minutes.',
+      'Upload your ID and complete the identity verification questionnaire.',
+      'Deposit a minimum of €50 via bank transfer or card, then search for your first asset.',
+      'Search for a beginner-friendly ETF (e.g. iShares MSCI World), click "Trade", and set your amount.',
+    ],
+    article: {
+      title: 'How to open an account and make your first trade',
+      source: 'eToro',
+      url: 'https://www.etoro.com/stocks/trading-and-investing-in-stocks/',
+    },
   },
   {
     id: 'bnp',
@@ -147,8 +169,19 @@ export const PLATFORMS: Platform[] = [
     time: '2–3 days',
     assets: ['Stocks', 'Bonds', 'Mutual Funds', 'ETFs'],
     perk: 'Regulated French bank · Phone support',
-    beginner: false,
+    beginner: true,
     rating: 3.9,
+    steps: [
+      'Visit your nearest BNP branch or go to mabanque.bnpparibas.fr to open a compte-titres.',
+      'Provide your ID, proof of address, and tax number (NIF) — approval takes 2–3 business days.',
+      'Once approved, log in to your online banking and navigate to "Bourse & Investissements".',
+      'Search for a fund or stock, review the fee schedule (€1.95–€9.95 per order), and place your first order.',
+    ],
+    article: {
+      title: 'Pourquoi et comment investir en bourse',
+      source: 'BNP Paribas',
+      url: 'https://mabanque.bnpparibas/fr/bourse/nos-offres-et-services-bourse/pourquoi-et-comment-investir-en-bourse',
+    },
   },
   {
     id: 'trade-republic',
@@ -160,5 +193,16 @@ export const PLATFORMS: Platform[] = [
     perk: '€1 flat fee per trade · 4% on cash',
     beginner: true,
     rating: 4.6,
+    steps: [
+      'Download the Trade Republic app — available on iOS and Android.',
+      'Enter your phone number, verify your identity with your ID card — takes about 10 minutes.',
+      'Add funds via bank transfer (min €10) — IBAN provided in the app.',
+      'Search for an ETF (e.g. MSCI World), tap "Buy", set your amount — flat €1 fee per trade.',
+    ],
+    article: {
+      title: 'Start investing with Trade Republic',
+      source: 'Trade Republic',
+      url: 'https://traderepublic.com/en-fr',
+    },
   },
 ]

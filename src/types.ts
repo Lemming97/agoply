@@ -107,4 +107,6 @@ export interface Platform {
   perk: string
   beginner: boolean
   rating: number
+  steps: string[]
+  article?: { title: string; source: string; url: string }
 }
