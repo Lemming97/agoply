@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { useState, useRef, useEffect } from 'react'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
@@ -13,12 +14,16 @@ import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
 import Paper from '@mui/material/Paper'
+import {
+  IconTarget, IconBuildingBank, IconListCheck, IconSearch,
+  IconExternalLink, IconAlertTriangle,
+} from '@tabler/icons-react'
 import { PLATFORMS } from '../data/gameData'
 import type { GameState, Platform } from '../types'
 
 interface RealWorldPageProps {
   gameState: GameState
-  showToast: (msg: string) => void
+  showToast: (msg: ReactNode) => void
 }
 
 export default function RealWorldPage({ gameState }: RealWorldPageProps) {
@@ -65,7 +70,7 @@ export default function RealWorldPage({ gameState }: RealWorldPageProps) {
       </Typography>
 
       {/* Risk Profile */}
-      <InfoCard title="🎯 Your Risk Profile">
+      <InfoCard title={<><IconTarget size={20} strokeWidth={1.5} /> Your Risk Profile</>}>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
           Based on your simulation behavior and {levelsCompleted} completed level{levelsCompleted !== 1 ? 's' : ''}:
         </Typography>
@@ -91,7 +96,7 @@ export default function RealWorldPage({ gameState }: RealWorldPageProps) {
       </InfoCard>
 
       {/* Partner Platforms */}
-      <InfoCard title="🏦 Partner Platforms">
+      <InfoCard title={<><IconBuildingBank size={20} strokeWidth={1.5} /> Partner Platforms</>}>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.75 }}>
           Tap a platform to compare features and find the right fit for you.
         </Typography>
@@ -151,7 +156,11 @@ export default function RealWorldPage({ gameState }: RealWorldPageProps) {
 
       {/* Step Guides */}
       <div ref={guideRef}>
-        <InfoCard title={selectedPlatform ? `📋 How to Start Investing on ${selectedPlatform.name}` : '📋 Getting Started with Investing'}>
+        <InfoCard title={
+          selectedPlatform
+            ? <><IconListCheck size={20} strokeWidth={1.5} /> How to Start Investing on {selectedPlatform.name}</>
+            : <><IconListCheck size={20} strokeWidth={1.5} /> Getting Started with Investing</>
+        }>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
             {selectedPlatform
               ? `Step-by-step instructions for getting started on ${selectedPlatform.name}.`
@@ -206,9 +215,10 @@ export default function RealWorldPage({ gameState }: RealWorldPageProps) {
                 '&:hover': { bgcolor: '#E3F0FF' },
               }}
             >
-              <Typography sx={{ fontSize: 11, fontWeight: 700, color: '#1a4fa0', mb: 0.5 }}>
-                📄 Want more detail?
-              </Typography>
+              <Stack direction="row" sx={{ alignItems: 'center', gap: 0.75, mb: 0.5 }}>
+                <IconExternalLink size={13} strokeWidth={1.5} color="#1a4fa0" />
+                <Typography sx={{ fontSize: 11, fontWeight: 700, color: '#1a4fa0' }}>Want more detail?</Typography>
+              </Stack>
               <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#1a4fa0' }}>
                 {selectedPlatform.article.title} →
               </Typography>
@@ -221,7 +231,7 @@ export default function RealWorldPage({ gameState }: RealWorldPageProps) {
       </div>
 
       {/* Investment Search */}
-      <InfoCard title="🔍 Investment Search">
+      <InfoCard title={<><IconSearch size={20} strokeWidth={1.5} /> Investment Search</>}>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
           Look up any stock, ETF, or crypto to find current market data on Yahoo Finance.
         </Typography>
@@ -249,6 +259,7 @@ export default function RealWorldPage({ gameState }: RealWorldPageProps) {
 
       <Alert
         severity="warning"
+        icon={<IconAlertTriangle size={20} strokeWidth={1.5} />}
         sx={{ mt: 1, borderRadius: '10px', border: '1px solid #FFD700', bgcolor: '#FFF8E1', color: '#7A5500', '& .MuiAlert-icon': { color: '#C08B00' } }}
       >
         <strong>Educational purposes only.</strong> This is not financial advice. Always do your own research and consider speaking with a licensed financial advisor before investing real money.
@@ -257,11 +268,13 @@ export default function RealWorldPage({ gameState }: RealWorldPageProps) {
   )
 }
 
-function InfoCard({ title, children }: { title: string; children: React.ReactNode }) {
+function InfoCard({ title, children }: { title: ReactNode; children: ReactNode }) {
   return (
     <Card sx={{ mb: 1.75 }}>
       <CardContent>
-        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5 }}>{title}</Typography>
+        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, display: 'flex', alignItems: 'center', gap: 0.75 }}>
+          {title}
+        </Typography>
         {children}
       </CardContent>
     </Card>

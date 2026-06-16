@@ -19,7 +19,7 @@ export const LEVELS: Level[] = [
           '**Credit Rating** — Issuer\'s likelihood of repaying (AAA = safest)',
           '**Maturity** — Date the principal is repaid',
         ]},
-        { type: 'text', value: '⚠️ **Important**: When interest rates rise, bond prices fall — and vice versa. This inverse relationship is the most critical concept in fixed income.' },
+        { type: 'important', value: 'When interest rates rise, bond prices fall — and vice versa. This inverse relationship is the most critical concept in fixed income.' },
       ],
       quiz: [
         {
@@ -103,7 +103,7 @@ export const LEVELS: Level[] = [
           '**Volatility** — Crypto can swing 10-20% in a single day',
           '**Wallet** — Software that stores your crypto keys',
         ]},
-        { type: 'text', value: '⚠️ Crypto is **high risk**. It\'s worth learning about, but should be a small portion of a diversified portfolio — especially for beginners.' },
+        { type: 'important', value: 'Crypto is high risk. It\'s worth learning about, but should be a small portion of a diversified portfolio — especially for beginners.' },
       ],
       quiz: [
         {

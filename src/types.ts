@@ -18,7 +18,12 @@ export interface CalloutBlock {
   items: string[]
 }
 
-export type ContentBlock = TextBlock | CalloutBlock
+export interface ImportantBlock {
+  type: 'important'
+  value: string
+}
+
+export type ContentBlock = TextBlock | CalloutBlock | ImportantBlock
 
 export interface Quiz {
   question: string

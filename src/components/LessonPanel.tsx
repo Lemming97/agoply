@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { useState, useRef, useEffect } from 'react'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
@@ -5,6 +6,9 @@ import Box from '@mui/material/Box'
 import Alert from '@mui/material/Alert'
 import Divider from '@mui/material/Divider'
 import Paper from '@mui/material/Paper'
+import {
+  IconCircleCheck, IconCircleX, IconTrophy, IconArrowBack, IconFlagExclamation, IconMountain,
+} from '@tabler/icons-react'
 import type { Lesson } from '../types'
 
 interface LessonPanelProps {
@@ -12,7 +16,7 @@ interface LessonPanelProps {
   levelId: number
   completed: boolean
   onComplete: () => void
-  showToast: (msg: string) => void
+  showToast: (msg: ReactNode) => void
 }
 
 function renderText(raw: string): string {
@@ -94,7 +98,6 @@ export default function LessonPanel({ lesson, completed, onComplete }: LessonPan
         if ((count === 2 && score === 2) || (count === totalQ && score >= 2)) {
           setShowNextBtn(true)
         } else if (count < totalQ) {
-          // More questions to go
           setShowNextBtn(true)
         } else if (score === 1) {
           // 1/3 → repopulation round
@@ -121,7 +124,6 @@ export default function LessonPanel({ lesson, completed, onComplete }: LessonPan
         if (!repopDone) {
           setShowNextBtn(true)
         } else if (rScore === capRepopQueue.length) {
-          // All repop questions correct → complete
           setShowNextBtn(true)
         } else {
           // Failed repopulation → review
@@ -146,25 +148,21 @@ export default function LessonPanel({ lesson, completed, onComplete }: LessonPan
 
   // --- UI computed values ---
 
-  const nextBtnLabel = isCompletionPoint
-    ? 'Complete Level & Earn Rewards 🎉'
-    : isCorrect ? 'Next question →' : 'Try a new question →'
-
   let completionMsg = ''
   if (isCompletionPoint) {
     if (phase === 'repop') {
-      completionMsg = '✅ You got them this time!'
+      completionMsg = 'You got them this time!'
     } else {
       const n = r1Results.length
       completionMsg = r1Score === n
-        ? `✅ ${r1Score} out of ${n} — perfect!`
-        : `✅ ${r1Score} out of ${n} — nice work!`
+        ? `${r1Score} out of ${n} — perfect!`
+        : `${r1Score} out of ${n} — nice work!`
     }
   }
 
   const progressText = phase === 'repop'
-    ? `Retry — Question ${repopIdx + 1} of ${repopQueue.length}  ·  ✅ ${repopScore} correct so far`
-    : `Question ${r1Index + 1} of ${totalQ}  ·  ✅ ${r1Score} correct so far`
+    ? `Retry — Question ${repopIdx + 1} of ${repopQueue.length}  ·  ${repopScore} correct so far`
+    : `Question ${r1Index + 1} of ${totalQ}  ·  ${r1Score} correct so far`
 
   const reviewMsg = repopQueue.length > 0
     ? "Let's review the lesson one more time."
@@ -175,7 +173,7 @@ export default function LessonPanel({ lesson, completed, onComplete }: LessonPan
   return (
     <Paper ref={panelRef} variant="outlined" sx={{ borderColor: 'var(--teal-100)', borderRadius: 'var(--radius)', p: 2.5, mb: 2, mt: '-4px' }}>
       <Typography variant="h6" color="var(--teal-600)" sx={{ fontSize: 16, fontWeight: 700, mb: 1.75 }}>
-        📖 {lesson.title}
+        {lesson.title}
       </Typography>
 
       {lesson.content.map((block, i) => {
@@ -188,6 +186,17 @@ export default function LessonPanel({ lesson, completed, onComplete }: LessonPan
               sx={{ fontSize: 13.5, lineHeight: 1.75, mb: 1.75 }}
               dangerouslySetInnerHTML={{ __html: renderText(block.value) }}
             />
+          )
+        }
+        if (block.type === 'important') {
+          return (
+            <Box key={i} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1.75 }}>
+              <IconFlagExclamation size={18} strokeWidth={1.5} color="var(--red-400)" style={{ flexShrink: 0, marginTop: 2 }} />
+              <Typography variant="body2" color="text.primary" sx={{ fontSize: 13.5, lineHeight: 1.75 }}>
+                <strong>Important</strong>{': '}
+                <span dangerouslySetInnerHTML={{ __html: renderText(block.value) }} />
+              </Typography>
+            </Box>
           )
         }
         if (block.type === 'callout') {
@@ -209,18 +218,19 @@ export default function LessonPanel({ lesson, completed, onComplete }: LessonPan
 
       <Divider sx={{ my: 2 }} />
 
-      {/* Review state — shown instead of quiz */}
+      {/* Review state */}
       {phase === 'review' && (
         <Alert
+          icon={<IconArrowBack size={18} strokeWidth={1.5} />}
           severity="warning"
           sx={{ borderRadius: '8px', border: '1px solid #F5C97A', bgcolor: '#FFFBF0', color: '#8A6000', '& .MuiAlert-icon': { color: '#8A6000' } }}
         >
-          <Typography sx={{ fontWeight: 700, fontSize: 13.5, mb: 0.5 }}>Review the lesson ↑</Typography>
+          <Typography sx={{ fontWeight: 700, fontSize: 13.5, mb: 0.5 }}>Review the lesson</Typography>
           <Typography sx={{ fontSize: 13 }}>{reviewMsg} You'll restart with question 1 in a moment.</Typography>
         </Alert>
       )}
 
-      {/* Repopulation intro — brief message before the retry questions load */}
+      {/* Repopulation intro */}
       {phase === 'repop_intro' && (
         <Alert severity="info" sx={{ borderRadius: '8px', '& .MuiAlert-icon': { alignItems: 'center' } }}>
           <Typography sx={{ fontWeight: 700, fontSize: 13.5, mb: 0.5 }}>So close!</Typography>
@@ -237,9 +247,12 @@ export default function LessonPanel({ lesson, completed, onComplete }: LessonPan
             {progressText}
           </Typography>
 
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5 }}>
-            🧠 Challenge: {currentQuiz.question}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1.5 }}>
+            <IconMountain size={18} strokeWidth={1.5} style={{ flexShrink: 0, marginTop: 2 }} />
+            <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+              Challenge: {currentQuiz.question}
+            </Typography>
+          </Box>
 
           {currentQuiz.options.map((opt, i) => {
             let bg = 'var(--surface)', borderColor = 'var(--border)', color = 'var(--text)'
@@ -271,6 +284,10 @@ export default function LessonPanel({ lesson, completed, onComplete }: LessonPan
 
           {answered !== null && (
             <Alert
+              icon={isCorrect
+                ? <IconCircleCheck size={18} strokeWidth={1.5} />
+                : <IconCircleX    size={18} strokeWidth={1.5} />
+              }
               severity={isCorrect ? 'success' : 'error'}
               sx={{ mt: 1, borderRadius: '8px', border: `1px solid ${isCorrect ? 'var(--teal-100)' : '#F09595'}`, bgcolor: isCorrect ? 'var(--teal-50)' : 'var(--red-50)', color: isCorrect ? 'var(--teal-600)' : '#A32D2D', '& .MuiAlert-icon': { color: isCorrect ? 'var(--teal-600)' : '#A32D2D' } }}
             >
@@ -282,6 +299,7 @@ export default function LessonPanel({ lesson, completed, onComplete }: LessonPan
             <Box sx={{ mt: 2 }}>
               {completionMsg && (
                 <Alert
+                  icon={<IconCircleCheck size={18} strokeWidth={1.5} />}
                   severity="success"
                   sx={{ mb: 1.5, borderRadius: '8px', border: '1px solid var(--teal-100)', bgcolor: 'var(--teal-50)', color: 'var(--teal-600)', '& .MuiAlert-icon': { color: 'var(--teal-600)' } }}
                 >
@@ -292,12 +310,16 @@ export default function LessonPanel({ lesson, completed, onComplete }: LessonPan
                 onClick={handleNext}
                 variant={isCompletionPoint ? 'contained' : 'outlined'}
                 color="primary"
+                endIcon={isCompletionPoint ? <IconTrophy size={16} strokeWidth={1.5} /> : undefined}
                 sx={{
                   borderRadius: '10px', px: 3, py: 1.5, fontSize: 13, fontWeight: 700, textTransform: 'none',
                   ...(!isCompletionPoint && { borderColor: 'var(--border)', color: 'var(--text)', '&:hover': { borderColor: 'var(--text)' } }),
                 }}
               >
-                {nextBtnLabel}
+                {isCompletionPoint
+                  ? 'Complete Level & Earn Rewards'
+                  : isCorrect ? 'Next question →' : 'Try a new question →'
+                }
               </Button>
             </Box>
           )}
@@ -305,8 +327,8 @@ export default function LessonPanel({ lesson, completed, onComplete }: LessonPan
       )}
 
       {completed && (
-        <Typography color="var(--teal-600)" sx={{ fontSize: 13, fontWeight: 600, mt: showQuiz ? 1.5 : 0 }}>
-          ✅ You've already completed this level!
+        <Typography color="var(--teal-600)" sx={{ fontSize: 13, fontWeight: 600, mt: showQuiz ? 1.5 : 0, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <IconCircleCheck size={16} strokeWidth={1.5} color="var(--teal-400)" /> You've already completed this level!
         </Typography>
       )}
     </Paper>

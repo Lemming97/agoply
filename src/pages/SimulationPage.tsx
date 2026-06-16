@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { useState } from 'react'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
@@ -18,12 +19,18 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Alert from '@mui/material/Alert'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import {
+  IconWallet, IconChartBar, IconTrophy, IconShoppingCart,
+  IconArrowUpRight, IconArrowDownRight, IconLock, IconCircleCheck,
+  IconBuildingBank, IconTrendingUp, IconCurrencyBitcoin,
+  IconCurrencyEuro, IconBarrel, IconChartPie,
+} from '@tabler/icons-react'
 import { MARKET_ASSETS, LEADERBOARD } from '../data/gameData'
-import type { GameState, MarketAsset, Holding, LeaderboardEntry } from '../types'
+import type { GameState, MarketAsset, Holding, LeaderboardEntry, AssetCategory } from '../types'
 
 interface SimulationPageProps {
   gameState: GameState
-  showToast: (msg: string) => void
+  showToast: (msg: ReactNode) => void
 }
 
 const CHART_DATA = [
@@ -34,6 +41,18 @@ const CHART_DATA = [
 
 type SimView = 'portfolio' | 'market' | 'leaderboard'
 type AssetFilter = 'all' | 'stock' | 'bond' | 'crypto' | 'forex' | 'commodity' | 'etf'
+
+function CategoryIcon({ category, size = 20 }: { category: AssetCategory; size?: number }) {
+  const props = { size, strokeWidth: 1.5 } as const
+  switch (category) {
+    case 'bond':      return <IconBuildingBank    {...props} />
+    case 'stock':     return <IconTrendingUp      {...props} />
+    case 'crypto':    return <IconCurrencyBitcoin {...props} />
+    case 'forex':     return <IconCurrencyEuro    {...props} />
+    case 'commodity': return <IconBarrel          {...props} />
+    case 'etf':       return <IconChartPie        {...props} />
+  }
+}
 
 export default function SimulationPage({ gameState, showToast }: SimulationPageProps) {
   const [view, setView] = useState<SimView>('portfolio')
@@ -46,7 +65,7 @@ export default function SimulationPage({ gameState, showToast }: SimulationPageP
   function handleBuy(asset: MarketAsset) {
     if (!gameState.completedLevels.includes(asset.requiredLevel)) {
       const lvlName = ['', 'Bonds', 'Stocks', 'Crypto', 'Forex', 'Commodities', 'ETFs', 'Mutual Funds'][asset.requiredLevel]
-      showToast(`🔒 Complete Level ${asset.requiredLevel}: ${lvlName} to unlock this!`)
+      showToast(`Complete Level ${asset.requiredLevel}: ${lvlName} to unlock this!`)
       return
     }
     setBuyModal(asset)
@@ -56,9 +75,14 @@ export default function SimulationPage({ gameState, showToast }: SimulationPageP
   function confirmBuy() {
     if (!buyModal) return
     const cost = buyModal.price * qty
-    if (cost > gameState.portfolio.cash) { showToast('❌ Not enough virtual cash!'); return }
+    if (cost > gameState.portfolio.cash) { showToast('Not enough virtual cash!'); return }
     gameState.buyAsset(buyModal, qty)
-    showToast(`✅ Bought ${qty}× ${buyModal.ticker} for €${cost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}!`)
+    showToast(
+      <Stack direction="row" sx={{ alignItems: 'center', gap: 0.75 }}>
+        <IconCircleCheck size={15} strokeWidth={1.5} />
+        <span>Bought {qty}× {buyModal.ticker} for €{cost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}!</span>
+      </Stack>
+    )
     setBuyModal(null)
   }
 
@@ -66,7 +90,12 @@ export default function SimulationPage({ gameState, showToast }: SimulationPageP
     if (!sellModal) return
     const proceeds = sellModal.price * qty
     gameState.sellAsset(sellModal.id, qty)
-    showToast(`✅ Sold ${qty}× ${sellModal.ticker} for €${proceeds.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}!`)
+    showToast(
+      <Stack direction="row" sx={{ alignItems: 'center', gap: 0.75 }}>
+        <IconCircleCheck size={15} strokeWidth={1.5} />
+        <span>Sold {qty}× {sellModal.ticker} for €{proceeds.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}!</span>
+      </Stack>
+    )
     setSellModal(null)
   }
 
@@ -89,22 +118,23 @@ export default function SimulationPage({ gameState, showToast }: SimulationPageP
           '& .MuiTabs-indicator': { bgcolor: '#1D9E75' },
         }}
       >
-        <MuiTab label="📂 Portfolio"  value="portfolio"    />
-        <MuiTab label="📈 Markets"    value="market"       />
-        <MuiTab label="🏆 Rankings"   value="leaderboard"  />
+        <MuiTab icon={<IconWallet  size={18} strokeWidth={1.5} />} iconPosition="start" label="Portfolio"  value="portfolio"   />
+        <MuiTab icon={<IconChartBar size={18} strokeWidth={1.5} />} iconPosition="start" label="Markets"    value="market"      />
+        <MuiTab icon={<IconTrophy  size={18} strokeWidth={1.5} />} iconPosition="start" label="Rankings"   value="leaderboard" />
       </Tabs>
 
       {view === 'portfolio'   && <PortfolioView gameState={gameState} totalValue={totalValue} onSell={(h: Holding) => { setSellModal(h); setQty(1) }} />}
       {view === 'market'      && <MarketView assets={MARKET_ASSETS} onBuy={handleBuy} completedLevels={gameState.completedLevels} cash={gameState.portfolio.cash} />}
       {view === 'leaderboard' && <LeaderboardView data={LEADERBOARD} myValue={Math.round(totalValue)} />}
 
+      {/* Buy dialog */}
       <Dialog
         open={!!buyModal}
         onClose={() => setBuyModal(null)}
         slotProps={{ paper: { sx: { borderRadius: '20px', width: '100%', maxWidth: 360 } } }}
       >
-        <DialogTitle sx={{ fontWeight: 700, fontSize: 18, pb: 1 }}>
-          Buy {buyModal?.icon} {buyModal?.name}
+        <DialogTitle sx={{ fontWeight: 700, fontSize: 18, pb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+          Buy{buyModal && <CategoryIcon category={buyModal.category} size={20} />}{buyModal?.name}
         </DialogTitle>
         <DialogContent>
           <Stack direction="row" sx={{ justifyContent: 'space-between', mb: 2 }}>
@@ -137,33 +167,23 @@ export default function SimulationPage({ gameState, showToast }: SimulationPageP
           </Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
-          <Button
-            onClick={() => setBuyModal(null)}
-            variant="outlined"
-            fullWidth
-            sx={{ py: 1.375, borderRadius: '10px', textTransform: 'none', borderColor: 'var(--border)', color: 'text.primary' }}
-          >
+          <Button onClick={() => setBuyModal(null)} variant="outlined" fullWidth sx={{ py: 1.375, borderRadius: '10px', textTransform: 'none', borderColor: 'var(--border)', color: 'text.primary' }}>
             Cancel
           </Button>
-          <Button
-            onClick={confirmBuy}
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ py: 1.375, borderRadius: '10px', textTransform: 'none', fontWeight: 700 }}
-          >
+          <Button onClick={confirmBuy} variant="contained" color="primary" fullWidth sx={{ py: 1.375, borderRadius: '10px', textTransform: 'none', fontWeight: 700 }}>
             Confirm Buy
           </Button>
         </DialogActions>
       </Dialog>
 
+      {/* Sell dialog */}
       <Dialog
         open={!!sellModal}
         onClose={() => setSellModal(null)}
         slotProps={{ paper: { sx: { borderRadius: '20px', width: '100%', maxWidth: 360 } } }}
       >
-        <DialogTitle sx={{ fontWeight: 700, fontSize: 18, pb: 1 }}>
-          Sell {sellModal?.icon} {sellModal?.name}
+        <DialogTitle sx={{ fontWeight: 700, fontSize: 18, pb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+          Sell{sellModal && <CategoryIcon category={sellModal.category} size={20} />}{sellModal?.name}
         </DialogTitle>
         <DialogContent>
           <Stack direction="row" sx={{ justifyContent: 'space-between', mb: 2 }}>
@@ -196,20 +216,10 @@ export default function SimulationPage({ gameState, showToast }: SimulationPageP
           </Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
-          <Button
-            onClick={() => setSellModal(null)}
-            variant="outlined"
-            fullWidth
-            sx={{ py: 1.375, borderRadius: '10px', textTransform: 'none', borderColor: 'var(--border)', color: 'text.primary' }}
-          >
+          <Button onClick={() => setSellModal(null)} variant="outlined" fullWidth sx={{ py: 1.375, borderRadius: '10px', textTransform: 'none', borderColor: 'var(--border)', color: 'text.primary' }}>
             Cancel
           </Button>
-          <Button
-            onClick={confirmSell}
-            variant="contained"
-            fullWidth
-            sx={{ py: 1.375, borderRadius: '10px', textTransform: 'none', fontWeight: 700, bgcolor: '#c0392b', '&:hover': { bgcolor: '#a93226' } }}
-          >
+          <Button onClick={confirmSell} variant="contained" fullWidth sx={{ py: 1.375, borderRadius: '10px', textTransform: 'none', fontWeight: 700, bgcolor: '#c0392b', '&:hover': { bgcolor: '#a93226' } }}>
             Confirm Sell
           </Button>
         </DialogActions>
@@ -291,30 +301,30 @@ function HoldingRow({ holding, onSell }: { holding: Holding; onSell: (h: Holding
   const isUp = holding.change >= 0
   return (
     <Paper variant="outlined" sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: '12px 14px', mb: 1, borderRadius: 2 }}>
-      <Avatar sx={{ bgcolor: 'var(--teal-50)', borderRadius: '8px', width: 38, height: 38, fontSize: 18 }}>{holding.icon}</Avatar>
+      <Avatar sx={{ bgcolor: 'var(--teal-50)', borderRadius: '8px', width: 38, height: 38, color: 'var(--teal-600)' }}>
+        <CategoryIcon category={holding.category} size={20} />
+      </Avatar>
       <Box sx={{ flex: 1 }}>
         <Typography sx={{ fontWeight: 600, fontSize: 13 }}>{holding.name}</Typography>
         <Typography variant="caption" color="text.secondary">{holding.ticker} · {holding.shares} shares</Typography>
       </Box>
       <Box sx={{ textAlign: 'right', mr: 1.5 }}>
         <Typography sx={{ fontWeight: 700, fontSize: 14 }}>€{value.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}</Typography>
-        <Typography sx={{ fontSize: 11, fontWeight: 600 }} color={isUp ? 'primary.main' : 'error.main'}>
-          {isUp ? '+' : ''}{holding.change}%
-        </Typography>
+        <Stack direction="row" component="span" sx={{ justifyContent: 'flex-end', alignItems: 'center', gap: 0.25 }}>
+          <Typography component="span" sx={{ fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center' }} color={isUp ? 'primary.main' : 'error.main'}>
+            {isUp
+              ? <IconArrowUpRight size={12} strokeWidth={1.5} />
+              : <IconArrowDownRight size={12} strokeWidth={1.5} />
+            }
+            {isUp ? '+' : ''}{holding.change}%
+          </Typography>
+        </Stack>
       </Box>
       <Button
         onClick={() => onSell(holding)}
         variant="outlined"
         size="small"
-        sx={{
-          bgcolor: '#fff5f5',
-          color: '#c0392b',
-          borderColor: '#f5c6c6',
-          borderRadius: '6px',
-          fontWeight: 700,
-          textTransform: 'none',
-          '&:hover': { bgcolor: '#fde8e8', borderColor: '#c0392b' },
-        }}
+        sx={{ bgcolor: '#fff5f5', color: '#c0392b', borderColor: '#f5c6c6', borderRadius: '6px', fontWeight: 700, textTransform: 'none', '&:hover': { bgcolor: '#fde8e8', borderColor: '#c0392b' } }}
       >
         SELL
       </Button>
@@ -347,15 +357,7 @@ function MarketView({ assets, onBuy, completedLevels, cash }: { assets: MarketAs
             key={c}
             value={c}
             size="small"
-            sx={{
-              fontSize: 11,
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-              px: 1.5,
-              color: 'text.secondary',
-              '&.Mui-selected': { bgcolor: 'var(--teal-50)', color: '#0F6E56', borderColor: '#1D9E75 !important' },
-            }}
+            sx={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', px: 1.5, color: 'text.secondary', '&.Mui-selected': { bgcolor: 'var(--teal-50)', color: '#0F6E56', borderColor: '#1D9E75 !important' } }}
           >
             {c}
           </ToggleButton>
@@ -367,8 +369,8 @@ function MarketView({ assets, onBuy, completedLevels, cash }: { assets: MarketAs
         const isUp = asset.change >= 0
         return (
           <Paper key={asset.id} variant="outlined" sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: '12px 14px', mb: 1, borderRadius: 2, opacity: unlocked ? 1 : 0.5 }}>
-            <Avatar sx={{ bgcolor: unlocked ? 'var(--teal-50)' : '#f5f5f5', borderRadius: '8px', width: 38, height: 38, fontSize: 18 }}>
-              {asset.icon}
+            <Avatar sx={{ bgcolor: unlocked ? 'var(--teal-50)' : '#f5f5f5', borderRadius: '8px', width: 38, height: 38, color: unlocked ? 'var(--teal-600)' : '#aaa' }}>
+              <CategoryIcon category={asset.category} size={20} />
             </Avatar>
             <Box sx={{ flex: 1 }}>
               <Typography sx={{ fontWeight: 600, fontSize: 13 }}>{asset.name}</Typography>
@@ -376,7 +378,11 @@ function MarketView({ assets, onBuy, completedLevels, cash }: { assets: MarketAs
             </Box>
             <Box sx={{ textAlign: 'right', mr: 1.5 }}>
               <Typography sx={{ fontWeight: 700, fontSize: 14 }}>€{asset.price.toLocaleString()}</Typography>
-              <Typography sx={{ fontSize: 11, fontWeight: 600 }} color={isUp ? 'primary.main' : 'error.main'}>
+              <Typography component="div" sx={{ fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.25 }} color={isUp ? 'primary.main' : 'error.main'}>
+                {isUp
+                  ? <IconArrowUpRight size={12} strokeWidth={1.5} />
+                  : <IconArrowDownRight size={12} strokeWidth={1.5} />
+                }
                 {isUp ? '+' : ''}{asset.change}%
               </Typography>
             </Box>
@@ -384,6 +390,7 @@ function MarketView({ assets, onBuy, completedLevels, cash }: { assets: MarketAs
               onClick={() => onBuy(asset)}
               variant="outlined"
               size="small"
+              startIcon={unlocked ? <IconShoppingCart size={13} strokeWidth={1.5} /> : undefined}
               sx={{
                 bgcolor: unlocked ? 'var(--teal-50)' : '#f5f5f5',
                 color: unlocked ? '#0F6E56' : '#aaa',
@@ -391,10 +398,11 @@ function MarketView({ assets, onBuy, completedLevels, cash }: { assets: MarketAs
                 borderRadius: '6px',
                 fontWeight: 700,
                 textTransform: 'none',
+                minWidth: unlocked ? undefined : 36,
                 '&:hover': { bgcolor: unlocked ? 'var(--teal-100)' : '#f5f5f5', borderColor: unlocked ? '#1D9E75' : '#ddd' },
               }}
             >
-              {unlocked ? 'BUY' : '🔒'}
+              {unlocked ? 'BUY' : <IconLock size={15} strokeWidth={1.5} />}
             </Button>
           </Paper>
         )
@@ -412,9 +420,9 @@ function LeaderboardView({ data, myValue }: { data: LeaderboardEntry[]; myValue:
   return (
     <>
       <Alert
-        icon="🏆"
+        icon={<IconTrophy size={18} strokeWidth={1.5} />}
         severity="warning"
-        sx={{ mb: 2, borderRadius: '10px', border: '1px solid #FFD700', bgcolor: '#FFF8E1', color: '#7A5500', '& .MuiAlert-icon': { fontSize: 16 } }}
+        sx={{ mb: 2, borderRadius: '10px', border: '1px solid #FFD700', bgcolor: '#FFF8E1', color: '#7A5500', '& .MuiAlert-icon': { color: '#C08B00' } }}
       >
         Weekly Challenge: <strong>Best Diversified Portfolio</strong> — ends Sunday
       </Alert>
