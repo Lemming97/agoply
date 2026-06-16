@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useState, useRef, useEffect } from 'react'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
+import Chip from '@mui/material/Chip'
 import Drawer from '@mui/material/Drawer'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
@@ -11,7 +12,7 @@ import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import {
   IconCircleCheck, IconCircleX, IconTrophy, IconArrowBack, IconFlagExclamation, IconMountain,
-  IconBooks, IconBookmark, IconBookmarkFilled,
+  IconBooks, IconBookmark, IconBookmarkFilled, IconX,
 } from '@tabler/icons-react'
 import type { Lesson, GlossaryEntry } from '../types'
 
@@ -190,14 +191,16 @@ export default function LessonPanel({
           {lesson.title}
         </Typography>
         {glossary && glossary.length > 0 && (
-          <Button
-            size="small"
-            startIcon={<IconBooks size={16} strokeWidth={1.5} />}
+          <Chip
+            icon={<IconBooks size={15} strokeWidth={1.5} />}
+            label="Glossary"
             onClick={() => setGlossaryOpen(true)}
-            sx={{ textTransform: 'none', fontSize: 12, fontWeight: 600, color: 'var(--teal-600)', flexShrink: 0 }}
-          >
-            Glossary
-          </Button>
+            sx={{
+              bgcolor: 'var(--teal-50)', color: 'var(--teal-600)', fontWeight: 700, fontSize: 15,
+              flexShrink: 0, cursor: 'pointer',
+              '& .MuiChip-icon': { color: 'var(--teal-600)' },
+            }}
+          />
         )}
       </Stack>
 
@@ -360,7 +363,12 @@ export default function LessonPanel({
       {/* Glossary drawer */}
       <Drawer anchor="bottom" open={glossaryOpen} onClose={() => setGlossaryOpen(false)}>
         <Box sx={{ p: 2.5, maxHeight: '70vh', overflow: 'auto' }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, fontSize: 16, mb: 0.5 }}>Glossary</Typography>
+          <Stack direction="row" sx={{ alignItems: 'flex-start', justifyContent: 'space-between', mb: 0.5 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, fontSize: 16 }}>Glossary</Typography>
+            <IconButton size="small" onClick={() => setGlossaryOpen(false)} sx={{ mt: -0.5, mr: -0.5 }}>
+              <IconX size={18} strokeWidth={1.5} />
+            </IconButton>
+          </Stack>
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
             {levelName} · {glossary?.length ?? 0} terms
           </Typography>
