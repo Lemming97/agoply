@@ -24,7 +24,7 @@ const AVATAR_SEEDS = [
 ]
 
 function dicebearUrl(seed: string) {
-  return `https://api.dicebear.com/7.x/micah/svg?seed=${seed}`
+  return `https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(seed)}`
 }
 
 interface Props {
