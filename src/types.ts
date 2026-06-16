@@ -63,6 +63,7 @@ export interface Level {
   unlocks: string
   lesson: Lesson | null
   isAI?: boolean
+  illustration?: string
   glossary?: { term: string; definition: string }[]
 }
 

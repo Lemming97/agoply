@@ -9,6 +9,7 @@ import RealWorldPage from './pages/RealWorldPage'
 import LoginPage from './pages/LoginPage'
 import EditProfilePage from './pages/EditProfilePage'
 import GlossaryPage from './pages/GlossaryPage'
+import LessonPage from './pages/LessonPage'
 import Toast from './components/Toast'
 import { useToast } from './hooks/useToast'
 import { useGameState } from './hooks/useGameState'
@@ -17,7 +18,7 @@ import { useUserProfile } from './hooks/useUserProfile'
 import theme from './theme'
 import type { NavTab, User } from './types'
 
-type AppView = 'main' | 'editProfile' | 'glossary'
+type AppView = 'main' | 'editProfile' | 'glossary' | 'lesson'
 
 export default function App() {
   const { user, login, logout, register } = useAuth()
@@ -37,6 +38,7 @@ export default function App() {
 function AuthenticatedApp({ user, onLogout }: { user: User; onLogout: () => void }) {
   const [tab, setTab] = useState<NavTab>('education')
   const [view, setView] = useState<AppView>('main')
+  const [selectedLevelId, setSelectedLevelId] = useState<number | null>(null)
   const { toast, showToast } = useToast()
   const gameState = useGameState(user.email)
   const { profile, updateProfile } = useUserProfile(user.name, user.email)
@@ -69,9 +71,16 @@ function AuthenticatedApp({ user, onLogout }: { user: User; onLogout: () => void
             showToast={showToast}
             onGoToLearn={() => { setView('main'); setTab('education') }}
           />
+        ) : view === 'lesson' && selectedLevelId !== null ? (
+          <LessonPage
+            levelId={selectedLevelId}
+            gameState={gameState}
+            showToast={showToast}
+            onBack={() => setView('main')}
+          />
         ) : (
           <>
-            {tab === 'education'  && <EducationPage  gameState={gameState} showToast={showToast} />}
+            {tab === 'education'  && <EducationPage  gameState={gameState} showToast={showToast} onOpenLesson={id => { setSelectedLevelId(id); setView('lesson') }} />}
             {tab === 'simulation' && <SimulationPage gameState={gameState} showToast={showToast} />}
             {tab === 'realworld'  && <RealWorldPage  gameState={gameState} showToast={showToast} />}
           </>

@@ -1,45 +1,24 @@
 import type { ReactNode } from 'react'
-import { useState } from 'react'
 import Card from '@mui/material/Card'
 import CardActionArea from '@mui/material/CardActionArea'
+import CardContent from '@mui/material/CardContent'
 import LinearProgress from '@mui/material/LinearProgress'
 import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
-import Avatar from '@mui/material/Avatar'
-import {
-  IconBuildingBank, IconTrendingUp, IconCurrencyBitcoin, IconCurrencyEuro,
-  IconBarrel, IconChartPie, IconBuildingStore, IconSparkles,
-  IconLock, IconCircleCheck, IconTrophy,
-} from '@tabler/icons-react'
+import Grid from '@mui/material/Grid'
+import { IconCircleCheck, IconLock, IconSparkles } from '@tabler/icons-react'
 import { LEVELS } from '../data/gameData'
-import LessonPanel from '../components/LessonPanel'
 import type { GameState, Level, LevelStatus } from '../types'
 
 interface EducationPageProps {
   gameState: GameState
   showToast: (msg: ReactNode) => void
+  onOpenLesson: (levelId: number) => void
 }
 
-function LevelIcon({ id, size = 20 }: { id: number; size?: number }) {
-  const props = { size, strokeWidth: 1.5 } as const
-  switch (id) {
-    case 1: return <IconBuildingBank    {...props} />
-    case 2: return <IconTrendingUp      {...props} />
-    case 3: return <IconCurrencyBitcoin {...props} />
-    case 4: return <IconCurrencyEuro    {...props} />
-    case 5: return <IconBarrel          {...props} />
-    case 6: return <IconChartPie        {...props} />
-    case 7: return <IconBuildingStore   {...props} />
-    case 8: return <IconSparkles        {...props} />
-    default: return null
-  }
-}
-
-export default function EducationPage({ gameState, showToast }: EducationPageProps) {
-  const [openLesson, setOpenLesson] = useState<number | null>(null)
-
+export default function EducationPage({ gameState, showToast, onOpenLesson }: EducationPageProps) {
   function getLevelStatus(level: Level): LevelStatus {
     if (gameState.completedLevels.includes(level.id)) return 'completed'
     if (gameState.activeLesson === level.id) return 'active'
@@ -49,20 +28,9 @@ export default function EducationPage({ gameState, showToast }: EducationPagePro
 
   function handleLevelClick(level: Level) {
     const status = getLevelStatus(level)
-    if (status === 'locked') { showToast('Complete the previous level first!'); return }
-    if (!level.lesson)       { showToast('This level is coming soon!'); return }
-    setOpenLesson(openLesson === level.id ? null : level.id)
-  }
-
-  function handleComplete(levelId: number) {
-    gameState.completeLevel(levelId)
-    setOpenLesson(null)
-    showToast(
-      <Stack direction="row" sx={{ alignItems: 'center', gap: 0.75 }}>
-        <IconTrophy size={16} strokeWidth={1.5} />
-        <span>Level complete! +50 XP · €100 virtual cash added!</span>
-      </Stack>
-    )
+    if (status === 'locked') { showToast('🔒 Complete the previous level first!'); return }
+    if (!level.lesson) { showToast('This level is coming soon!'); return }
+    onOpenLesson(level.id)
   }
 
   return (
@@ -72,29 +40,16 @@ export default function EducationPage({ gameState, showToast }: EducationPagePro
         Complete lessons to unlock investment instruments in the Simulator
       </Typography>
 
-      {LEVELS.map(level => {
-        const status = getLevelStatus(level)
-        const isOpen = openLesson === level.id
-        return (
-          <Box key={level.id}>
-            <LevelCard level={level} status={status} isOpen={isOpen} onClick={() => handleLevelClick(level)} />
-            {isOpen && level.lesson && (
-              <LessonPanel
-                lesson={level.lesson}
-                levelId={level.id}
-                levelName={level.name}
-                completed={status === 'completed'}
-                onComplete={() => handleComplete(level.id)}
-                showToast={showToast}
-                glossary={level.glossary}
-                savedGlossary={gameState.savedGlossary}
-                onSaveGlossaryTerm={gameState.saveGlossaryTerm}
-                onRemoveSavedTerm={gameState.removeSavedTerm}
-              />
-            )}
-          </Box>
-        )
-      })}
+      <Grid container spacing={2}>
+        {LEVELS.map(level => {
+          const status = getLevelStatus(level)
+          return (
+            <Grid key={level.id} size={{ xs: 12, sm: 6 }}>
+              <LevelCard level={level} status={status} onClick={() => handleLevelClick(level)} />
+            </Grid>
+          )
+        })}
+      </Grid>
     </Box>
   )
 }
@@ -102,18 +57,12 @@ export default function EducationPage({ gameState, showToast }: EducationPagePro
 interface LevelCardProps {
   level: Level
   status: LevelStatus
-  isOpen: boolean
   onClick: () => void
 }
 
-function LevelCard({ level, status, isOpen, onClick }: LevelCardProps) {
+function LevelCard({ level, status, onClick }: LevelCardProps) {
+  const isLocked = status === 'locked'
   const pct = status === 'completed' ? 100 : status === 'active' ? 45 : 0
-
-  const avatarStyles: Record<LevelStatus, object> = {
-    completed: { bgcolor: '#1D9E75', color: '#fff' },
-    active:    { bgcolor: 'var(--gold-50)', color: 'var(--gold-400)', border: '2px solid var(--gold-500)' },
-    locked:    { bgcolor: '#f0f0f0', color: '#aaa' },
-  }
 
   const chipContent: Record<LevelStatus, ReactNode> = {
     completed: (
@@ -132,14 +81,14 @@ function LevelCard({ level, status, isOpen, onClick }: LevelCardProps) {
   }
 
   const chipSx: Record<LevelStatus, object> = {
-    completed: { bgcolor: 'var(--teal-50)',  color: 'var(--teal-600)', fontWeight: 700, fontSize: 15 },
-    active:    { bgcolor: 'var(--gold-50)',  color: 'var(--gold-400)', fontWeight: 700, fontSize: 15 },
-    locked:    { bgcolor: '#f5f5f5',         color: '#aaa',            fontWeight: 700, fontSize: 15 },
+    completed: { bgcolor: 'var(--teal-50)', color: 'var(--teal-600)', fontWeight: 700, fontSize: 15 },
+    active:    { bgcolor: 'var(--gold-50)', color: 'var(--gold-400)', fontWeight: 700, fontSize: 15 },
+    locked:    { bgcolor: '#f5f5f5',        color: '#aaa',            fontWeight: 700, fontSize: 15 },
   }
 
   let chipLabel: ReactNode = chipContent[status]
   let chipStyle = chipSx[status]
-  if (level.isAI && status === 'locked') {
+  if (level.isAI && isLocked) {
     chipLabel = (
       <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5 }}>
         <IconSparkles size={13} strokeWidth={1.5} />
@@ -149,48 +98,86 @@ function LevelCard({ level, status, isOpen, onClick }: LevelCardProps) {
     chipStyle = { ...chipStyle, bgcolor: 'var(--purple-50)', color: 'var(--purple-600)', fontWeight: 700 }
   }
 
-  const avatarContent =
-    status === 'completed'
-      ? <IconCircleCheck size={22} strokeWidth={1.5} />
-      : <LevelIcon id={level.id} size={22} />
+  const badgeSx = isLocked
+    ? { bgcolor: '#e0e0e0', color: '#aaa' }
+    : status === 'completed'
+    ? { bgcolor: '#1D9E75', color: '#fff' }
+    : { bgcolor: 'var(--teal-400)', color: '#fff' }
 
   return (
     <Card
       sx={{
-        mb: 1.25,
-        bgcolor: status === 'completed' ? 'var(--teal-50)' : status === 'active' ? '#fffdf5' : 'background.paper',
-        border: isOpen ? '2px solid #1D9E75' : status === 'active' ? '1.5px solid var(--gold-500)' : '1px solid var(--border)',
-        opacity: status === 'locked' ? 0.55 : 1,
-        transition: 'all 0.18s',
+        height: '100%',
+        border: '1px solid var(--border)',
+        opacity: isLocked ? 0.7 : 1,
+        transition: 'box-shadow 0.18s, transform 0.18s',
+        ...(!isLocked && {
+          '&:hover': { boxShadow: 3, transform: 'translateY(-2px)' },
+        }),
       }}
     >
       <CardActionArea
         onClick={onClick}
-        disabled={status === 'locked'}
-        sx={{ p: '14px 16px', display: 'flex', alignItems: 'center', gap: 1.75, cursor: status === 'locked' ? 'default' : 'pointer' }}
+        disabled={isLocked}
+        sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'stretch', cursor: isLocked ? 'default' : 'pointer' }}
       >
-        <Avatar sx={{ width: 42, height: 42, borderRadius: '10px', flexShrink: 0, ...avatarStyles[status] }}>
-          {avatarContent}
-        </Avatar>
+        {/* Media area */}
+        <Box
+          sx={{
+            height: 160,
+            background: isLocked ? '#f5f5f5' : 'linear-gradient(180deg, var(--teal-50) 0%, #fff 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative',
+            flexShrink: 0,
+          }}
+        >
+          <Box
+            sx={{
+              position: 'absolute', top: 12, left: 12,
+              width: 28, height: 28, borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-display)',
+              ...badgeSx,
+            }}
+          >
+            {level.id}
+          </Box>
 
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Stack direction="row" sx={{ alignItems: 'center', gap: 0.75, mb: 0.25 }}>
-            <LevelIcon id={level.id} size={16} />
-            <Typography variant="body2" sx={{ fontWeight: 700, fontSize: 14 }}>
-              {level.name} — {level.subtitle}
-            </Typography>
+          {level.illustration && (
+            <Box
+              component="img"
+              src={`${import.meta.env.BASE_URL}${level.illustration}`}
+              alt={level.name}
+              sx={{
+                height: 120,
+                objectFit: 'contain',
+                ...(isLocked && { opacity: 0.4, filter: 'grayscale(100%)' }),
+              }}
+            />
+          )}
+        </Box>
+
+        <CardContent sx={{ flex: 1, pb: '12px !important' }}>
+          <Stack direction="row" sx={{ alignItems: 'flex-start', justifyContent: 'space-between', gap: 1, mb: 0.5 }}>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography sx={{ fontWeight: 700, fontSize: 15, fontFamily: 'var(--font-display)', lineHeight: 1.3 }}>
+                {level.id} · {level.name}
+              </Typography>
+              <Typography sx={{ fontSize: 12, color: 'text.secondary', fontFamily: 'var(--font-body)', mt: 0.25 }}>
+                {level.subtitle}
+              </Typography>
+            </Box>
+            <Chip label={chipLabel} sx={{ ...chipStyle, flexShrink: 0 }} />
           </Stack>
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.75 }}>
-            {level.desc}
-          </Typography>
+
           <LinearProgress
             variant="determinate"
             value={pct}
-            sx={{ height: 4, '& .MuiLinearProgress-bar': { background: 'linear-gradient(90deg, var(--teal-100), #1D9E75)', borderRadius: 2 } }}
+            sx={{ mt: 1.5, height: 4, borderRadius: 2, '& .MuiLinearProgress-bar': { background: 'linear-gradient(90deg, var(--teal-100), #1D9E75)', borderRadius: 2 } }}
           />
-        </Box>
-
-        <Chip label={chipLabel} sx={chipStyle} />
+        </CardContent>
       </CardActionArea>
     </Card>
   )
