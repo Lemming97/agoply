@@ -21,12 +21,26 @@ export const LEVELS: Level[] = [
         ]},
         { type: 'text', value: '⚠️ **Important**: When interest rates rise, bond prices fall — and vice versa. This inverse relationship is the most critical concept in fixed income.' },
       ],
-      quiz: {
-        question: 'When the European Central Bank raises interest rates, what happens to existing bond prices?',
-        options: ['Bond prices rise', 'Bond prices fall', 'Bond prices stay the same', 'Only new bonds are affected'],
-        correct: 1,
-        explanation: 'Bond prices and interest rates move in opposite directions. When new bonds offer higher rates, existing bonds become less attractive, so their prices drop.',
-      },
+      quiz: [
+        {
+          question: 'When the European Central Bank raises interest rates, what happens to existing bond prices?',
+          options: ['Bond prices rise', 'Bond prices fall', 'Bond prices stay the same', 'Only new bonds are affected'],
+          correct: 1,
+          explanation: 'Bond prices and interest rates move in opposite directions. When new bonds offer higher rates, existing bonds become less attractive, so their prices drop.',
+        },
+        {
+          question: "What does the 'coupon rate' on a bond represent?",
+          options: ["The bond's maturity date", 'The annual interest rate paid to bondholders', "The credit rating of the bond issuer", "The bond's market price"],
+          correct: 1,
+          explanation: "The coupon rate is the fixed annual interest payment expressed as a percentage of the bond's face value — separate from what the bond currently trades for.",
+        },
+        {
+          question: 'A bond has a face value of €1,000 and pays an annual coupon of €40. What is the coupon rate?',
+          options: ['2.5%', '4%', '6%', '10%'],
+          correct: 1,
+          explanation: 'Coupon rate = Annual payment ÷ Face value = €40 ÷ €1,000 = 4%.',
+        },
+      ],
     },
   },
   {
@@ -49,12 +63,26 @@ export const LEVELS: Level[] = [
         ]},
         { type: 'text', value: 'Stocks are **higher risk** than bonds but historically offer higher long-term returns. The key is diversification — never put all your money in one company.' },
       ],
-      quiz: {
-        question: "A stock is priced at €60. Its annual earnings per share is €4. What is the P/E ratio?",
-        options: ['4', '10', '15', '24'],
-        correct: 2,
-        explanation: 'P/E = Price ÷ EPS = 60 ÷ 4 = 15. This means investors pay €15 for every €1 of annual earnings — a reasonable valuation for a stable company.',
-      },
+      quiz: [
+        {
+          question: 'A stock is priced at €60. Its annual earnings per share is €4. What is the P/E ratio?',
+          options: ['4', '10', '15', '24'],
+          correct: 2,
+          explanation: 'P/E = Price ÷ EPS = 60 ÷ 4 = 15. This means investors pay €15 for every €1 of annual earnings — a reasonable valuation for a stable company.',
+        },
+        {
+          question: 'What does a dividend represent?',
+          options: ['A loan to the company', 'A share of company profits paid to investors', "The stock's annual price change", "The company's total market value"],
+          correct: 1,
+          explanation: "Dividends are periodic cash payments from a company's profits to its shareholders — a way to earn income even if the stock price doesn't move.",
+        },
+        {
+          question: "What does 'market cap' mean?",
+          options: ['The maximum price a stock can reach', 'The total value of all shares outstanding', "The company's annual revenue", 'The number of shares available to buy'],
+          correct: 1,
+          explanation: 'Market cap = share price × total shares outstanding. It represents the total market value of a company.',
+        },
+      ],
     },
   },
   {
@@ -77,12 +105,26 @@ export const LEVELS: Level[] = [
         ]},
         { type: 'text', value: '⚠️ Crypto is **high risk**. It\'s worth learning about, but should be a small portion of a diversified portfolio — especially for beginners.' },
       ],
-      quiz: {
-        question: 'What gives Bitcoin its scarcity and store-of-value properties?',
-        options: ['It is backed by gold reserves', 'There is a fixed maximum supply of 21 million BTC', 'Governments control its supply', 'Mining companies set the limit each year'],
-        correct: 1,
-        explanation: 'Bitcoin\'s supply is hard-capped at 21 million coins by its code. This fixed supply — combined with growing demand — is the core argument for its store-of-value properties.',
-      },
+      quiz: [
+        {
+          question: 'What gives Bitcoin its scarcity and store-of-value properties?',
+          options: ['It is backed by gold reserves', 'There is a fixed maximum supply of 21 million BTC', 'Governments control its supply', 'Mining companies set the limit each year'],
+          correct: 1,
+          explanation: "Bitcoin's supply is hard-capped at 21 million coins by its code. This fixed supply — combined with growing demand — is the core argument for its store-of-value properties.",
+        },
+        {
+          question: 'What is a blockchain?',
+          options: ['A type of cryptocurrency', 'A decentralized ledger that records all transactions', 'A digital wallet for storing crypto', 'A government-regulated exchange'],
+          correct: 1,
+          explanation: 'A blockchain is a distributed, decentralized ledger that records every transaction across a network of computers — making it transparent and tamper-resistant.',
+        },
+        {
+          question: 'Which statement about Ethereum is correct?',
+          options: ['It has a fixed supply like Bitcoin', 'It is primarily used for smart contracts and DeFi', 'It was created before Bitcoin', 'It is backed by the US government'],
+          correct: 1,
+          explanation: 'Ethereum is a programmable blockchain platform that enables smart contracts and decentralized applications (DeFi, NFTs, etc.) — fundamentally different from Bitcoin.',
+        },
+      ],
     },
   },
   { id: 4, name: 'Forex',        subtitle: 'Currency Markets',     icon: '💱', desc: 'Exchange rates, pairs & macro drivers',          unlocks: 'FX pairs in Simulator',    lesson: null },

@@ -30,7 +30,7 @@ export interface Quiz {
 export interface Lesson {
   title: string
   content: ContentBlock[]
-  quiz: Quiz
+  quiz: Quiz[]
 }
 
 export interface Level {
