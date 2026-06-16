@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react'
 import type { GameStateData, GameState, MarketAsset } from '../types'
 
-const INITIAL_STATE: GameStateData = {
+const STATE_KEY = (email: string) => `agoply_state_${email}`
+
+// Pre-loaded demo data for the test account
+const DEMO_STATE: GameStateData = {
   xp: 340,
   streak: 5,
   completedLevels: [1],
@@ -17,19 +20,32 @@ const INITIAL_STATE: GameStateData = {
   riskProfile: 'Balanced Growth',
 }
 
-export function useGameState(): GameState {
+// Blank starting state for new registered users
+const FRESH_STATE: GameStateData = {
+  xp: 0,
+  streak: 0,
+  completedLevels: [],
+  activeLesson: 1,
+  portfolio: { cash: 1000, holdings: [] },
+  riskProfile: '',
+}
+
+const TEST_EMAIL = 'test@agoply.com'
+
+export function useGameState(userEmail: string): GameState {
+  const key = STATE_KEY(userEmail)
+
   const [state, setState] = useState<GameStateData>(() => {
     try {
-      const saved = localStorage.getItem('agoply_state')
-      return saved ? (JSON.parse(saved) as GameStateData) : INITIAL_STATE
-    } catch {
-      return INITIAL_STATE
-    }
+      const saved = localStorage.getItem(key)
+      if (saved) return JSON.parse(saved) as GameStateData
+    } catch { /* ignore */ }
+    return userEmail === TEST_EMAIL ? DEMO_STATE : FRESH_STATE
   })
 
   useEffect(() => {
-    localStorage.setItem('agoply_state', JSON.stringify(state))
-  }, [state])
+    localStorage.setItem(key, JSON.stringify(state))
+  }, [state, key])
 
   function completeLevel(levelId: number): void {
     setState(s => ({
@@ -82,7 +98,7 @@ export function useGameState(): GameState {
   }
 
   function resetState(): void {
-    setState(INITIAL_STATE)
+    setState(userEmail === TEST_EMAIL ? DEMO_STATE : FRESH_STATE)
   }
 
   const portfolioValue = state.portfolio.holdings.reduce(
