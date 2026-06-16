@@ -3,7 +3,9 @@ import { useState, useRef, useEffect } from 'react'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import Chip from '@mui/material/Chip'
-import Drawer from '@mui/material/Drawer'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Alert from '@mui/material/Alert'
@@ -12,7 +14,7 @@ import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import {
   IconCircleCheck, IconCircleX, IconTrophy, IconArrowBack, IconFlagExclamation, IconMountain,
-  IconBooks, IconBookmark, IconBookmarkFilled, IconX,
+  IconBooks, IconBookmark, IconBookmarkFilled, IconBookmarkOff, IconX,
 } from '@tabler/icons-react'
 import type { Lesson, GlossaryEntry } from '../types'
 
@@ -360,18 +362,28 @@ export default function LessonPanel({
         </Typography>
       )}
 
-      {/* Glossary drawer */}
-      <Drawer anchor="bottom" open={glossaryOpen} onClose={() => setGlossaryOpen(false)}>
-        <Box sx={{ p: 2.5, maxHeight: '70vh', overflow: 'auto' }}>
-          <Stack direction="row" sx={{ alignItems: 'flex-start', justifyContent: 'space-between', mb: 0.5 }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, fontSize: 16 }}>Glossary</Typography>
-            <IconButton size="small" onClick={() => setGlossaryOpen(false)} sx={{ mt: -0.5, mr: -0.5 }}>
-              <IconX size={18} strokeWidth={1.5} />
-            </IconButton>
-          </Stack>
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-            {levelName} · {glossary?.length ?? 0} terms
-          </Typography>
+      {/* Glossary dialog */}
+      <Dialog
+        open={glossaryOpen}
+        onClose={() => setGlossaryOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        scroll="paper"
+      >
+        <DialogTitle sx={{ fontWeight: 700, fontSize: 16, pb: 0.5 }}>
+          Glossary
+          <IconButton
+            size="small"
+            onClick={() => setGlossaryOpen(false)}
+            sx={{ position: 'absolute', right: 12, top: 12 }}
+          >
+            <IconX size={18} strokeWidth={1.5} />
+          </IconButton>
+        </DialogTitle>
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', px: 3, pb: 1 }}>
+          {levelName} · {glossary?.length ?? 0} terms
+        </Typography>
+        <DialogContent dividers>
           {(glossary ?? []).map(({ term, definition }) => {
             const isSaved = savedGlossary.some(e => e.term === term)
             return (
@@ -389,10 +401,10 @@ export default function LessonPanel({
                   onClick={() => {
                     if (isSaved) {
                       onRemoveSavedTerm(term)
-                      showToast(`${term} removed from glossary`)
+                      showToast(<span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><IconBookmarkOff size={14} color="var(--muted)" />{term} removed from glossary</span>)
                     } else {
                       onSaveGlossaryTerm({ term, definition, levelId, levelName, savedAt: new Date().toISOString() })
-                      showToast(`${term} saved to glossary 🔖`)
+                      showToast(<span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><IconBookmarkFilled size={14} color="var(--teal-400)" />{term} saved to glossary</span>)
                     }
                   }}
                   sx={{ flexShrink: 0, mt: 0.25 }}
@@ -405,8 +417,8 @@ export default function LessonPanel({
               </Box>
             )
           })}
-        </Box>
-      </Drawer>
+        </DialogContent>
+      </Dialog>
     </Paper>
   )
 }
