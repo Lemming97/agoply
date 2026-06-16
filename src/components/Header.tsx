@@ -32,7 +32,7 @@ const TABS: { id: NavTab; label: string; icon: ReactElement }[] = [
 
 function avatarSrc(profile: UserProfile): string | undefined {
   if (profile.avatarType === 'upload') return profile.avatarValue ?? undefined
-  if (profile.avatarType === 'icon') return `${import.meta.env.BASE_URL}avatars/${profile.avatarValue}`
+  if (profile.avatarType === 'icon') return `https://api.dicebear.com/7.x/micah/svg?seed=${profile.avatarValue}`
   return undefined
 }
 

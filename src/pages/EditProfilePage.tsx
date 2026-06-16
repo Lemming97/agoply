@@ -16,9 +16,16 @@ import {
 } from '@tabler/icons-react'
 import type { UserProfile } from '../types'
 
-// Tabler avatar filenames — place these in public/avatars/
-// Download the free pack from https://tabler.io/avatars (tabler/tabler on GitHub)
-const AVATAR_OPTIONS = Array.from({ length: 16 }, (_, i) => `${i + 1}.jpg`)
+const AVATAR_SEEDS = [
+  'Lindsey', 'Marcus', 'Sofia',  'James',
+  'Aisha',   'Carlos', 'Emma',   'Noah',
+  'Zara',    'Luca',   'Maya',   'Kai',
+  'Priya',   'Felix',  'Nina',   'Omar',
+]
+
+function dicebearUrl(seed: string) {
+  return `https://api.dicebear.com/7.x/micah/svg?seed=${seed}`
+}
 
 interface Props {
   profile: UserProfile
@@ -29,7 +36,7 @@ interface Props {
 
 function getAvatarSrc(p: UserProfile): string | undefined {
   if (p.avatarType === 'upload') return p.avatarValue ?? undefined
-  if (p.avatarType === 'icon') return `${import.meta.env.BASE_URL}avatars/${p.avatarValue}`
+  if (p.avatarType === 'icon') return dicebearUrl(p.avatarValue ?? '')
   return undefined
 }
 
@@ -218,37 +225,36 @@ export default function EditProfilePage({ profile, onSave, onBack, showToast }: 
               pt: 0.5,
             }}
           >
-            {AVATAR_OPTIONS.map(filename => {
-              const selected = draft.avatarType === 'icon' && draft.avatarValue === filename
+            {AVATAR_SEEDS.map(seed => {
+              const selected = draft.avatarType === 'icon' && draft.avatarValue === seed
               return (
                 <Box
-                  key={filename}
+                  key={seed}
                   onClick={() => {
-                    setDraft(d => ({ ...d, avatarType: 'icon', avatarValue: filename }))
+                    setDraft(d => ({ ...d, avatarType: 'icon', avatarValue: seed }))
                     setPickerOpen(false)
                   }}
                   sx={{
+                    width: 70,
+                    height: 70,
                     borderRadius: '50%',
                     border: selected ? '3px solid var(--teal-400)' : '3px solid transparent',
-                    p: '2px',
+                    overflow: 'hidden',
                     cursor: 'pointer',
-                    transition: 'border-color 0.15s',
-                    '&:hover': { borderColor: selected ? 'var(--teal-400)' : '#A8E4D2' },
+                    boxSizing: 'border-box',
+                    transition: 'transform 0.15s, border-color 0.15s',
+                    '&:hover': { transform: 'scale(1.05)' },
                   }}
                 >
-                  <Avatar
-                    src={`${import.meta.env.BASE_URL}avatars/${filename}`}
-                    sx={{ width: '100%', aspectRatio: '1', fontSize: 13, fontWeight: 700 }}
-                  >
-                    {filename.replace('.jpg', '')}
-                  </Avatar>
+                  <img
+                    src={dicebearUrl(seed)}
+                    alt={seed}
+                    style={{ width: '100%', height: '100%', display: 'block' }}
+                  />
                 </Box>
               )
             })}
           </Box>
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2, textAlign: 'center' }}>
-            Teal ring = selected
-          </Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={() => setPickerOpen(false)} sx={{ textTransform: 'none' }}>Cancel</Button>
