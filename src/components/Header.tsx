@@ -39,7 +39,7 @@ export default function Header({ tab, setTab, xp, streak, user, onLogout }: Head
         <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
           <Box
             component="img"
-            src="/agoplylogo.svg"
+            src={`${import.meta.env.BASE_URL}agoplylogo.svg`}
             alt="Agoply"
             sx={{ width: 40, height: 40, objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
           />

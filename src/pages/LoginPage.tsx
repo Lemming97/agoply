@@ -70,7 +70,7 @@ export default function LoginPage({ onLogin, onRegister }: LoginPageProps) {
     setMode(next)
   }
 
-  function handleLogin(e?: React.FormEvent) {
+  function handleLogin(e?: React.FormEvent<HTMLFormElement>) {
     e?.preventDefault()
     setLoginError('')
     if (!email.trim() || !password) { setLoginError('Please enter your email and password.'); return }
@@ -96,7 +96,7 @@ export default function LoginPage({ onLogin, onRegister }: LoginPageProps) {
     setRegErrors(e => ({ ...e, [field]: validateRegField(field, reg[field]) }))
   }
 
-  function handleRegSubmit(e?: React.FormEvent) {
+  function handleRegSubmit(e?: React.FormEvent<HTMLFormElement>) {
     e?.preventDefault()
     const newErrors = (Object.keys(INITIAL_ERR) as Array<keyof RegFields>).reduce((acc, field) => {
       acc[field] = validateRegField(field, reg[field])
@@ -136,7 +136,7 @@ export default function LoginPage({ onLogin, onRegister }: LoginPageProps) {
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <Box
             component="img"
-            src="/agoplylogo.svg"
+            src={`${import.meta.env.BASE_URL}agoplylogo.svg`}
             alt="Agoply"
             sx={{ width: 96, height: 96, objectFit: 'contain', mx: 'auto', mb: 1, display: 'block' }}
           />
