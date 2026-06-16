@@ -113,23 +113,23 @@ function LevelCard({ level, status, isOpen, onClick }: LevelCardProps) {
   const chipContent: Record<LevelStatus, ReactNode> = {
     completed: (
       <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5 }}>
-        <IconCircleCheck size={13} strokeWidth={1.5} />
+        <IconCircleCheck size={15} strokeWidth={1.5} />
         <span>Done</span>
       </Stack>
     ),
     active: 'In Progress',
     locked: (
       <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5 }}>
-        <IconLock size={13} strokeWidth={1.5} />
+        <IconLock size={15} strokeWidth={1.5} />
         <span>Locked</span>
       </Stack>
     ),
   }
 
   const chipSx: Record<LevelStatus, object> = {
-    completed: { bgcolor: 'var(--teal-50)',  color: 'var(--teal-600)', fontWeight: 700 },
-    active:    { bgcolor: 'var(--gold-50)',  color: 'var(--gold-400)', fontWeight: 700 },
-    locked:    { bgcolor: '#f5f5f5',         color: '#aaa',            fontWeight: 700 },
+    completed: { bgcolor: 'var(--teal-50)',  color: 'var(--teal-600)', fontWeight: 700, fontSize: 15 },
+    active:    { bgcolor: 'var(--gold-50)',  color: 'var(--gold-400)', fontWeight: 700, fontSize: 15 },
+    locked:    { bgcolor: '#f5f5f5',         color: '#aaa',            fontWeight: 700, fontSize: 15 },
   }
 
   let chipLabel: ReactNode = chipContent[status]
