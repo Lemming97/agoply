@@ -1,7 +1,8 @@
+import type { ReactNode } from 'react'
 import Snackbar from '@mui/material/Snackbar'
 
 interface ToastProps {
-  message: string | null
+  message: ReactNode
 }
 
 export default function Toast({ message }: ToastProps) {
