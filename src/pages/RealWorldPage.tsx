@@ -1,22 +1,23 @@
 import type { ReactNode } from 'react'
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
+import Collapse from '@mui/material/Collapse'
+import Divider from '@mui/material/Divider'
 import LinearProgress from '@mui/material/LinearProgress'
 import Alert from '@mui/material/Alert'
 import TextField from '@mui/material/TextField'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemAvatar from '@mui/material/ListItemAvatar'
-import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
-import Paper from '@mui/material/Paper'
 import {
-  IconTarget, IconBuildingBank, IconListCheck, IconSearch,
+  IconTarget, IconBuildingBank, IconSearch,
   IconExternalLink, IconAlertTriangle,
+  IconChevronDown, IconChevronUp, IconZoomQuestion,
 } from '@tabler/icons-react'
 import { PLATFORMS } from '../data/gameData'
 import type { GameState, Platform } from '../types'
@@ -27,15 +28,8 @@ interface RealWorldPageProps {
 }
 
 export default function RealWorldPage({ gameState }: RealWorldPageProps) {
-  const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null)
+  const [openPlatformId, setOpenPlatformId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
-  const guideRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (selectedPlatform) {
-      guideRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    }
-  }, [selectedPlatform])
 
   const levelsCompleted = gameState.completedLevels.length
   const riskScore = Math.min(100, levelsCompleted * 14)
@@ -56,10 +50,14 @@ export default function RealWorldPage({ gameState }: RealWorldPageProps) {
     riskScore < 80 ? '50% Stocks · 35% ETFs · 15% Crypto' :
     '60% Stocks · 25% Crypto · 15% Commodities'
 
-  function handleSearch(e: React.FormEvent<HTMLFormElement>) {
+  function handleSearch(e: { preventDefault(): void }) {
     e.preventDefault()
     if (!searchQuery.trim()) return
     window.open(`https://finance.yahoo.com/search?p=${encodeURIComponent(searchQuery)}`, '_blank')
+  }
+
+  function togglePlatform(id: string) {
+    setOpenPlatformId(prev => prev === id ? null : id)
   }
 
   return (
@@ -95,140 +93,22 @@ export default function RealWorldPage({ gameState }: RealWorldPageProps) {
         </Typography>
       </InfoCard>
 
-      {/* Partner Platforms */}
-      <InfoCard title={<><IconBuildingBank size={20} strokeWidth={1.5} /> Partner Platforms</>}>
+      {/* Platform Accordion */}
+      <InfoCard title={<><IconBuildingBank size={20} strokeWidth={1.5} /> Get Started with a Platform</>}>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.75 }}>
-          Tap a platform to compare features and find the right fit for you.
+          Tap a platform to see a step-by-step guide for getting started.
         </Typography>
-        <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1, mb: 1.75 }}>
-          {PLATFORMS.map(p => (
-            <Chip
-              key={p.id}
-              onClick={() => setSelectedPlatform(selectedPlatform?.id === p.id ? null : p)}
-              variant={selectedPlatform?.id === p.id ? 'filled' : 'outlined'}
-              label={
-                <Stack direction="row" sx={{ alignItems: 'center', gap: 0.75 }}>
-                  <Box sx={{ width: 18, height: 18, borderRadius: '4px', bgcolor: p.color, border: '1px solid rgba(0,0,0,0.1)', flexShrink: 0 }} />
-                  <span>{p.name}</span>
-                  {p.beginner && (
-                    <Box component="span" sx={{ fontSize: 9, bgcolor: 'var(--teal-50)', color: '#0F6E56', borderRadius: 2, px: '5px', py: '1px', fontWeight: 700 }}>
-                      BEGINNER
-                    </Box>
-                  )}
-                </Stack>
-              }
-              sx={{
-                height: 'auto',
-                py: 0.75,
-                borderRadius: '20px',
-                borderColor: selectedPlatform?.id === p.id ? '#1D9E75' : 'var(--border)',
-                bgcolor: selectedPlatform?.id === p.id ? 'var(--teal-50)' : 'var(--surface2)',
-                color: selectedPlatform?.id === p.id ? '#0F6E56' : 'text.primary',
-                '& .MuiChip-label': { px: 1.75 },
-                '&:hover': { bgcolor: 'var(--teal-50)', borderColor: '#1D9E75' },
-              }}
+        {PLATFORMS.map((p, i) => (
+          <Box key={p.id}>
+            {i > 0 && <Divider />}
+            <PlatformRow
+              platform={p}
+              isOpen={openPlatformId === p.id}
+              onToggle={() => togglePlatform(p.id)}
             />
-          ))}
-        </Stack>
-
-        {selectedPlatform && (
-          <Paper variant="outlined" sx={{ borderRadius: 2, p: 2 }}>
-            <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
-              <Typography sx={{ fontWeight: 700, fontSize: 16 }}>{selectedPlatform.name}</Typography>
-              <Typography color="warning.dark" sx={{ fontSize: 12, fontWeight: 700 }}>★ {selectedPlatform.rating}</Typography>
-            </Stack>
-            {[
-              { label: 'Min. deposit', val: selectedPlatform.min },
-              { label: 'Setup time',   val: selectedPlatform.time },
-              { label: 'Assets',       val: selectedPlatform.assets.join(', ') },
-            ].map(r => (
-              <Stack key={r.label} direction="row" sx={{ justifyContent: 'space-between', mb: 0.75 }}>
-                <Typography color="text.secondary" sx={{ fontSize: 12.5 }}>{r.label}</Typography>
-                <Typography sx={{ fontSize: 12.5, fontWeight: 500, maxWidth: 220, textAlign: 'right' }}>{r.val}</Typography>
-              </Stack>
-            ))}
-            <Box sx={{ mt: 1.25, p: '8px 12px', bgcolor: 'var(--teal-50)', border: '1px solid var(--teal-100)', borderRadius: 2 }}>
-              <Typography color="primary.dark" sx={{ fontSize: 12, fontWeight: 600 }}>★ {selectedPlatform.perk}</Typography>
-            </Box>
-          </Paper>
-        )}
+          </Box>
+        ))}
       </InfoCard>
-
-      {/* Step Guides */}
-      <div ref={guideRef}>
-        <InfoCard title={
-          selectedPlatform
-            ? <><IconListCheck size={20} strokeWidth={1.5} /> How to Start Investing on {selectedPlatform.name}</>
-            : <><IconListCheck size={20} strokeWidth={1.5} /> Getting Started with Investing</>
-        }>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-            {selectedPlatform
-              ? `Step-by-step instructions for getting started on ${selectedPlatform.name}.`
-              : 'Beginner guides tailored to your risk profile and learning progress.'}
-          </Typography>
-          <List disablePadding>
-            {selectedPlatform
-              ? selectedPlatform.steps.map((desc, i) => (
-                  <ListItem key={i} alignItems="flex-start" disablePadding sx={{ mb: 1.75 }}>
-                    <ListItemAvatar sx={{ minWidth: 40, mt: 0.25 }}>
-                      <Box sx={{ width: 26, height: 26, borderRadius: '6px', bgcolor: 'var(--teal-50)', border: '1px solid var(--teal-100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Typography sx={{ fontSize: 12, fontWeight: 700, color: '#0F6E56' }}>{i + 1}</Typography>
-                      </Box>
-                    </ListItemAvatar>
-                    <Typography color="text.secondary" sx={{ fontSize: 12.5, lineHeight: 1.6, pt: 0.25 }}>{desc}</Typography>
-                  </ListItem>
-                ))
-              : [
-                  { n: 1, title: 'Open a brokerage account', desc: 'Compare Revolut, eToro, or Trade Republic. Choose based on min deposit and assets you want to trade.' },
-                  { n: 2, title: 'Start with an ETF', desc: 'A MSCI World or S&P 500 ETF gives instant diversification across 500–1600 companies for as little as €10/month.' },
-                  { n: 3, title: 'Set a monthly budget', desc: 'Even €20–50/month invested consistently from age 20 can grow to €50,000+ by age 40 thanks to compounding.' },
-                  { n: 4, title: 'Understand your taxes', desc: 'In France, capital gains and dividends are taxed at 30% (Prélèvement Forfaitaire Unique). A PEA account can reduce this.' },
-                ].map(step => (
-                  <ListItem key={step.n} alignItems="flex-start" disablePadding sx={{ mb: 1.75 }}>
-                    <ListItemAvatar sx={{ minWidth: 40, mt: 0.25 }}>
-                      <Box sx={{ width: 26, height: 26, borderRadius: '6px', bgcolor: 'var(--teal-50)', border: '1px solid var(--teal-100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Typography sx={{ fontSize: 12, fontWeight: 700, color: '#0F6E56' }}>{step.n}</Typography>
-                      </Box>
-                    </ListItemAvatar>
-                    <Box>
-                      <Typography sx={{ fontWeight: 600, fontSize: 13, mb: 0.3 }}>{step.title}</Typography>
-                      <Typography color="text.secondary" sx={{ fontSize: 12.5, lineHeight: 1.6 }}>{step.desc}</Typography>
-                    </Box>
-                  </ListItem>
-                ))
-            }
-          </List>
-          {selectedPlatform?.article && (
-            <Box
-              component="a"
-              href={selectedPlatform.article.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              sx={{
-                display: 'block',
-                mt: 0.5,
-                p: '12px 14px',
-                borderRadius: 2,
-                bgcolor: '#F0F7FF',
-                border: '1px solid #C5DBFF',
-                textDecoration: 'none',
-                '&:hover': { bgcolor: '#E3F0FF' },
-              }}
-            >
-              <Stack direction="row" sx={{ alignItems: 'center', gap: 0.75, mb: 0.5 }}>
-                <IconExternalLink size={13} strokeWidth={1.5} color="#1a4fa0" />
-                <Typography sx={{ fontSize: 11, fontWeight: 700, color: '#1a4fa0' }}>Want more detail?</Typography>
-              </Stack>
-              <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#1a4fa0' }}>
-                {selectedPlatform.article.title} →
-              </Typography>
-              <Typography sx={{ fontSize: 11, color: '#5a7fa8', mt: 0.25 }}>
-                via {selectedPlatform.article.source}
-              </Typography>
-            </Box>
-          )}
-        </InfoCard>
-      </div>
 
       {/* Investment Search */}
       <InfoCard title={<><IconSearch size={20} strokeWidth={1.5} /> Investment Search</>}>
@@ -264,6 +144,92 @@ export default function RealWorldPage({ gameState }: RealWorldPageProps) {
       >
         <strong>Educational purposes only.</strong> This is not financial advice. Always do your own research and consider speaking with a licensed financial advisor before investing real money.
       </Alert>
+    </Box>
+  )
+}
+
+function PlatformRow({ platform: p, isOpen, onToggle }: { platform: Platform; isOpen: boolean; onToggle: () => void }) {
+  return (
+    <Box>
+      {/* Accordion header */}
+      <Box
+        onClick={onToggle}
+        sx={{
+          display: 'flex', alignItems: 'center', gap: 1.25,
+          py: 1.5, cursor: 'pointer',
+          '&:hover': { bgcolor: 'var(--surface2)', mx: -2, px: 2, borderRadius: 1 },
+        }}
+      >
+        <Box sx={{ width: 14, height: 14, borderRadius: '50%', bgcolor: p.color, border: '1px solid rgba(0,0,0,0.12)', flexShrink: 0 }} />
+        <Typography sx={{ fontWeight: 600, fontSize: 14, flex: 1, fontFamily: 'var(--font-body)' }}>
+          {p.name}
+        </Typography>
+        {p.beginner && (
+          <Box component="span" sx={{ fontSize: 9, bgcolor: 'var(--teal-50)', color: '#0F6E56', borderRadius: 2, px: '5px', py: '2px', fontWeight: 700, letterSpacing: '0.4px', flexShrink: 0 }}>
+            BEGINNER FRIENDLY
+          </Box>
+        )}
+        <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'warning.dark', flexShrink: 0 }}>
+          ★ {p.rating}
+        </Typography>
+        <Box sx={{ color: 'text.secondary', flexShrink: 0, display: 'flex' }}>
+          {isOpen
+            ? <IconChevronUp  size={16} strokeWidth={2} />
+            : <IconChevronDown size={16} strokeWidth={2} />
+          }
+        </Box>
+      </Box>
+
+      {/* Accordion body */}
+      <Collapse in={isOpen} timeout={250}>
+        <Box sx={{ pb: 2, pt: 0.5 }}>
+          <List disablePadding>
+            {p.steps.map((desc, i) => (
+              <ListItem key={i} alignItems="flex-start" disablePadding sx={{ mb: 1.75 }}>
+                <ListItemAvatar sx={{ minWidth: 40, mt: 0.25 }}>
+                  <Box sx={{ width: 26, height: 26, borderRadius: '6px', bgcolor: 'var(--teal-50)', border: '1px solid var(--teal-100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Typography sx={{ fontSize: 12, fontWeight: 700, color: '#0F6E56', fontFamily: 'var(--font-display)' }}>{i + 1}</Typography>
+                  </Box>
+                </ListItemAvatar>
+                <Typography color="text.secondary" sx={{ fontSize: 12.5, lineHeight: 1.6, pt: 0.25, fontFamily: 'var(--font-body)' }}>{desc}</Typography>
+              </ListItem>
+            ))}
+          </List>
+
+          {p.article && (
+            <Box
+              component="a"
+              href={p.article.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                display: 'block',
+                mt: 0.5,
+                p: '12px 14px',
+                borderRadius: 2,
+                bgcolor: '#F0F7FF',
+                border: '1px solid #C5DBFF',
+                textDecoration: 'none',
+                '&:hover': { bgcolor: '#E3F0FF' },
+              }}
+            >
+              <Stack direction="row" sx={{ alignItems: 'center', gap: '6px', mb: 0.5 }}>
+                <IconZoomQuestion size={16} strokeWidth={1.5} color="var(--muted)" />
+                <Typography sx={{ fontSize: 11, color: '#5a7fa8', fontFamily: 'var(--font-body)' }}>Want more detail?</Typography>
+              </Stack>
+              <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5, mb: 0.25 }}>
+                <Typography sx={{ fontSize: 15, fontWeight: 700, color: '#1a4fa0', fontFamily: 'var(--font-body)' }}>
+                  {p.article.title} →
+                </Typography>
+                <IconExternalLink size={14} strokeWidth={1.5} color="#1a4fa0" style={{ flexShrink: 0 }} />
+              </Stack>
+              <Typography sx={{ fontSize: 11, color: '#5a7fa8', fontFamily: 'var(--font-body)' }}>
+                via {p.article.source}
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      </Collapse>
     </Box>
   )
 }
