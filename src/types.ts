@@ -12,6 +12,14 @@ export interface UserProfile {
   avatarType: 'initials' | 'icon' | 'upload'
   avatarValue: string | null
 }
+
+export interface GlossaryEntry {
+  term: string
+  definition: string
+  levelId: number
+  levelName: string
+  savedAt: string
+}
 export type AssetCategory = 'stock' | 'bond' | 'crypto' | 'forex' | 'commodity' | 'etf'
 export type LevelStatus = 'completed' | 'active' | 'locked'
 
@@ -55,6 +63,7 @@ export interface Level {
   unlocks: string
   lesson: Lesson | null
   isAI?: boolean
+  glossary?: { term: string; definition: string }[]
 }
 
 export interface MarketAsset {
@@ -100,6 +109,9 @@ export interface GameState extends GameStateData {
   buyAsset: (asset: MarketAsset, quantity: number) => void
   sellAsset: (holdingId: string, quantity: number) => void
   resetState: () => void
+  savedGlossary: GlossaryEntry[]
+  saveGlossaryTerm: (entry: GlossaryEntry) => void
+  removeSavedTerm: (term: string) => void
 }
 
 export interface LeaderboardEntry {

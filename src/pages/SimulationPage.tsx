@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useState } from 'react'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
+import Skeleton from '@mui/material/Skeleton'
 import Tabs from '@mui/material/Tabs'
 import { Tab as MuiTab } from '@mui/material'
 import ToggleButton from '@mui/material/ToggleButton'
@@ -25,7 +26,8 @@ import {
   IconBuildingBank, IconTrendingUp, IconCurrencyBitcoin,
   IconCurrencyEuro, IconBarrel, IconChartPie,
 } from '@tabler/icons-react'
-import { MARKET_ASSETS, LEADERBOARD } from '../data/gameData'
+import { LEADERBOARD } from '../data/gameData'
+import { useLiveMarketData } from '../hooks/useLiveMarketData'
 import type { GameState, MarketAsset, Holding, LeaderboardEntry, AssetCategory } from '../types'
 
 interface SimulationPageProps {
@@ -59,6 +61,7 @@ export default function SimulationPage({ gameState, showToast }: SimulationPageP
   const [buyModal, setBuyModal] = useState<MarketAsset | null>(null)
   const [sellModal, setSellModal] = useState<typeof gameState.portfolio.holdings[0] | null>(null)
   const [qty, setQty] = useState(1)
+  const { assets, loading, isLive } = useLiveMarketData()
 
   const totalValue = gameState.portfolioValue
 
@@ -99,6 +102,24 @@ export default function SimulationPage({ gameState, showToast }: SimulationPageP
     setSellModal(null)
   }
 
+  const marketsLabel = (
+    <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5 }}>
+      <span>Markets</span>
+      <Box
+        component="span"
+        sx={{
+          fontSize: 9,
+          fontWeight: 700,
+          letterSpacing: '0.3px',
+          color: isLive ? '#1D9E75' : 'text.disabled',
+          fontFamily: 'var(--font-body)',
+        }}
+      >
+        {isLive ? '● LIVE' : '○ DELAYED'}
+      </Box>
+    </Stack>
+  )
+
   return (
     <Box>
       <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>Portfolio Simulator</Typography>
@@ -118,13 +139,13 @@ export default function SimulationPage({ gameState, showToast }: SimulationPageP
           '& .MuiTabs-indicator': { bgcolor: '#1D9E75' },
         }}
       >
-        <MuiTab icon={<IconWallet  size={18} strokeWidth={1.5} />} iconPosition="start" label="Portfolio"  value="portfolio"   />
-        <MuiTab icon={<IconChartBar size={18} strokeWidth={1.5} />} iconPosition="start" label="Markets"    value="market"      />
-        <MuiTab icon={<IconTrophy  size={18} strokeWidth={1.5} />} iconPosition="start" label="Rankings"   value="leaderboard" />
+        <MuiTab icon={<IconWallet  size={18} strokeWidth={1.5} />} iconPosition="start" label="Portfolio"    value="portfolio"   />
+        <MuiTab icon={<IconChartBar size={18} strokeWidth={1.5} />} iconPosition="start" label={marketsLabel} value="market"      />
+        <MuiTab icon={<IconTrophy  size={18} strokeWidth={1.5} />} iconPosition="start" label="Rankings"     value="leaderboard" />
       </Tabs>
 
       {view === 'portfolio'   && <PortfolioView gameState={gameState} totalValue={totalValue} onSell={(h: Holding) => { setSellModal(h); setQty(1) }} />}
-      {view === 'market'      && <MarketView assets={MARKET_ASSETS} onBuy={handleBuy} completedLevels={gameState.completedLevels} cash={gameState.portfolio.cash} />}
+      {view === 'market'      && <MarketView assets={assets} loading={loading} onBuy={handleBuy} completedLevels={gameState.completedLevels} cash={gameState.portfolio.cash} />}
       {view === 'leaderboard' && <LeaderboardView data={LEADERBOARD} myValue={Math.round(totalValue)} />}
 
       {/* Buy dialog */}
@@ -142,19 +163,9 @@ export default function SimulationPage({ gameState, showToast }: SimulationPageP
             <Typography sx={{ fontSize: 13, fontWeight: 700 }}>€{buyModal?.price.toLocaleString()}</Typography>
           </Stack>
           <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5, mb: 2 }}>
-            <IconButton
-              onClick={() => setQty(q => Math.max(1, q - 1))}
-              sx={{ border: '1.5px solid var(--border)', bgcolor: 'var(--surface2)', width: 36, height: 36, borderRadius: '50%' }}
-            >
-              −
-            </IconButton>
+            <IconButton onClick={() => setQty(q => Math.max(1, q - 1))} sx={{ border: '1.5px solid var(--border)', bgcolor: 'var(--surface2)', width: 36, height: 36, borderRadius: '50%' }}>−</IconButton>
             <Typography sx={{ flex: 1, textAlign: 'center', fontSize: 22, fontWeight: 700 }}>{qty}</Typography>
-            <IconButton
-              onClick={() => setQty(q => q + 1)}
-              sx={{ border: '1.5px solid var(--border)', bgcolor: 'var(--surface2)', width: 36, height: 36, borderRadius: '50%' }}
-            >
-              +
-            </IconButton>
+            <IconButton onClick={() => setQty(q => q + 1)} sx={{ border: '1.5px solid var(--border)', bgcolor: 'var(--surface2)', width: 36, height: 36, borderRadius: '50%' }}>+</IconButton>
           </Stack>
           <Paper variant="outlined" sx={{ display: 'flex', justifyContent: 'space-between', p: '10px 14px', mb: 2, borderRadius: 2, bgcolor: 'var(--teal-50)', borderColor: 'var(--teal-100)' }}>
             <Typography sx={{ fontSize: 14 }}>Total cost</Typography>
@@ -167,12 +178,8 @@ export default function SimulationPage({ gameState, showToast }: SimulationPageP
           </Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
-          <Button onClick={() => setBuyModal(null)} variant="outlined" fullWidth sx={{ py: 1.375, borderRadius: '10px', textTransform: 'none', borderColor: 'var(--border)', color: 'text.primary' }}>
-            Cancel
-          </Button>
-          <Button onClick={confirmBuy} variant="contained" color="primary" fullWidth sx={{ py: 1.375, borderRadius: '10px', textTransform: 'none', fontWeight: 700 }}>
-            Confirm Buy
-          </Button>
+          <Button onClick={() => setBuyModal(null)} variant="outlined" fullWidth sx={{ py: 1.375, borderRadius: '10px', textTransform: 'none', borderColor: 'var(--border)', color: 'text.primary' }}>Cancel</Button>
+          <Button onClick={confirmBuy} variant="contained" color="primary" fullWidth sx={{ py: 1.375, borderRadius: '10px', textTransform: 'none', fontWeight: 700 }}>Confirm Buy</Button>
         </DialogActions>
       </Dialog>
 
@@ -191,19 +198,9 @@ export default function SimulationPage({ gameState, showToast }: SimulationPageP
             <Typography sx={{ fontSize: 13, fontWeight: 700 }}>€{sellModal?.price.toLocaleString()}</Typography>
           </Stack>
           <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5, mb: 2 }}>
-            <IconButton
-              onClick={() => setQty(q => Math.max(1, q - 1))}
-              sx={{ border: '1.5px solid var(--border)', bgcolor: 'var(--surface2)', width: 36, height: 36, borderRadius: '50%' }}
-            >
-              −
-            </IconButton>
+            <IconButton onClick={() => setQty(q => Math.max(1, q - 1))} sx={{ border: '1.5px solid var(--border)', bgcolor: 'var(--surface2)', width: 36, height: 36, borderRadius: '50%' }}>−</IconButton>
             <Typography sx={{ flex: 1, textAlign: 'center', fontSize: 22, fontWeight: 700 }}>{qty}</Typography>
-            <IconButton
-              onClick={() => setQty(q => Math.min(sellModal?.shares ?? 1, q + 1))}
-              sx={{ border: '1.5px solid var(--border)', bgcolor: 'var(--surface2)', width: 36, height: 36, borderRadius: '50%' }}
-            >
-              +
-            </IconButton>
+            <IconButton onClick={() => setQty(q => Math.min(sellModal?.shares ?? 1, q + 1))} sx={{ border: '1.5px solid var(--border)', bgcolor: 'var(--surface2)', width: 36, height: 36, borderRadius: '50%' }}>+</IconButton>
           </Stack>
           <Paper variant="outlined" sx={{ display: 'flex', justifyContent: 'space-between', p: '10px 14px', mb: 2, borderRadius: 2, bgcolor: 'var(--teal-50)', borderColor: 'var(--teal-100)' }}>
             <Typography sx={{ fontSize: 14 }}>Total proceeds</Typography>
@@ -216,12 +213,8 @@ export default function SimulationPage({ gameState, showToast }: SimulationPageP
           </Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
-          <Button onClick={() => setSellModal(null)} variant="outlined" fullWidth sx={{ py: 1.375, borderRadius: '10px', textTransform: 'none', borderColor: 'var(--border)', color: 'text.primary' }}>
-            Cancel
-          </Button>
-          <Button onClick={confirmSell} variant="contained" fullWidth sx={{ py: 1.375, borderRadius: '10px', textTransform: 'none', fontWeight: 700, bgcolor: '#c0392b', '&:hover': { bgcolor: '#a93226' } }}>
-            Confirm Sell
-          </Button>
+          <Button onClick={() => setSellModal(null)} variant="outlined" fullWidth sx={{ py: 1.375, borderRadius: '10px', textTransform: 'none', borderColor: 'var(--border)', color: 'text.primary' }}>Cancel</Button>
+          <Button onClick={confirmSell} variant="contained" fullWidth sx={{ py: 1.375, borderRadius: '10px', textTransform: 'none', fontWeight: 700, bgcolor: '#c0392b', '&:hover': { bgcolor: '#a93226' } }}>Confirm Sell</Button>
         </DialogActions>
       </Dialog>
     </Box>
@@ -310,29 +303,19 @@ function HoldingRow({ holding, onSell }: { holding: Holding; onSell: (h: Holding
       </Box>
       <Box sx={{ textAlign: 'right', mr: 1.5 }}>
         <Typography sx={{ fontWeight: 700, fontSize: 14 }}>€{value.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}</Typography>
-        <Stack direction="row" component="span" sx={{ justifyContent: 'flex-end', alignItems: 'center', gap: 0.25 }}>
-          <Typography component="span" sx={{ fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center' }} color={isUp ? 'primary.main' : 'error.main'}>
-            {isUp
-              ? <IconArrowUpRight size={12} strokeWidth={1.5} />
-              : <IconArrowDownRight size={12} strokeWidth={1.5} />
-            }
-            {isUp ? '+' : ''}{holding.change}%
-          </Typography>
-        </Stack>
+        <Typography component="div" sx={{ fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.25 }} color={isUp ? 'primary.main' : 'error.main'}>
+          {isUp ? <IconArrowUpRight size={12} strokeWidth={1.5} /> : <IconArrowDownRight size={12} strokeWidth={1.5} />}
+          {isUp ? '+' : ''}{holding.change}%
+        </Typography>
       </Box>
-      <Button
-        onClick={() => onSell(holding)}
-        variant="outlined"
-        size="small"
-        sx={{ bgcolor: '#fff5f5', color: '#c0392b', borderColor: '#f5c6c6', borderRadius: '6px', fontWeight: 700, textTransform: 'none', '&:hover': { bgcolor: '#fde8e8', borderColor: '#c0392b' } }}
-      >
+      <Button onClick={() => onSell(holding)} variant="outlined" size="small" sx={{ bgcolor: '#fff5f5', color: '#c0392b', borderColor: '#f5c6c6', borderRadius: '6px', fontWeight: 700, textTransform: 'none', '&:hover': { bgcolor: '#fde8e8', borderColor: '#c0392b' } }}>
         SELL
       </Button>
     </Paper>
   )
 }
 
-function MarketView({ assets, onBuy, completedLevels, cash }: { assets: MarketAsset[]; onBuy: (a: MarketAsset) => void; completedLevels: number[]; cash: number }) {
+function MarketView({ assets, loading, onBuy, completedLevels, cash }: { assets: MarketAsset[]; loading: boolean; onBuy: (a: MarketAsset) => void; completedLevels: number[]; cash: number }) {
   const [filter, setFilter] = useState<AssetFilter>('all')
   const cats: AssetFilter[] = ['all', 'bond', 'stock', 'crypto', 'forex', 'commodity', 'etf']
   const filtered = (filter === 'all' ? assets : assets.filter(a => a.category === filter))
@@ -346,6 +329,7 @@ function MarketView({ assets, onBuy, completedLevels, cash }: { assets: MarketAs
           €{cash.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}
         </Typography>
       </Paper>
+
       <ToggleButtonGroup
         value={filter}
         exclusive
@@ -353,60 +337,60 @@ function MarketView({ assets, onBuy, completedLevels, cash }: { assets: MarketAs
         sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2, '& .MuiToggleButtonGroup-grouped': { border: '1.5px solid var(--border) !important', borderRadius: '20px !important', mx: 0 } }}
       >
         {cats.map(c => (
-          <ToggleButton
-            key={c}
-            value={c}
-            size="small"
-            sx={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', px: 1.5, color: 'text.secondary', '&.Mui-selected': { bgcolor: 'var(--teal-50)', color: '#0F6E56', borderColor: '#1D9E75 !important' } }}
-          >
+          <ToggleButton key={c} value={c} size="small" sx={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', px: 1.5, color: 'text.secondary', '&.Mui-selected': { bgcolor: 'var(--teal-50)', color: '#0F6E56', borderColor: '#1D9E75 !important' } }}>
             {c}
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
 
-      {filtered.map(asset => {
-        const unlocked = completedLevels.includes(asset.requiredLevel)
-        const isUp = asset.change >= 0
-        return (
-          <Paper key={asset.id} variant="outlined" sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: '12px 14px', mb: 1, borderRadius: 2, opacity: unlocked ? 1 : 0.5 }}>
-            <Avatar sx={{ bgcolor: unlocked ? 'var(--teal-50)' : '#f5f5f5', borderRadius: '8px', width: 38, height: 38, color: unlocked ? 'var(--teal-600)' : '#aaa' }}>
-              <CategoryIcon category={asset.category} size={20} />
-            </Avatar>
+      {loading ? (
+        Array.from({ length: 6 }).map((_, i) => (
+          <Paper key={i} variant="outlined" sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: '12px 14px', mb: 1, borderRadius: 2 }}>
+            <Skeleton variant="rounded" width={38} height={38} sx={{ borderRadius: '8px', flexShrink: 0 }} />
             <Box sx={{ flex: 1 }}>
-              <Typography sx={{ fontWeight: 600, fontSize: 13 }}>{asset.name}</Typography>
-              <Typography variant="caption" color="text.secondary">{asset.ticker}</Typography>
+              <Skeleton width="55%" height={14} sx={{ mb: 0.75 }} />
+              <Skeleton width="30%" height={11} />
             </Box>
             <Box sx={{ textAlign: 'right', mr: 1.5 }}>
-              <Typography sx={{ fontWeight: 700, fontSize: 14 }}>€{asset.price.toLocaleString()}</Typography>
-              <Typography component="div" sx={{ fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.25 }} color={isUp ? 'primary.main' : 'error.main'}>
-                {isUp
-                  ? <IconArrowUpRight size={12} strokeWidth={1.5} />
-                  : <IconArrowDownRight size={12} strokeWidth={1.5} />
-                }
-                {isUp ? '+' : ''}{asset.change}%
-              </Typography>
+              <Skeleton width={60} height={14} sx={{ mb: 0.75 }} />
+              <Skeleton width={40} height={11} />
             </Box>
-            <Button
-              onClick={() => onBuy(asset)}
-              variant="outlined"
-              size="small"
-              startIcon={unlocked ? <IconShoppingCart size={13} strokeWidth={1.5} /> : undefined}
-              sx={{
-                bgcolor: unlocked ? 'var(--teal-50)' : '#f5f5f5',
-                color: unlocked ? '#0F6E56' : '#aaa',
-                borderColor: unlocked ? 'var(--teal-100)' : '#ddd',
-                borderRadius: '6px',
-                fontWeight: 700,
-                textTransform: 'none',
-                minWidth: unlocked ? undefined : 36,
-                '&:hover': { bgcolor: unlocked ? 'var(--teal-100)' : '#f5f5f5', borderColor: unlocked ? '#1D9E75' : '#ddd' },
-              }}
-            >
-              {unlocked ? 'BUY' : <IconLock size={15} strokeWidth={1.5} />}
-            </Button>
+            <Skeleton variant="rounded" width={46} height={30} sx={{ borderRadius: '6px' }} />
           </Paper>
-        )
-      })}
+        ))
+      ) : (
+        filtered.map(asset => {
+          const unlocked = completedLevels.includes(asset.requiredLevel)
+          const isUp = asset.change >= 0
+          return (
+            <Paper key={asset.id} variant="outlined" sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: '12px 14px', mb: 1, borderRadius: 2, opacity: unlocked ? 1 : 0.5 }}>
+              <Avatar sx={{ bgcolor: unlocked ? 'var(--teal-50)' : '#f5f5f5', borderRadius: '8px', width: 38, height: 38, color: unlocked ? 'var(--teal-600)' : '#aaa' }}>
+                <CategoryIcon category={asset.category} size={20} />
+              </Avatar>
+              <Box sx={{ flex: 1 }}>
+                <Typography sx={{ fontWeight: 600, fontSize: 13 }}>{asset.name}</Typography>
+                <Typography variant="caption" color="text.secondary">{asset.ticker}</Typography>
+              </Box>
+              <Box sx={{ textAlign: 'right', mr: 1.5 }}>
+                <Typography sx={{ fontWeight: 700, fontSize: 14 }}>€{asset.price.toLocaleString()}</Typography>
+                <Typography component="div" sx={{ fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.25 }} color={isUp ? 'primary.main' : 'error.main'}>
+                  {isUp ? <IconArrowUpRight size={12} strokeWidth={1.5} /> : <IconArrowDownRight size={12} strokeWidth={1.5} />}
+                  {isUp ? '+' : ''}{asset.change}%
+                </Typography>
+              </Box>
+              <Button
+                onClick={() => onBuy(asset)}
+                variant="outlined"
+                size="small"
+                startIcon={unlocked ? <IconShoppingCart size={13} strokeWidth={1.5} /> : undefined}
+                sx={{ bgcolor: unlocked ? 'var(--teal-50)' : '#f5f5f5', color: unlocked ? '#0F6E56' : '#aaa', borderColor: unlocked ? 'var(--teal-100)' : '#ddd', borderRadius: '6px', fontWeight: 700, textTransform: 'none', minWidth: unlocked ? undefined : 36, '&:hover': { bgcolor: unlocked ? 'var(--teal-100)' : '#f5f5f5', borderColor: unlocked ? '#1D9E75' : '#ddd' } }}
+              >
+                {unlocked ? 'BUY' : <IconLock size={15} strokeWidth={1.5} />}
+              </Button>
+            </Paper>
+          )
+        })
+      )}
     </>
   )
 }
@@ -419,36 +403,21 @@ function LeaderboardView({ data, myValue }: { data: LeaderboardEntry[]; myValue:
 
   return (
     <>
-      <Alert
-        icon={<IconTrophy size={18} strokeWidth={1.5} />}
-        severity="warning"
-        sx={{ mb: 2, borderRadius: '10px', border: '1px solid #FFD700', bgcolor: '#FFF8E1', color: '#7A5500', '& .MuiAlert-icon': { color: '#C08B00' } }}
-      >
+      <Alert icon={<IconTrophy size={18} strokeWidth={1.5} />} severity="warning" sx={{ mb: 2, borderRadius: '10px', border: '1px solid #FFD700', bgcolor: '#FFF8E1', color: '#7A5500', '& .MuiAlert-icon': { color: '#C08B00' } }}>
         Weekly Challenge: <strong>Best Diversified Portfolio</strong> — ends Sunday
       </Alert>
-
       {updated.map(r => {
         const rankColors = ['#FFD700', '#C0C0C0', '#CD7F32']
         const rankBg = r.rank <= 3 ? rankColors[r.rank - 1] : '#f0f0f0'
         const rankColor = r.rank === 1 ? '#7A5500' : r.rank <= 3 ? '#444' : '#888'
         return (
-          <Paper
-            key={r.name}
-            variant="outlined"
-            sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: '10px 14px', mb: 0.75, borderRadius: 2, bgcolor: r.me ? 'var(--teal-50)' : 'background.paper', borderColor: r.me ? 'var(--teal-100)' : 'divider' }}
-          >
-            <Avatar sx={{ width: 28, height: 28, bgcolor: rankBg, fontSize: 12, fontWeight: 800, color: rankColor }}>
-              {r.rank}
-            </Avatar>
+          <Paper key={r.name} variant="outlined" sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: '10px 14px', mb: 0.75, borderRadius: 2, bgcolor: r.me ? 'var(--teal-50)' : 'background.paper', borderColor: r.me ? 'var(--teal-100)' : 'divider' }}>
+            <Avatar sx={{ width: 28, height: 28, bgcolor: rankBg, fontSize: 12, fontWeight: 800, color: rankColor }}>{r.rank}</Avatar>
             <Box sx={{ flex: 1 }}>
-              <Typography sx={{ fontWeight: r.me ? 700 : 500, fontSize: 13 }}>
-                {r.name} {r.me && '(you)'}
-              </Typography>
+              <Typography sx={{ fontWeight: r.me ? 700 : 500, fontSize: 13 }}>{r.name} {r.me && '(you)'}</Typography>
               <Typography variant="caption" color="text.secondary">{r.school}</Typography>
             </Box>
-            <Typography color={r.me ? 'primary.dark' : 'text.primary'} sx={{ fontWeight: 700, fontSize: 14 }}>
-              €{r.value.toLocaleString()}
-            </Typography>
+            <Typography color={r.me ? 'primary.dark' : 'text.primary'} sx={{ fontWeight: 700, fontSize: 14 }}>€{r.value.toLocaleString()}</Typography>
           </Paper>
         )
       })}

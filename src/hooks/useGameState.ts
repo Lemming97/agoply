@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
-import type { GameStateData, GameState, MarketAsset } from '../types'
+import type { GameStateData, GameState, MarketAsset, GlossaryEntry } from '../types'
+
+const GLOSSARY_KEY = 'agoply_glossary'
 
 const STATE_KEY = (email: string) => `agoply_state_${email}`
 
@@ -34,6 +36,10 @@ const TEST_EMAIL = 'test@agoply.com'
 
 export function useGameState(userEmail: string): GameState {
   const key = STATE_KEY(userEmail)
+
+  const [savedGlossary, setSavedGlossary] = useState<GlossaryEntry[]>(() => {
+    try { return JSON.parse(localStorage.getItem(GLOSSARY_KEY) || '[]') as GlossaryEntry[] } catch { return [] }
+  })
 
   const [state, setState] = useState<GameStateData>(() => {
     try {
@@ -101,9 +107,26 @@ export function useGameState(userEmail: string): GameState {
     setState(userEmail === TEST_EMAIL ? DEMO_STATE : FRESH_STATE)
   }
 
+  function saveGlossaryTerm(entry: GlossaryEntry): void {
+    setSavedGlossary(prev => {
+      if (prev.some(e => e.term === entry.term)) return prev
+      const next = [...prev, entry]
+      try { localStorage.setItem(GLOSSARY_KEY, JSON.stringify(next)) } catch {}
+      return next
+    })
+  }
+
+  function removeSavedTerm(term: string): void {
+    setSavedGlossary(prev => {
+      const next = prev.filter(e => e.term !== term)
+      try { localStorage.setItem(GLOSSARY_KEY, JSON.stringify(next)) } catch {}
+      return next
+    })
+  }
+
   const portfolioValue = state.portfolio.holdings.reduce(
     (sum, h) => sum + h.price * h.shares, 0
   ) + state.portfolio.cash
 
-  return { ...state, portfolioValue, completeLevel, buyAsset, sellAsset, resetState }
+  return { ...state, portfolioValue, completeLevel, buyAsset, sellAsset, resetState, savedGlossary, saveGlossaryTerm, removeSavedTerm }
 }

@@ -1,22 +1,31 @@
 import type { ReactNode } from 'react'
 import { useState, useRef, useEffect } from 'react'
 import Button from '@mui/material/Button'
+import IconButton from '@mui/material/IconButton'
+import Drawer from '@mui/material/Drawer'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Alert from '@mui/material/Alert'
 import Divider from '@mui/material/Divider'
 import Paper from '@mui/material/Paper'
+import Stack from '@mui/material/Stack'
 import {
   IconCircleCheck, IconCircleX, IconTrophy, IconArrowBack, IconFlagExclamation, IconMountain,
+  IconBooks, IconBookmark, IconBookmarkFilled,
 } from '@tabler/icons-react'
-import type { Lesson } from '../types'
+import type { Lesson, GlossaryEntry } from '../types'
 
 interface LessonPanelProps {
   lesson: Lesson
   levelId: number
+  levelName: string
   completed: boolean
   onComplete: () => void
   showToast: (msg: ReactNode) => void
+  glossary?: { term: string; definition: string }[]
+  savedGlossary: GlossaryEntry[]
+  onSaveGlossaryTerm: (entry: GlossaryEntry) => void
+  onRemoveSavedTerm: (term: string) => void
 }
 
 function renderText(raw: string): string {
@@ -25,7 +34,11 @@ function renderText(raw: string): string {
 
 type Phase = 'round1' | 'repop_intro' | 'repop' | 'review'
 
-export default function LessonPanel({ lesson, completed, onComplete }: LessonPanelProps) {
+export default function LessonPanel({
+  lesson, levelId, levelName, completed, onComplete, showToast,
+  glossary, savedGlossary, onSaveGlossaryTerm, onRemoveSavedTerm,
+}: LessonPanelProps) {
+  const [glossaryOpen, setGlossaryOpen] = useState(false)
   const [phase, setPhase] = useState<Phase>('round1')
   const [r1Index, setR1Index] = useState(0)
   const [r1Results, setR1Results] = useState<boolean[]>([])
@@ -172,9 +185,21 @@ export default function LessonPanel({ lesson, completed, onComplete }: LessonPan
 
   return (
     <Paper ref={panelRef} variant="outlined" sx={{ borderColor: 'var(--teal-100)', borderRadius: 'var(--radius)', p: 2.5, mb: 2, mt: '-4px' }}>
-      <Typography variant="h6" color="var(--teal-600)" sx={{ fontSize: 16, fontWeight: 700, mb: 1.75 }}>
-        {lesson.title}
-      </Typography>
+      <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 1.75 }}>
+        <Typography variant="h6" color="var(--teal-600)" sx={{ fontSize: 16, fontWeight: 700 }}>
+          {lesson.title}
+        </Typography>
+        {glossary && glossary.length > 0 && (
+          <Button
+            size="small"
+            startIcon={<IconBooks size={16} strokeWidth={1.5} />}
+            onClick={() => setGlossaryOpen(true)}
+            sx={{ textTransform: 'none', fontSize: 12, fontWeight: 600, color: 'var(--teal-600)', flexShrink: 0 }}
+          >
+            Glossary
+          </Button>
+        )}
+      </Stack>
 
       {lesson.content.map((block, i) => {
         if (block.type === 'text') {
@@ -331,6 +356,49 @@ export default function LessonPanel({ lesson, completed, onComplete }: LessonPan
           <IconCircleCheck size={16} strokeWidth={1.5} color="var(--teal-400)" /> You've already completed this level!
         </Typography>
       )}
+
+      {/* Glossary drawer */}
+      <Drawer anchor="bottom" open={glossaryOpen} onClose={() => setGlossaryOpen(false)}>
+        <Box sx={{ p: 2.5, maxHeight: '70vh', overflow: 'auto' }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, fontSize: 16, mb: 0.5 }}>Glossary</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+            {levelName} · {glossary?.length ?? 0} terms
+          </Typography>
+          {(glossary ?? []).map(({ term, definition }) => {
+            const isSaved = savedGlossary.some(e => e.term === term)
+            return (
+              <Box key={term} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 2 }}>
+                <Box sx={{ flex: 1 }}>
+                  <Typography sx={{ fontWeight: 700, fontSize: 14, fontFamily: 'var(--font-display)', mb: 0.25 }}>
+                    {term}
+                  </Typography>
+                  <Typography sx={{ fontSize: 13, color: 'text.secondary', fontFamily: 'var(--font-body)', lineHeight: 1.65 }}>
+                    {definition}
+                  </Typography>
+                </Box>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (isSaved) {
+                      onRemoveSavedTerm(term)
+                      showToast(`${term} removed from glossary`)
+                    } else {
+                      onSaveGlossaryTerm({ term, definition, levelId, levelName, savedAt: new Date().toISOString() })
+                      showToast(`${term} saved to glossary 🔖`)
+                    }
+                  }}
+                  sx={{ flexShrink: 0, mt: 0.25 }}
+                >
+                  {isSaved
+                    ? <IconBookmarkFilled size={20} color="var(--teal-400)" />
+                    : <IconBookmark size={20} strokeWidth={1.5} />
+                  }
+                </IconButton>
+              </Box>
+            )
+          })}
+        </Box>
+      </Drawer>
     </Paper>
   )
 }

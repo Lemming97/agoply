@@ -8,6 +8,7 @@ import SimulationPage from './pages/SimulationPage'
 import RealWorldPage from './pages/RealWorldPage'
 import LoginPage from './pages/LoginPage'
 import EditProfilePage from './pages/EditProfilePage'
+import GlossaryPage from './pages/GlossaryPage'
 import Toast from './components/Toast'
 import { useToast } from './hooks/useToast'
 import { useGameState } from './hooks/useGameState'
@@ -15,6 +16,8 @@ import { useAuth } from './hooks/useAuth'
 import { useUserProfile } from './hooks/useUserProfile'
 import theme from './theme'
 import type { NavTab, User } from './types'
+
+type AppView = 'main' | 'editProfile' | 'glossary'
 
 export default function App() {
   const { user, login, logout, register } = useAuth()
@@ -33,7 +36,7 @@ export default function App() {
 
 function AuthenticatedApp({ user, onLogout }: { user: User; onLogout: () => void }) {
   const [tab, setTab] = useState<NavTab>('education')
-  const [editingProfile, setEditingProfile] = useState(false)
+  const [view, setView] = useState<AppView>('main')
   const { toast, showToast } = useToast()
   const gameState = useGameState(user.email)
   const { profile, updateProfile } = useUserProfile(user.name, user.email)
@@ -46,16 +49,25 @@ function AuthenticatedApp({ user, onLogout }: { user: User; onLogout: () => void
         xp={gameState.xp}
         streak={gameState.streak}
         profile={profile}
-        onEditProfile={() => setEditingProfile(true)}
+        onEditProfile={() => setView('editProfile')}
+        onShowGlossary={() => setView('glossary')}
         onLogout={onLogout}
       />
       <Box component="main" sx={{ flex: 1, p: '20px 16px 40px' }}>
-        {editingProfile ? (
+        {view === 'editProfile' ? (
           <EditProfilePage
             profile={profile}
             onSave={updateProfile}
-            onBack={() => setEditingProfile(false)}
+            onBack={() => setView('main')}
             showToast={showToast}
+          />
+        ) : view === 'glossary' ? (
+          <GlossaryPage
+            savedGlossary={gameState.savedGlossary}
+            onRemoveSavedTerm={gameState.removeSavedTerm}
+            onBack={() => setView('main')}
+            showToast={showToast}
+            onGoToLearn={() => { setView('main'); setTab('education') }}
           />
         ) : (
           <>

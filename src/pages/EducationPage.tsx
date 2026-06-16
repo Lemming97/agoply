@@ -82,9 +82,14 @@ export default function EducationPage({ gameState, showToast }: EducationPagePro
               <LessonPanel
                 lesson={level.lesson}
                 levelId={level.id}
+                levelName={level.name}
                 completed={status === 'completed'}
                 onComplete={() => handleComplete(level.id)}
                 showToast={showToast}
+                glossary={level.glossary}
+                savedGlossary={gameState.savedGlossary}
+                onSaveGlossaryTerm={gameState.saveGlossaryTerm}
+                onRemoveSavedTerm={gameState.removeSavedTerm}
               />
             )}
           </Box>

@@ -11,7 +11,7 @@ import Stack from '@mui/material/Stack'
 import Box from '@mui/material/Box'
 import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
-import { IconSchool, IconChartLine, IconWorld, IconFlame, IconBolt, IconEdit } from '@tabler/icons-react'
+import { IconSchool, IconChartLine, IconWorld, IconFlame, IconBolt, IconEdit, IconBooks } from '@tabler/icons-react'
 import type { NavTab, UserProfile } from '../types'
 
 interface HeaderProps {
@@ -21,6 +21,7 @@ interface HeaderProps {
   streak: number
   profile: UserProfile
   onEditProfile: () => void
+  onShowGlossary: () => void
   onLogout: () => void
 }
 
@@ -36,7 +37,7 @@ function avatarSrc(profile: UserProfile): string | undefined {
   return undefined
 }
 
-export default function Header({ tab, setTab, xp, streak, profile, onEditProfile, onLogout }: HeaderProps) {
+export default function Header({ tab, setTab, xp, streak, profile, onEditProfile, onShowGlossary, onLogout }: HeaderProps) {
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null)
 
   const displayName = [profile.firstName, profile.lastName].filter(Boolean).join(' ')
@@ -128,6 +129,13 @@ export default function Header({ tab, setTab, xp, streak, profile, onEditProfile
             >
               <IconEdit size={16} strokeWidth={1.5} />
               Edit Profile
+            </MenuItem>
+            <MenuItem
+              onClick={() => { setMenuAnchor(null); onShowGlossary() }}
+              sx={{ gap: 1.25, fontSize: 14, py: 1.25 }}
+            >
+              <IconBooks size={16} strokeWidth={1.5} />
+              My Glossary
             </MenuItem>
             <Divider />
             <MenuItem
