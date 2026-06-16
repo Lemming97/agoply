@@ -93,11 +93,11 @@ export const LEVELS: Level[] = [
 ]
 
 export const MARKET_ASSETS: MarketAsset[] = [
+  { id: 'eurgb',  name: 'EUR Gov Bond 2027', ticker: 'EURGB',  icon: '🏛️', price: 102.40, change: 0.4,   category: 'bond',      requiredLevel: 1 },
+  { id: 'fr10y',  name: 'France 10Y Bond',   ticker: 'OAT10',  icon: '🇫🇷', price: 98.70,  change: -0.2,  category: 'bond',      requiredLevel: 1 },
   { id: 'aapl',   name: 'Apple Inc.',        ticker: 'AAPL',   icon: '🍎', price: 215.40, change: 2.3,   category: 'stock',     requiredLevel: 2 },
   { id: 'nvda',   name: 'NVIDIA Corp.',      ticker: 'NVDA',   icon: '🟢', price: 847.20, change: 3.8,   category: 'stock',     requiredLevel: 2 },
   { id: 'mc',     name: 'LVMH',              ticker: 'MC',     icon: '💎', price: 694.50, change: -1.1,  category: 'stock',     requiredLevel: 2 },
-  { id: 'eurgb',  name: 'EUR Gov Bond 2027', ticker: 'EURGB',  icon: '🏛️', price: 102.40, change: 0.4,   category: 'bond',      requiredLevel: 1 },
-  { id: 'fr10y',  name: 'France 10Y Bond',   ticker: 'OAT10',  icon: '🇫🇷', price: 98.70,  change: -0.2,  category: 'bond',      requiredLevel: 1 },
   { id: 'btc',    name: 'Bitcoin',           ticker: 'BTC',    icon: '₿',  price: 61200,  change: -1.4,  category: 'crypto',    requiredLevel: 3 },
   { id: 'eth',    name: 'Ethereum',          ticker: 'ETH',    icon: '⬡',  price: 3240,   change: 2.1,   category: 'crypto',    requiredLevel: 3 },
   { id: 'eurusd', name: 'EUR/USD',           ticker: 'EURUSD', icon: '💱', price: 1.0842, change: 0.15,  category: 'forex',     requiredLevel: 4 },

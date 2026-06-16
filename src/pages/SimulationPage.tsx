@@ -324,8 +324,9 @@ function HoldingRow({ holding, onSell }: { holding: Holding; onSell: (h: Holding
 
 function MarketView({ assets, onBuy, completedLevels, cash }: { assets: MarketAsset[]; onBuy: (a: MarketAsset) => void; completedLevels: number[]; cash: number }) {
   const [filter, setFilter] = useState<AssetFilter>('all')
-  const cats: AssetFilter[] = ['all', 'stock', 'bond', 'crypto', 'forex', 'commodity', 'etf']
-  const filtered = filter === 'all' ? assets : assets.filter(a => a.category === filter)
+  const cats: AssetFilter[] = ['all', 'bond', 'stock', 'crypto', 'forex', 'commodity', 'etf']
+  const filtered = (filter === 'all' ? assets : assets.filter(a => a.category === filter))
+    .slice().sort((a, b) => a.name.localeCompare(b.name))
 
   return (
     <>
