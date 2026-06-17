@@ -1,48 +1,54 @@
 import type { ReactNode } from 'react'
 import { useState, useRef, useEffect } from 'react'
-import Button from '@mui/material/Button'
-import IconButton from '@mui/material/IconButton'
-import Chip from '@mui/material/Chip'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
 import Alert from '@mui/material/Alert'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
-import Paper from '@mui/material/Paper'
+import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 import {
-  IconCircleCheck, IconCircleX, IconTrophy, IconArrowBack, IconFlagExclamation, IconMountain,
-  IconBooks, IconBookmark, IconBookmarkFilled, IconBookmarkOff, IconX,
+  IconArrowLeft, IconArrowBack, IconCircleCheck, IconCircleX,
+  IconMountain, IconSparkles, IconTrophy,
+  IconBuildingBank, IconTrendingUp, IconCurrencyBitcoin, IconCurrencyEuro,
+  IconBarrel, IconChartPie, IconBuildingStore,
 } from '@tabler/icons-react'
-import type { Lesson, GlossaryEntry } from '../types'
+import LottieAnimation from '../components/LottieAnimation'
+import TrophyWinner from '../assets/animations/Trophy_Winner.json'
+import MoneyAnim from '../assets/animations/money_1.json'
+import { LEVELS } from '../data/gameData'
+import type { GameState } from '../types'
 
-interface LessonPanelProps {
-  lesson: Lesson
+type QuizPhase = 'intro' | 'round1' | 'repop_intro' | 'repop' | 'review' | 'done'
+
+interface QuizPageProps {
   levelId: number
-  levelName: string
-  completed: boolean
-  onComplete: () => void
+  gameState: GameState
   showToast: (msg: ReactNode) => void
-  glossary?: { term: string; definition: string }[]
-  savedGlossary: GlossaryEntry[]
-  onSaveGlossaryTerm: (entry: GlossaryEntry) => void
-  onRemoveSavedTerm: (term: string) => void
+  onBack: () => void
 }
 
-function renderText(raw: string): string {
-  return raw.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+type IconComponent = React.ComponentType<{ size: number; strokeWidth: number; color: string }>
+
+const LEVEL_CONFIG: Record<number, { color: string; Icon: IconComponent }> = {
+  1: { color: '#1D9E75', Icon: IconBuildingBank    },
+  2: { color: '#2E86AB', Icon: IconTrendingUp      },
+  3: { color: '#7B5FD4', Icon: IconCurrencyBitcoin },
+  4: { color: '#C08B00', Icon: IconCurrencyEuro    },
+  5: { color: '#E07B39', Icon: IconBarrel          },
+  6: { color: '#3AAFA9', Icon: IconChartPie        },
+  7: { color: '#D45F8A', Icon: IconBuildingStore   },
+  8: { color: '#0F6E56', Icon: IconSparkles        },
 }
 
-type Phase = 'round1' | 'repop_intro' | 'repop' | 'review'
+export default function QuizPage({ levelId, gameState, showToast, onBack }: QuizPageProps) {
+  const level = LEVELS.find(l => l.id === levelId)!
+  const quiz = level.quiz
+  const cfg = LEVEL_CONFIG[level.id]
+  const color = cfg?.color ?? '#1D9E75'
+  const LevelIcon: IconComponent = cfg?.Icon ?? IconSparkles
 
-export default function LessonPanel({
-  lesson, levelId, levelName, completed, onComplete, showToast,
-  glossary, savedGlossary, onSaveGlossaryTerm, onRemoveSavedTerm,
-}: LessonPanelProps) {
-  const [glossaryOpen, setGlossaryOpen] = useState(false)
-  const [phase, setPhase] = useState<Phase>('round1')
+  const [phase, setPhase] = useState<QuizPhase>('intro')
   const [r1Index, setR1Index] = useState(0)
   const [r1Results, setR1Results] = useState<boolean[]>([])
   const [repopQueue, setRepopQueue] = useState<number[]>([])
@@ -50,7 +56,6 @@ export default function LessonPanel({
   const [repopResults, setRepopResults] = useState<boolean[]>([])
   const [answered, setAnswered] = useState<number | null>(null)
   const [showNextBtn, setShowNextBtn] = useState(false)
-  const panelRef = useRef<HTMLDivElement>(null)
   const t1 = useRef<ReturnType<typeof setTimeout> | null>(null)
   const t2 = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -59,21 +64,14 @@ export default function LessonPanel({
     if (t2.current) clearTimeout(t2.current)
   }, [])
 
-  const totalQ = lesson.quiz.length
-
-  // Derived round-1 state
+  const totalQ = quiz.length
   const r1Score = r1Results.filter(Boolean).length
   const isEarlyExit = r1Results.length === 2 && r1Score === 2
   const isR1Complete = r1Results.length === totalQ
-
-  // Derived repopulation state
   const repopScore = repopResults.filter(Boolean).length
   const isRepopComplete = repopQueue.length > 0 && repopResults.length === repopQueue.length
-
-  const currentQuiz = phase === 'repop' ? lesson.quiz[repopQueue[repopIdx]] : lesson.quiz[r1Index]
+  const currentQuiz = phase === 'repop' ? quiz[repopQueue[repopIdx]] : quiz[r1Index]
   const isCorrect = answered !== null && answered === currentQuiz?.correct
-
-  // True when the next-button click should complete the level
   const isCompletionPoint = showNextBtn && (
     (phase === 'round1' && (isEarlyExit || (isR1Complete && r1Score >= 2))) ||
     (phase === 'repop' && isRepopComplete && repopScore === repopQueue.length)
@@ -94,9 +92,6 @@ export default function LessonPanel({
     if (answered !== null || !currentQuiz) return
     setAnswered(idx)
     const correct = idx === currentQuiz.correct
-
-    // Capture current state for the timer closure (user can't submit another answer
-    // while answered !== null, so these values won't change before the timer fires)
     const capPhase = phase
     const capR1Results = r1Results
     const capRepopResults = repopResults
@@ -110,13 +105,11 @@ export default function LessonPanel({
         const score = newResults.filter(Boolean).length
         const count = newResults.length
 
-        // Early exit (first 2 both correct) or round complete with passing score
         if ((count === 2 && score === 2) || (count === totalQ && score >= 2)) {
           setShowNextBtn(true)
         } else if (count < totalQ) {
           setShowNextBtn(true)
         } else if (score === 1) {
-          // 1/3 → repopulation round
           const missed = newResults.reduce<number[]>((acc, r, i) => (r ? acc : [...acc, i]), [])
           setRepopQueue(missed)
           setPhase('repop_intro')
@@ -126,9 +119,8 @@ export default function LessonPanel({
             setShowNextBtn(false)
           }, 1500)
         } else {
-          // 0/3 → review
           setPhase('review')
-          panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          window.scrollTo({ top: 0, behavior: 'smooth' })
           t2.current = setTimeout(doReset, 3000)
         }
       } else if (capPhase === 'repop') {
@@ -142,9 +134,8 @@ export default function LessonPanel({
         } else if (rScore === capRepopQueue.length) {
           setShowNextBtn(true)
         } else {
-          // Failed repopulation → review
           setPhase('review')
-          panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          window.scrollTo({ top: 0, behavior: 'smooth' })
           t2.current = setTimeout(doReset, 3000)
         }
       }
@@ -153,7 +144,14 @@ export default function LessonPanel({
 
   function handleNext() {
     if (isCompletionPoint) {
-      onComplete()
+      gameState.completeLevel(level.id)
+      setPhase('done')
+      showToast(
+        <Stack direction="row" sx={{ alignItems: 'center', gap: 0.75 }}>
+          <LottieAnimation animationData={MoneyAnim} height={20} width={20} loop={false} />
+          <span>Level complete! +50 XP · €100 virtual cash added!</span>
+        </Stack>
+      )
       return
     }
     if (phase === 'round1') setR1Index(i => i + 1)
@@ -161,8 +159,6 @@ export default function LessonPanel({
     setAnswered(null)
     setShowNextBtn(false)
   }
-
-  // --- UI computed values ---
 
   let completionMsg = ''
   if (isCompletionPoint) {
@@ -181,88 +177,166 @@ export default function LessonPanel({
     : `Question ${r1Index + 1} of ${totalQ}  ·  ${r1Score} correct so far`
 
   const reviewMsg = repopQueue.length > 0
-    ? "Let's review the lesson one more time."
-    : "Let's review the lesson before moving on."
+    ? 'Let\'s review the lesson one more time.'
+    : 'Let\'s review the lesson before moving on.'
 
   const showQuiz = phase === 'round1' || phase === 'repop'
 
-  return (
-    <Paper ref={panelRef} variant="outlined" sx={{ borderColor: 'var(--teal-100)', borderRadius: 'var(--radius)', p: 2.5, mb: 2, mt: '-4px' }}>
-      <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 1.75 }}>
-        <Typography variant="h6" color="var(--teal-600)" sx={{ fontSize: 16, fontWeight: 700 }}>
-          {lesson.title}
-        </Typography>
-        {glossary && glossary.length > 0 && (
-          <Chip
-            icon={<IconBooks size={15} strokeWidth={1.5} />}
-            label="Glossary"
-            onClick={() => setGlossaryOpen(true)}
+  // Intro screen
+  if (phase === 'intro') {
+    return (
+      <Box sx={{ maxWidth: 640, mx: 'auto' }}>
+        <Stack direction="row" sx={{ alignItems: 'center', mb: 3, gap: 0.5 }}>
+          <IconButton onClick={onBack} size="small">
+            <IconArrowLeft size={20} strokeWidth={1.5} />
+          </IconButton>
+          <Typography variant="caption" color="text.secondary" sx={{ cursor: 'pointer' }} onClick={onBack}>
+            Back to Module
+          </Typography>
+        </Stack>
+
+        <Box
+          sx={{
+            borderRadius: '20px',
+            bgcolor: color,
+            p: 4,
+            mb: 3,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 1,
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          <Typography
             sx={{
-              bgcolor: 'var(--teal-50)', color: 'var(--teal-600)', fontWeight: 700, fontSize: 15,
-              flexShrink: 0, cursor: 'pointer',
-              '& .MuiChip-icon': { color: 'var(--teal-600)' },
+              position: 'absolute',
+              bottom: -28,
+              right: 8,
+              fontSize: 160,
+              fontWeight: 800,
+              fontFamily: 'var(--font-display)',
+              color: 'rgba(255,255,255,0.12)',
+              lineHeight: 1,
+              userSelect: 'none',
+              pointerEvents: 'none',
             }}
+          >
+            {level.id}
+          </Typography>
+          <Box
+            sx={{
+              width: 72,
+              height: 72,
+              borderRadius: '50%',
+              bgcolor: 'rgba(255,255,255,0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mb: 1,
+            }}
+          >
+            <LevelIcon size={36} strokeWidth={1.5} color="#fff" />
+          </Box>
+          <Typography variant="h5" sx={{ color: '#fff', fontWeight: 800, fontFamily: 'var(--font-display)', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+            {level.name} Quiz
+          </Typography>
+          <Typography sx={{ color: 'rgba(255,255,255,0.8)', fontSize: 14, textAlign: 'center', position: 'relative', zIndex: 1 }}>
+            {level.subtitle}
+          </Typography>
+        </Box>
+
+        <Stack sx={{ gap: 1.5, mb: 3 }}>
+          {[
+            { icon: '❓', label: `${totalQ} questions` },
+            { icon: '⚡', label: '+50 XP on completion' },
+            { icon: '💶', label: '€100 virtual cash added to your portfolio' },
+          ].map(({ icon, label }) => (
+            <Stack key={label} direction="row" sx={{ alignItems: 'center', gap: 1.5, p: '12px 16px', borderRadius: '10px', bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}>
+              <Typography sx={{ fontSize: 18 }}>{icon}</Typography>
+              <Typography sx={{ fontSize: 14, fontWeight: 600 }}>{label}</Typography>
+            </Stack>
+          ))}
+        </Stack>
+
+        <Button
+          variant="contained"
+          fullWidth
+          onClick={() => setPhase('round1')}
+          startIcon={<IconTrophy size={18} strokeWidth={1.5} />}
+          sx={{
+            borderRadius: '12px',
+            py: 1.75,
+            fontWeight: 800,
+            fontSize: 15,
+            textTransform: 'none',
+            bgcolor: color,
+            '&:hover': { bgcolor: color, opacity: 0.9 },
+          }}
+        >
+          Start Quiz
+        </Button>
+      </Box>
+    )
+  }
+
+  // Done state
+  if (phase === 'done') {
+    return (
+      <Box sx={{ maxWidth: 640, mx: 'auto' }}>
+        <Stack direction="row" sx={{ alignItems: 'center', mb: 2.5, gap: 0.5 }}>
+          <IconButton onClick={onBack} size="small">
+            <IconArrowLeft size={20} strokeWidth={1.5} />
+          </IconButton>
+        </Stack>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 6 }}>
+          <LottieAnimation
+            animationData={TrophyWinner}
+            height={200}
+            width={200}
+            loop={false}
+            onComplete={() => setTimeout(onBack, 1000)}
           />
-        )}
+          <Typography variant="h5" sx={{ fontWeight: 700, fontFamily: 'var(--font-display)', mt: 1 }}>
+            Level Complete!
+          </Typography>
+          <Typography color="text.secondary" sx={{ mt: 0.5 }}>
+            +50 XP · €100 virtual cash added
+          </Typography>
+        </Box>
+      </Box>
+    )
+  }
+
+  // Quiz in progress
+  return (
+    <Box sx={{ maxWidth: 640, mx: 'auto' }}>
+      <Stack direction="row" sx={{ alignItems: 'center', mb: 2, gap: 1 }}>
+        <IconButton onClick={onBack} size="small" sx={{ flexShrink: 0 }}>
+          <IconArrowLeft size={20} strokeWidth={1.5} />
+        </IconButton>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, fontSize: 16, lineHeight: 1.2 }}>
+            {level.name} — Quiz
+          </Typography>
+          <Typography variant="caption" color="text.secondary">Back to Module</Typography>
+        </Box>
       </Stack>
 
-      {lesson.content.map((block, i) => {
-        if (block.type === 'text') {
-          return (
-            <Typography
-              key={i}
-              variant="body2"
-              color="text.primary"
-              sx={{ fontSize: 13.5, lineHeight: 1.75, mb: 1.75 }}
-              dangerouslySetInnerHTML={{ __html: renderText(block.value) }}
-            />
-          )
-        }
-        if (block.type === 'important') {
-          return (
-            <Box key={i} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1.75 }}>
-              <IconFlagExclamation size={18} strokeWidth={1.5} color="var(--red-400)" style={{ flexShrink: 0, marginTop: 2 }} />
-              <Typography variant="body2" color="text.primary" sx={{ fontSize: 13.5, lineHeight: 1.75 }}>
-                <strong>Important</strong>{': '}
-                <span dangerouslySetInnerHTML={{ __html: renderText(block.value) }} />
-              </Typography>
-            </Box>
-          )
-        }
-        if (block.type === 'callout') {
-          return (
-            <Alert key={i} icon={false} severity="success" sx={{ bgcolor: 'var(--teal-50)', border: '1px solid var(--teal-100)', borderRadius: '10px', mb: 1.75, '& .MuiAlert-message': { width: '100%' } }}>
-              <Typography variant="caption" color="var(--teal-600)" sx={{ fontWeight: 700, letterSpacing: '0.8px', display: 'block', mb: 1 }}>
-                {block.label.toUpperCase()}
-              </Typography>
-              {block.items.map((item, j) => (
-                <Typography key={j} variant="body2" sx={{ fontSize: 13, lineHeight: 1.7, mb: 0.5 }}
-                  dangerouslySetInnerHTML={{ __html: '• ' + renderText(item) }}
-                />
-              ))}
-            </Alert>
-          )
-        }
-        return null
-      })}
-
-      <Divider sx={{ my: 2 }} />
-
-      {/* Review state */}
       {phase === 'review' && (
         <Alert
           icon={<IconArrowBack size={18} strokeWidth={1.5} />}
           severity="warning"
-          sx={{ borderRadius: '8px', border: '1px solid #F5C97A', bgcolor: '#FFFBF0', color: '#8A6000', '& .MuiAlert-icon': { color: '#8A6000' } }}
+          sx={{ mb: 2, borderRadius: '8px', border: '1px solid #F5C97A', bgcolor: '#FFFBF0', color: '#8A6000', '& .MuiAlert-icon': { color: '#8A6000' } }}
         >
           <Typography sx={{ fontWeight: 700, fontSize: 13.5, mb: 0.5 }}>Review the lesson</Typography>
-          <Typography sx={{ fontSize: 13 }}>{reviewMsg} You'll restart with question 1 in a moment.</Typography>
+          <Typography sx={{ fontSize: 13 }}>{reviewMsg} You'll restart in a moment.</Typography>
         </Alert>
       )}
 
-      {/* Repopulation intro */}
       {phase === 'repop_intro' && (
-        <Alert severity="info" sx={{ borderRadius: '8px', '& .MuiAlert-icon': { alignItems: 'center' } }}>
+        <Alert severity="info" sx={{ mb: 2, borderRadius: '8px', '& .MuiAlert-icon': { alignItems: 'center' } }}>
           <Typography sx={{ fontWeight: 700, fontSize: 13.5, mb: 0.5 }}>So close!</Typography>
           <Typography sx={{ fontSize: 13 }}>
             You got 1 out of {totalQ}. Let's revisit the {repopQueue.length} you missed.
@@ -270,7 +344,6 @@ export default function LessonPanel({
         </Alert>
       )}
 
-      {/* Active quiz */}
       {showQuiz && currentQuiz && (
         <>
           <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1.25 }}>
@@ -316,7 +389,7 @@ export default function LessonPanel({
             <Alert
               icon={isCorrect
                 ? <IconCircleCheck size={18} strokeWidth={1.5} />
-                : <IconCircleX    size={18} strokeWidth={1.5} />
+                : <IconCircleX size={18} strokeWidth={1.5} />
               }
               severity={isCorrect ? 'success' : 'error'}
               sx={{ mt: 1, borderRadius: '8px', border: `1px solid ${isCorrect ? 'var(--teal-100)' : '#F09595'}`, bgcolor: isCorrect ? 'var(--teal-50)' : 'var(--red-50)', color: isCorrect ? 'var(--teal-600)' : '#A32D2D', '& .MuiAlert-icon': { color: isCorrect ? 'var(--teal-600)' : '#A32D2D' } }}
@@ -340,7 +413,7 @@ export default function LessonPanel({
                 onClick={handleNext}
                 variant={isCompletionPoint ? 'contained' : 'outlined'}
                 color="primary"
-                endIcon={isCompletionPoint ? <IconTrophy size={16} strokeWidth={1.5} /> : undefined}
+                endIcon={isCompletionPoint ? <IconCircleCheck size={16} strokeWidth={1.5} /> : undefined}
                 sx={{
                   borderRadius: '10px', px: 3, py: 1.5, fontSize: 13, fontWeight: 700, textTransform: 'none',
                   ...(!isCompletionPoint && { borderColor: 'var(--border)', color: 'var(--text)', '&:hover': { borderColor: 'var(--text)' } }),
@@ -356,69 +429,7 @@ export default function LessonPanel({
         </>
       )}
 
-      {completed && (
-        <Typography color="var(--teal-600)" sx={{ fontSize: 13, fontWeight: 600, mt: showQuiz ? 1.5 : 0, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <IconCircleCheck size={16} strokeWidth={1.5} color="var(--teal-400)" /> You've already completed this level!
-        </Typography>
-      )}
-
-      {/* Glossary dialog */}
-      <Dialog
-        open={glossaryOpen}
-        onClose={() => setGlossaryOpen(false)}
-        maxWidth="sm"
-        fullWidth
-        scroll="paper"
-      >
-        <DialogTitle sx={{ fontWeight: 700, fontSize: 16, pb: 0.5 }}>
-          Glossary
-          <IconButton
-            size="small"
-            onClick={() => setGlossaryOpen(false)}
-            sx={{ position: 'absolute', right: 12, top: 12 }}
-          >
-            <IconX size={18} strokeWidth={1.5} />
-          </IconButton>
-        </DialogTitle>
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', px: 3, pb: 1 }}>
-          {levelName} · {glossary?.length ?? 0} terms
-        </Typography>
-        <DialogContent dividers>
-          {(glossary ?? []).map(({ term, definition }) => {
-            const isSaved = savedGlossary.some(e => e.term === term)
-            return (
-              <Box key={term} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 2 }}>
-                <Box sx={{ flex: 1 }}>
-                  <Typography sx={{ fontWeight: 700, fontSize: 14, fontFamily: 'var(--font-display)', mb: 0.25 }}>
-                    {term}
-                  </Typography>
-                  <Typography sx={{ fontSize: 13, color: 'text.secondary', fontFamily: 'var(--font-body)', lineHeight: 1.65 }}>
-                    {definition}
-                  </Typography>
-                </Box>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    if (isSaved) {
-                      onRemoveSavedTerm(term)
-                      showToast(<span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><IconBookmarkOff size={14} color="var(--muted)" />{term} removed from glossary</span>)
-                    } else {
-                      onSaveGlossaryTerm({ term, definition, levelId, levelName, savedAt: new Date().toISOString() })
-                      showToast(<span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><IconBookmarkFilled size={14} color="var(--teal-400)" />{term} saved to glossary</span>)
-                    }
-                  }}
-                  sx={{ flexShrink: 0, mt: 0.25 }}
-                >
-                  {isSaved
-                    ? <IconBookmarkFilled size={20} color="var(--teal-400)" />
-                    : <IconBookmark size={20} strokeWidth={1.5} />
-                  }
-                </IconButton>
-              </Box>
-            )
-          })}
-        </DialogContent>
-      </Dialog>
-    </Paper>
+      <Divider sx={{ my: 3, display: showQuiz ? 'block' : 'none' }} />
+    </Box>
   )
 }

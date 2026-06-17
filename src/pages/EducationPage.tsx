@@ -46,7 +46,7 @@ export default function EducationPage({ gameState, showToast, onOpenLesson }: Ed
   function handleLevelClick(level: Level) {
     const status = getLevelStatus(level)
     if (status === 'locked') { showToast('🔒 Complete the previous level first!'); return }
-    if (!level.lesson) { showToast('This level is coming soon!'); return }
+    if (!level.subLessons.length) { showToast('This level is coming soon!'); return }
     onOpenLesson(level.id)
   }
 
@@ -60,9 +60,15 @@ export default function EducationPage({ gameState, showToast, onOpenLesson }: Ed
       <Grid container spacing={2}>
         {LEVELS.map(level => {
           const status = getLevelStatus(level)
+          const completedSubCount = level.subLessons.filter(sl => gameState.completedSubLessons.includes(sl.id)).length
           return (
             <Grid key={level.id} size={{ xs: 12, md: 6 }}>
-              <LevelCard level={level} status={status} onClick={() => handleLevelClick(level)} />
+              <LevelCard
+                level={level}
+                status={status}
+                completedSubCount={completedSubCount}
+                onClick={() => handleLevelClick(level)}
+              />
             </Grid>
           )
         })}
@@ -74,12 +80,14 @@ export default function EducationPage({ gameState, showToast, onOpenLesson }: Ed
 interface LevelCardProps {
   level: Level
   status: LevelStatus
+  completedSubCount: number
   onClick: () => void
 }
 
-function LevelCard({ level, status, onClick }: LevelCardProps) {
+function LevelCard({ level, status, completedSubCount, onClick }: LevelCardProps) {
   const isLocked = status === 'locked'
-  const pct = status === 'completed' ? 100 : status === 'active' ? 45 : 0
+  const totalSubs = level.subLessons.length
+  const pct = status === 'completed' ? 100 : totalSubs > 0 ? Math.round((completedSubCount / totalSubs) * 100) : 0
   const cfg = LEVEL_CONFIG[level.id]
   const headerBg = isLocked ? '#DADDE3' : cfg?.color ?? '#1D9E75'
   const Icon: IconComponent = isLocked ? IconLock : (cfg?.Icon ?? IconSparkles)

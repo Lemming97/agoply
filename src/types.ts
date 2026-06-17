@@ -48,10 +48,10 @@ export interface Quiz {
   explanation: string
 }
 
-export interface Lesson {
+export interface SubLesson {
+  id: string
   title: string
   content: ContentBlock[]
-  quiz: Quiz[]
 }
 
 export interface Level {
@@ -61,7 +61,8 @@ export interface Level {
   icon: string
   desc: string
   unlocks: string
-  lesson: Lesson | null
+  subLessons: SubLesson[]
+  quiz: Quiz[]
   isAI?: boolean
   animation?: object
   glossary?: { term: string; definition: string }[]
@@ -99,6 +100,7 @@ export interface GameStateData {
   xp: number
   streak: number
   completedLevels: number[]
+  completedSubLessons: string[]
   activeLesson: number
   portfolio: Portfolio
   riskProfile: string
@@ -107,6 +109,7 @@ export interface GameStateData {
 export interface GameState extends GameStateData {
   portfolioValue: number
   completeLevel: (levelId: number) => void
+  completeSubLesson: (id: string) => void
   buyAsset: (asset: MarketAsset, quantity: number) => void
   sellAsset: (holdingId: string, quantity: number) => void
   resetState: () => void

@@ -9,7 +9,9 @@ import RealWorldPage from './pages/RealWorldPage'
 import LoginPage from './pages/LoginPage'
 import EditProfilePage from './pages/EditProfilePage'
 import GlossaryPage from './pages/GlossaryPage'
-import LessonPage from './pages/LessonPage'
+import LevelDetailPage from './pages/LevelDetailPage'
+import SubLessonPage from './pages/SubLessonPage'
+import QuizPage from './pages/QuizPage'
 import Toast from './components/Toast'
 import { useToast } from './hooks/useToast'
 import { useGameState } from './hooks/useGameState'
@@ -18,7 +20,7 @@ import { useUserProfile } from './hooks/useUserProfile'
 import theme from './theme'
 import type { NavTab, User } from './types'
 
-type AppView = 'main' | 'editProfile' | 'glossary' | 'lesson'
+type AppView = 'main' | 'editProfile' | 'glossary' | 'levelDetail' | 'subLesson' | 'quiz'
 
 export default function App() {
   const { user, login, logout, register } = useAuth()
@@ -39,9 +41,28 @@ function AuthenticatedApp({ user, onLogout }: { user: User; onLogout: () => void
   const [tab, setTab] = useState<NavTab>('education')
   const [view, setView] = useState<AppView>('main')
   const [selectedLevelId, setSelectedLevelId] = useState<number | null>(null)
+  const [selectedSubLessonId, setSelectedSubLessonId] = useState<string | null>(null)
   const { toast, showToast } = useToast()
   const gameState = useGameState(user.email)
   const { profile, updateProfile } = useUserProfile(user.name, user.email)
+
+  function openLevel(levelId: number) {
+    setSelectedLevelId(levelId)
+    setView('levelDetail')
+  }
+
+  function openSubLesson(subLessonId: string) {
+    setSelectedSubLessonId(subLessonId)
+    setView('subLesson')
+  }
+
+  function handleSubLessonComplete(nextId: string | null) {
+    if (nextId) {
+      openSubLesson(nextId)
+    } else {
+      setView('levelDetail')
+    }
+  }
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
@@ -71,16 +92,34 @@ function AuthenticatedApp({ user, onLogout }: { user: User; onLogout: () => void
             showToast={showToast}
             onGoToLearn={() => { setView('main'); setTab('education') }}
           />
-        ) : view === 'lesson' && selectedLevelId !== null ? (
-          <LessonPage
+        ) : view === 'levelDetail' && selectedLevelId !== null ? (
+          <LevelDetailPage
             levelId={selectedLevelId}
             gameState={gameState}
             showToast={showToast}
             onBack={() => setView('main')}
+            onOpenSubLesson={openSubLesson}
+            onStartQuiz={() => setView('quiz')}
+          />
+        ) : view === 'subLesson' && selectedLevelId !== null && selectedSubLessonId !== null ? (
+          <SubLessonPage
+            levelId={selectedLevelId}
+            subLessonId={selectedSubLessonId}
+            gameState={gameState}
+            showToast={showToast}
+            onBack={() => setView('levelDetail')}
+            onComplete={handleSubLessonComplete}
+          />
+        ) : view === 'quiz' && selectedLevelId !== null ? (
+          <QuizPage
+            levelId={selectedLevelId}
+            gameState={gameState}
+            showToast={showToast}
+            onBack={() => setView('levelDetail')}
           />
         ) : (
           <>
-            {tab === 'education'  && <EducationPage  gameState={gameState} showToast={showToast} onOpenLesson={id => { setSelectedLevelId(id); setView('lesson') }} />}
+            {tab === 'education'  && <EducationPage  gameState={gameState} showToast={showToast} onOpenLesson={openLevel} />}
             {tab === 'simulation' && <SimulationPage gameState={gameState} showToast={showToast} profile={profile} />}
             {tab === 'realworld'  && <RealWorldPage  gameState={gameState} showToast={showToast} />}
           </>
