@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
+import Autocomplete from '@mui/material/Autocomplete'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -12,12 +13,14 @@ import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
 import LinearProgress from '@mui/material/LinearProgress'
 import Fade from '@mui/material/Fade'
+import { IconX } from '@tabler/icons-react'
+import { searchLycees, type School } from '../services/schoolApi'
 
 type Mode = 'login' | 'signup' | 'success'
 
 interface LoginPageProps {
   onLogin: (email: string, password: string) => boolean
-  onRegister: (firstName: string, lastName: string, email: string, password: string) => 'ok' | 'email_taken'
+  onRegister: (firstName: string, lastName: string, email: string, password: string, school: string | null, schoolUai: string | null, schoolCity: string | null) => 'ok' | 'email_taken'
 }
 
 interface RegFields {
@@ -63,11 +66,33 @@ export default function LoginPage({ onLogin, onRegister }: LoginPageProps) {
   const [showConfirmPw, setShowConfirmPw] = useState(false)
   const [regLoading, setRegLoading]     = useState(false)
 
+  // School search state
+  const [schoolOptions, setSchoolOptions]       = useState<School[]>([])
+  const [schoolLoading, setSchoolLoading]       = useState(false)
+  const [schoolInputValue, setSchoolInputValue] = useState('')
+  const [selectedSchool, setSelectedSchool]     = useState<School | null>(null)
+  const [schoolDropdownOpen, setSchoolDropdownOpen] = useState(false)
+  const schoolDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   function switchMode(next: Mode) {
     setEmail(''); setPassword(''); setShowPw(false); setLoginError('')
     setReg(INITIAL_REG); setRegErrors(INITIAL_ERR)
     setShowRegPw(false); setShowConfirmPw(false)
+    setSchoolOptions([]); setSchoolInputValue(''); setSelectedSchool(null); setSchoolDropdownOpen(false)
     setMode(next)
+  }
+
+  function handleSchoolInputChange(_: unknown, value: string, reason: string) {
+    setSchoolInputValue(value)
+    if (reason !== 'input') return
+    if (schoolDebounceRef.current) clearTimeout(schoolDebounceRef.current)
+    if (!value || value.length < 2) { setSchoolOptions([]); return }
+    schoolDebounceRef.current = setTimeout(async () => {
+      setSchoolLoading(true)
+      const results = await searchLycees(value)
+      setSchoolOptions(results)
+      setSchoolLoading(false)
+    }, 300)
   }
 
   function handleLogin(e?: React.FormEvent<HTMLFormElement>) {
@@ -107,7 +132,10 @@ export default function LoginPage({ onLogin, onRegister }: LoginPageProps) {
 
     setRegLoading(true)
     setTimeout(() => {
-      const result = onRegister(reg.firstName.trim(), reg.lastName.trim(), reg.email.trim(), reg.password)
+      const result = onRegister(
+        reg.firstName.trim(), reg.lastName.trim(), reg.email.trim(), reg.password,
+        selectedSchool?.name ?? null, selectedSchool?.uai ?? null, selectedSchool?.city ?? null,
+      )
       if (result === 'email_taken') {
         setRegErrors(e => ({ ...e, email: 'An account with this email already exists' }))
         setRegLoading(false)
@@ -306,6 +334,68 @@ export default function LoginPage({ onLogin, onRegister }: LoginPageProps) {
                       sx={{ mb: 2 }}
                       autoComplete="email"
                       slotProps={{ htmlInput: { 'aria-describedby': regErrors.email ? 'email-error' : undefined }, formHelperText: { id: 'email-error' } }}
+                    />
+
+                    <Autocomplete
+                      value={selectedSchool}
+                      inputValue={schoolInputValue}
+                      options={schoolOptions}
+                      loading={schoolLoading}
+                      open={schoolDropdownOpen && schoolInputValue.length >= 2}
+                      onOpen={() => setSchoolDropdownOpen(true)}
+                      onClose={() => setSchoolDropdownOpen(false)}
+                      filterOptions={x => x}
+                      getOptionLabel={option => option.name}
+                      isOptionEqualToValue={(option, value) => option.uai === value.uai}
+                      onChange={(_, newValue) => setSelectedSchool(newValue)}
+                      onInputChange={handleSchoolInputChange}
+                      noOptionsText={
+                        !schoolInputValue || schoolInputValue.length < 2
+                          ? 'Type to search for your lycée'
+                          : schoolLoading
+                          ? 'Searching…'
+                          : 'No lycée found. Try a different search.'
+                      }
+                      clearIcon={<IconX size={14} strokeWidth={1.5} />}
+                      sx={{ mb: 2 }}
+                      slotProps={{
+                        paper: {
+                          sx: {
+                            boxShadow: '0 8px 24px rgba(15, 110, 86, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)',
+                            borderRadius: '12px',
+                            border: '1px solid',
+                            borderColor: 'var(--teal-100)',
+                            mt: 0.5,
+                          },
+                        },
+                      }}
+                      renderInput={params => (
+                        <TextField
+                          {...params}
+                          label="My School"
+                          placeholder="Search for your lycée…"
+                          size="small"
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontFamily: 'var(--font-body)' } }}
+                        />
+                      )}
+                      renderOption={(props, option) => {
+                        const { key, ...rest } = props as React.HTMLAttributes<HTMLLIElement> & { key?: React.Key }
+                        const sub = [option.city, option.departmentCode].filter(Boolean).join(' · ')
+                        return (
+                          <Box component="li" key={key ?? option.uai} {...rest} sx={{ py: '10px !important', px: '14px !important' }}>
+                            <Box>
+                              <Typography sx={{ fontWeight: 700, fontSize: 13, fontFamily: 'var(--font-body)', lineHeight: 1.3 }}>
+                                {option.name}
+                              </Typography>
+                              {sub && (
+                                <Typography sx={{ fontSize: 11, color: 'text.secondary', fontFamily: 'var(--font-body)', mt: 0.25 }}>
+                                  {sub}
+                                </Typography>
+                              )}
+                            </Box>
+                          </Box>
+                        )
+                      }}
                     />
 
                     <TextField
