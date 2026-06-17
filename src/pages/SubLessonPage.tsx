@@ -23,6 +23,7 @@ import DragDropGame from '../components/DragDropGame'
 import BondsYieldCalculator from '../components/games/BondsYieldCalculator'
 import StocksPortfolioBuilder from '../components/games/StocksPortfolioBuilder'
 import ETFsFeeCalculator from '../components/games/ETFsFeeCalculator'
+import CryptoRollercoaster from '../components/games/CryptoRollercoaster'
 import type { GameState } from '../types'
 
 interface SubLessonPageProps {
@@ -251,7 +252,7 @@ export default function SubLessonPage({
       )}
 
       {/* Embedded interactive games */}
-      {(['bonds-2', 'stocks-3', 'etfs-3'] as const).includes(subLessonId as 'bonds-2' | 'stocks-3' | 'etfs-3') && (
+      {(['bonds-2', 'stocks-3', 'etfs-3', 'crypto-3'] as const).includes(subLessonId as 'bonds-2' | 'stocks-3' | 'etfs-3' | 'crypto-3') && (
         <>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, my: 3 }}>
             <Divider sx={{ flex: 1 }} />
@@ -279,6 +280,12 @@ export default function SubLessonPage({
             <ETFsFeeCalculator
               isCompleted={gameState.isGameComplete('game-etfs-fees')}
               onComplete={() => { gameState.completeGame('game-etfs-fees', 20); showToast('+20 XP · Game complete!') }}
+            />
+          )}
+          {subLessonId === 'crypto-3' && (
+            <CryptoRollercoaster
+              isCompleted={gameState.isGameComplete('game-crypto-rollercoaster')}
+              onComplete={() => { gameState.completeGame('game-crypto-rollercoaster', 20); showToast('+20 XP · Game complete!') }}
             />
           )}
         </>
