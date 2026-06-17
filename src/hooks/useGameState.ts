@@ -10,6 +10,7 @@ const DEMO_STATE: GameStateData = {
   xp: 340,
   streak: 5,
   completedLevels: [1],
+  completedSubLessons: ['bonds-1', 'bonds-2', 'bonds-3'],
   activeLesson: 2,
   portfolio: {
     cash: 200,
@@ -27,6 +28,7 @@ const FRESH_STATE: GameStateData = {
   xp: 0,
   streak: 0,
   completedLevels: [],
+  completedSubLessons: [],
   activeLesson: 1,
   portfolio: { cash: 1000, holdings: [] },
   riskProfile: '',
@@ -44,7 +46,10 @@ export function useGameState(userEmail: string): GameState {
   const [state, setState] = useState<GameStateData>(() => {
     try {
       const saved = localStorage.getItem(key)
-      if (saved) return JSON.parse(saved) as GameStateData
+      if (saved) {
+        const parsed = JSON.parse(saved) as GameStateData
+        return { ...parsed, completedSubLessons: parsed.completedSubLessons ?? [] }
+      }
     } catch { /* ignore */ }
     return userEmail === TEST_EMAIL ? DEMO_STATE : FRESH_STATE
   })
@@ -103,6 +108,13 @@ export function useGameState(userEmail: string): GameState {
     })
   }
 
+  function completeSubLesson(id: string): void {
+    setState(s => ({
+      ...s,
+      completedSubLessons: [...new Set([...s.completedSubLessons, id])],
+    }))
+  }
+
   function resetState(): void {
     setState(userEmail === TEST_EMAIL ? DEMO_STATE : FRESH_STATE)
   }
@@ -128,5 +140,5 @@ export function useGameState(userEmail: string): GameState {
     (sum, h) => sum + h.price * h.shares, 0
   ) + state.portfolio.cash
 
-  return { ...state, portfolioValue, completeLevel, buyAsset, sellAsset, resetState, savedGlossary, saveGlossaryTerm, removeSavedTerm }
+  return { ...state, portfolioValue, completeLevel, completeSubLesson, buyAsset, sellAsset, resetState, savedGlossary, saveGlossaryTerm, removeSavedTerm }
 }
