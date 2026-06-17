@@ -21,6 +21,8 @@ const DEMO_STATE: GameStateData = {
     ],
   },
   riskProfile: 'Balanced Growth',
+  completedGames: [],
+  earnedGameXP: {},
 }
 
 // Blank starting state for new registered users
@@ -32,6 +34,8 @@ const FRESH_STATE: GameStateData = {
   activeLesson: 1,
   portfolio: { cash: 1000, holdings: [] },
   riskProfile: '',
+  completedGames: [],
+  earnedGameXP: {},
 }
 
 const TEST_EMAIL = 'test@agoply.com'
@@ -48,7 +52,12 @@ export function useGameState(userEmail: string): GameState {
       const saved = localStorage.getItem(key)
       if (saved) {
         const parsed = JSON.parse(saved) as GameStateData
-        return { ...parsed, completedSubLessons: parsed.completedSubLessons ?? [] }
+        return {
+          ...parsed,
+          completedSubLessons: parsed.completedSubLessons ?? [],
+          completedGames: parsed.completedGames ?? [],
+          earnedGameXP: parsed.earnedGameXP ?? {},
+        }
       }
     } catch { /* ignore */ }
     return userEmail === TEST_EMAIL ? DEMO_STATE : FRESH_STATE
@@ -119,6 +128,22 @@ export function useGameState(userEmail: string): GameState {
     setState(s => ({ ...s, xp: s.xp + amount }))
   }
 
+  function completeGame(gameId: string, xp: number): void {
+    setState(s => {
+      if (s.completedGames.includes(gameId)) return s
+      return {
+        ...s,
+        xp: s.xp + xp,
+        completedGames: [...s.completedGames, gameId],
+        earnedGameXP: { ...s.earnedGameXP, [gameId]: xp },
+      }
+    })
+  }
+
+  function isGameComplete(gameId: string): boolean {
+    return state.completedGames.includes(gameId)
+  }
+
   function resetState(): void {
     setState(userEmail === TEST_EMAIL ? DEMO_STATE : FRESH_STATE)
   }
@@ -144,5 +169,5 @@ export function useGameState(userEmail: string): GameState {
     (sum, h) => sum + h.price * h.shares, 0
   ) + state.portfolio.cash
 
-  return { ...state, portfolioValue, completeLevel, completeSubLesson, buyAsset, sellAsset, addXP, resetState, savedGlossary, saveGlossaryTerm, removeSavedTerm }
+  return { ...state, portfolioValue, completeLevel, completeSubLesson, buyAsset, sellAsset, addXP, completeGame, isGameComplete, resetState, savedGlossary, saveGlossaryTerm, removeSavedTerm }
 }

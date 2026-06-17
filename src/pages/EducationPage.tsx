@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useState } from 'react'
 import Card from '@mui/material/Card'
 import CardActionArea from '@mui/material/CardActionArea'
 import CardContent from '@mui/material/CardContent'
@@ -8,18 +9,22 @@ import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
 import Grid from '@mui/material/Grid'
+import ToggleButton from '@mui/material/ToggleButton'
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import {
   IconLock, IconSparkles,
   IconBuildingBank, IconTrendingUp, IconCurrencyBitcoin, IconCurrencyEuro,
-  IconBarrel, IconChartPie, IconBuildingStore,
+  IconBarrel, IconChartPie, IconBuildingStore, IconDeviceGamepad2,
 } from '@tabler/icons-react'
 import { LEVELS } from '../data/gameData'
+import GamesPage from './GamesPage'
 import type { GameState, Level, LevelStatus } from '../types'
 
 interface EducationPageProps {
   gameState: GameState
   showToast: (msg: ReactNode) => void
   onOpenLesson: (levelId: number) => void
+  onOpenGame: (gameId: string) => void
 }
 
 type IconComponent = React.ComponentType<{ size: number; strokeWidth: number; color: string }>
@@ -35,7 +40,9 @@ const LEVEL_CONFIG: Record<number, { color: string; Icon: IconComponent }> = {
   8: { color: '#0F6E56', Icon: IconSparkles        },
 }
 
-export default function EducationPage({ gameState, showToast, onOpenLesson }: EducationPageProps) {
+export default function EducationPage({ gameState, showToast, onOpenLesson, onOpenGame }: EducationPageProps) {
+  const [mode, setMode] = useState<'path' | 'games'>('path')
+
   function getLevelStatus(level: Level): LevelStatus {
     if (gameState.completedLevels.includes(level.id)) return 'completed'
     if (gameState.activeLesson === level.id) return 'active'
@@ -45,34 +52,75 @@ export default function EducationPage({ gameState, showToast, onOpenLesson }: Ed
 
   function handleLevelClick(level: Level) {
     const status = getLevelStatus(level)
-    if (status === 'locked') { showToast('🔒 Complete the previous level first!'); return }
+    if (status === 'locked') { showToast('Complete the previous level first!'); return }
     if (!level.subLessons.length) { showToast('This level is coming soon!'); return }
     onOpenLesson(level.id)
   }
 
   return (
     <Box>
-      <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>Your Learning Path</Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Complete lessons to unlock investment instruments in the Simulator
-      </Typography>
+      {/* Toggle */}
+      <ToggleButtonGroup
+        value={mode}
+        exclusive
+        onChange={(_, val) => val && setMode(val)}
+        size="small"
+        sx={{ mb: 3 }}
+      >
+        <ToggleButton
+          value="path"
+          sx={{
+            textTransform: 'none', fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 13,
+            px: 2.5, borderRadius: '10px 0 0 10px !important', border: '1px solid var(--border, #E0E0E0)',
+            '&.Mui-selected': { bgcolor: 'var(--teal-400)', color: 'white', '&:hover': { bgcolor: 'var(--teal-600)' } },
+            '&:not(.Mui-selected)': { bgcolor: 'white', color: 'var(--muted, #888)' },
+          }}
+        >
+          Learning Path
+        </ToggleButton>
+        <ToggleButton
+          value="games"
+          sx={{
+            textTransform: 'none', fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 13,
+            px: 2.5, borderRadius: '0 10px 10px 0 !important', border: '1px solid var(--border, #E0E0E0)',
+            '&.Mui-selected': { bgcolor: 'var(--teal-400)', color: 'white', '&:hover': { bgcolor: 'var(--teal-600)' } },
+            '&:not(.Mui-selected)': { bgcolor: 'white', color: 'var(--muted, #888)' },
+          }}
+        >
+          <Stack direction="row" sx={{ alignItems: 'center', gap: 0.75 }}>
+            <IconDeviceGamepad2 size={16} strokeWidth={1.5} />
+            Games
+          </Stack>
+        </ToggleButton>
+      </ToggleButtonGroup>
 
-      <Grid container spacing={2}>
-        {LEVELS.map(level => {
-          const status = getLevelStatus(level)
-          const completedSubCount = level.subLessons.filter(sl => gameState.completedSubLessons.includes(sl.id)).length
-          return (
-            <Grid key={level.id} size={{ xs: 12, md: 6 }}>
-              <LevelCard
-                level={level}
-                status={status}
-                completedSubCount={completedSubCount}
-                onClick={() => handleLevelClick(level)}
-              />
-            </Grid>
-          )
-        })}
-      </Grid>
+      {mode === 'games' ? (
+        <GamesPage gameState={gameState} showToast={showToast} onOpenGame={onOpenGame} />
+      ) : (
+        <>
+          <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>Your Learning Path</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Complete lessons to unlock investment instruments in the Simulator
+          </Typography>
+
+          <Grid container spacing={2}>
+            {LEVELS.map(level => {
+              const status = getLevelStatus(level)
+              const completedSubCount = level.subLessons.filter(sl => gameState.completedSubLessons.includes(sl.id)).length
+              return (
+                <Grid key={level.id} size={{ xs: 12, md: 6 }}>
+                  <LevelCard
+                    level={level}
+                    status={status}
+                    completedSubCount={completedSubCount}
+                    onClick={() => handleLevelClick(level)}
+                  />
+                </Grid>
+              )
+            })}
+          </Grid>
+        </>
+      )}
     </Box>
   )
 }
@@ -106,7 +154,7 @@ function LevelCard({ level, status, completedSubCount, onClick }: LevelCardProps
     chipLabel = 'In Progress'
     chipSx = { bgcolor: '#FFF8E1', color: 'var(--gold-400)', fontWeight: 700, fontSize: 12 }
   } else {
-    chipLabel = '🔒 Locked'
+    chipLabel = 'Locked'
     chipSx = { bgcolor: '#f5f5f5', color: '#aaa', fontWeight: 700, fontSize: 12 }
   }
 
@@ -131,57 +179,33 @@ function LevelCard({ level, status, completedSubCount, onClick }: LevelCardProps
         disableRipple={isLocked}
         sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'stretch', cursor: isLocked ? 'default' : 'pointer' }}
       >
-        {/* Illustration area */}
         <Box
           sx={{
-            height: 180,
-            bgcolor: headerBg,
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            overflow: 'hidden',
+            height: 180, bgcolor: headerBg, position: 'relative',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0, overflow: 'hidden',
           }}
         >
-          {/* Giant watermark number */}
           <Typography
             sx={{
-              position: 'absolute',
-              bottom: -18,
-              right: 12,
-              fontSize: 120,
-              fontWeight: 800,
-              fontFamily: 'var(--font-display)',
-              color: 'rgba(255,255,255,0.15)',
-              lineHeight: 1,
-              userSelect: 'none',
-              pointerEvents: 'none',
+              position: 'absolute', bottom: -18, right: 12, fontSize: 120, fontWeight: 800,
+              fontFamily: 'var(--font-display)', color: 'rgba(255,255,255,0.15)',
+              lineHeight: 1, userSelect: 'none', pointerEvents: 'none',
             }}
           >
             {level.id}
           </Typography>
-
-          {/* Icon badge */}
           <Box
             sx={{
-              width: 80,
-              height: 80,
-              borderRadius: '50%',
-              bgcolor: '#fff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-              position: 'relative',
-              zIndex: 1,
+              width: 80, height: 80, borderRadius: '50%', bgcolor: '#fff',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.15)', position: 'relative', zIndex: 1,
             }}
           >
             <Icon size={36} strokeWidth={1.5} color={iconColor} />
           </Box>
         </Box>
 
-        {/* Info area */}
         <CardContent sx={{ flex: 1, pb: '14px !important', pt: 1.5 }}>
           <Stack direction="row" sx={{ alignItems: 'flex-start', justifyContent: 'space-between', gap: 1, mb: 1 }}>
             <Box sx={{ minWidth: 0 }}>
@@ -199,10 +223,7 @@ function LevelCard({ level, status, completedSubCount, onClick }: LevelCardProps
             variant="determinate"
             value={pct}
             sx={{
-              mt: 0.5,
-              height: 4,
-              borderRadius: 2,
-              bgcolor: '#f0f0f0',
+              mt: 0.5, height: 4, borderRadius: 2, bgcolor: '#f0f0f0',
               '& .MuiLinearProgress-bar': { background: 'linear-gradient(90deg, var(--teal-100), #1D9E75)', borderRadius: 2 },
             }}
           />
