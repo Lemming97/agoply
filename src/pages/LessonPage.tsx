@@ -2,7 +2,6 @@ import type { ReactNode } from 'react'
 import { useState, useRef, useEffect } from 'react'
 import LottieAnimation from '../components/LottieAnimation'
 import TrophyWinner from '../assets/animations/Trophy_Winner.json'
-import ThinkingAnim from '../assets/animations/Thinking.json'
 import MoneyAnim from '../assets/animations/money_1.json'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
@@ -40,7 +39,6 @@ export default function LessonPage({ levelId, gameState, showToast, onBack }: Le
   const lesson = level.lesson!
 
   const [glossaryOpen, setGlossaryOpen] = useState(false)
-  const [isContentLoading, setIsContentLoading] = useState(true)
   const [phase, setPhase] = useState<Phase>('round1')
   const [r1Index, setR1Index] = useState(0)
   const [r1Results, setR1Results] = useState<boolean[]>([])
@@ -52,13 +50,9 @@ export default function LessonPage({ levelId, gameState, showToast, onBack }: Le
   const t1 = useRef<ReturnType<typeof setTimeout> | null>(null)
   const t2 = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  useEffect(() => {
-    const t = setTimeout(() => setIsContentLoading(false), 600)
-    return () => {
-      clearTimeout(t)
-      if (t1.current) clearTimeout(t1.current)
-      if (t2.current) clearTimeout(t2.current)
-    }
+  useEffect(() => () => {
+    if (t1.current) clearTimeout(t1.current)
+    if (t2.current) clearTimeout(t2.current)
   }, [])
 
   const totalQ = lesson.quiz.length
@@ -183,7 +177,7 @@ export default function LessonPage({ levelId, gameState, showToast, onBack }: Le
   return (
     <Box sx={{ maxWidth: 640, mx: 'auto' }}>
       {/* Page header */}
-      <Stack direction="row" sx={{ alignItems: 'center', mb: 2.5, gap: 1 }}>
+      <Stack direction="row" sx={{ alignItems: 'center', mb: phase !== 'done' ? 0 : 2.5, gap: 1 }}>
         <IconButton onClick={onBack} size="small" sx={{ flexShrink: 0 }}>
           <IconArrowLeft size={20} strokeWidth={1.5} />
         </IconButton>
@@ -207,6 +201,21 @@ export default function LessonPage({ levelId, gameState, showToast, onBack }: Le
         )}
       </Stack>
 
+      {/* Hero animation */}
+      {phase !== 'done' && level.animation && (
+        <Box
+          sx={{
+            height: 260,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            mb: 3,
+          }}
+        >
+          <LottieAnimation animationData={level.animation} height={220} width={220} />
+        </Box>
+      )}
+
       {/* Success state */}
       {phase === 'done' && (
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 6 }}>
@@ -222,14 +231,7 @@ export default function LessonPage({ levelId, gameState, showToast, onBack }: Le
         </Box>
       )}
 
-      {/* Thinking loading state */}
-      {phase !== 'done' && isContentLoading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-          <LottieAnimation animationData={ThinkingAnim} height={160} width={160} />
-        </Box>
-      )}
-
-      {phase !== 'done' && !isContentLoading && (
+      {phase !== 'done' && (
         <>
           <Typography variant="h6" color="var(--teal-600)" sx={{ fontSize: 16, fontWeight: 700, mb: 1.75 }}>
             {lesson.title}

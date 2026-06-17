@@ -8,10 +8,12 @@ import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
 import Grid from '@mui/material/Grid'
-import { IconCircleCheck, IconLock, IconSparkles } from '@tabler/icons-react'
+import {
+  IconCircleCheck, IconLock, IconSparkles,
+  IconBuildingBank, IconTrendingUp, IconCurrencyBitcoin, IconCurrencyEuro,
+  IconBarrel, IconChartPie, IconBuildingStore,
+} from '@tabler/icons-react'
 import { LEVELS } from '../data/gameData'
-import LottieAnimation from '../components/LottieAnimation'
-import LockAnim from '../assets/animations/Lock.json'
 import type { GameState, Level, LevelStatus } from '../types'
 
 interface EducationPageProps {
@@ -54,6 +56,22 @@ export default function EducationPage({ gameState, showToast, onOpenLesson }: Ed
       </Grid>
     </Box>
   )
+}
+
+function LevelIcon({ levelId, isLocked }: { levelId: number; isLocked: boolean }) {
+  const color = isLocked ? '#ccc' : 'var(--teal-400)'
+  const props = { size: 48, strokeWidth: 1.5, color } as const
+  switch (levelId) {
+    case 1: return <IconBuildingBank   {...props} />
+    case 2: return <IconTrendingUp     {...props} />
+    case 3: return <IconCurrencyBitcoin {...props} />
+    case 4: return <IconCurrencyEuro   {...props} />
+    case 5: return <IconBarrel         {...props} />
+    case 6: return <IconChartPie       {...props} />
+    case 7: return <IconBuildingStore  {...props} />
+    case 8: return <IconSparkles       {...props} />
+    default: return null
+  }
 }
 
 interface LevelCardProps {
@@ -126,8 +144,8 @@ function LevelCard({ level, status, onClick }: LevelCardProps) {
         {/* Media area */}
         <Box
           sx={{
-            height: 160,
-            background: isLocked ? '#f5f5f5' : 'linear-gradient(180deg, var(--teal-50) 0%, #fff 100%)',
+            height: 120,
+            background: 'linear-gradient(135deg, var(--teal-50) 0%, #ffffff 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -147,13 +165,7 @@ function LevelCard({ level, status, onClick }: LevelCardProps) {
             {level.id}
           </Box>
 
-          {isLocked ? (
-            <Box sx={{ opacity: 0.4, filter: 'grayscale(100%)' }}>
-              <LottieAnimation animationData={LockAnim} height={100} width={100} />
-            </Box>
-          ) : level.animation ? (
-            <LottieAnimation animationData={level.animation} height={120} width={120} />
-          ) : null}
+          <LevelIcon levelId={level.id} isLocked={isLocked} />
         </Box>
 
         <CardContent sx={{ flex: 1, pb: '12px !important' }}>
