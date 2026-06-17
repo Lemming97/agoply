@@ -1,4 +1,12 @@
 import type { Level, MarketAsset, LeaderboardEntry, Platform } from '../types'
+import PiggyBankLoop from '../assets/animations/Piggy_bank_loop.json'
+import DrawkitCharts from '../assets/animations/drawkit_charts_and_graphs.json'
+import BlockchainCurrency from '../assets/animations/blockchain_currency.json'
+import CurrencyExchange from '../assets/animations/Currency_Exchange.json'
+import Gold from '../assets/animations/gold.json'
+import Charts from '../assets/animations/charts.json'
+import Money from '../assets/animations/Money.json'
+import ArtificialIntelligence from '../assets/animations/artificial_intelligence.json'
 
 export const LEVELS: Level[] = [
   {
@@ -42,7 +50,7 @@ export const LEVELS: Level[] = [
         },
       ],
     },
-    illustration: 'illustrations/payment.png',
+    animation: PiggyBankLoop,
     glossary: [
       { term: 'Bond',          definition: 'A loan made to a government or company in exchange for periodic interest payments and return of principal at maturity.' },
       { term: 'Coupon',        definition: 'The periodic interest payment made to bondholders, expressed as a percentage of the bond\'s face value.' },
@@ -94,7 +102,7 @@ export const LEVELS: Level[] = [
         },
       ],
     },
-    illustration: 'illustrations/chart.png',
+    animation: DrawkitCharts,
     glossary: [
       { term: 'Stock',       definition: 'A share representing partial ownership of a company and its future earnings.' },
       { term: 'Dividend',    definition: 'A portion of company profits distributed to shareholders, typically paid quarterly.' },
@@ -147,7 +155,7 @@ export const LEVELS: Level[] = [
         },
       ],
     },
-    illustration: 'illustrations/chart-circle.png',
+    animation: BlockchainCurrency,
     glossary: [
       { term: 'Blockchain',  definition: 'A decentralized digital ledger that records all transactions across a network of computers, making them transparent and tamper-resistant.' },
       { term: 'Bitcoin',     definition: 'The first and largest cryptocurrency by market cap, with a fixed supply of 21 million coins.' },
@@ -158,11 +166,11 @@ export const LEVELS: Level[] = [
       { term: 'Altcoin',     definition: 'Any cryptocurrency other than Bitcoin — includes Ethereum, Solana, and thousands of others.' },
     ],
   },
-  { id: 4, name: 'Forex',        subtitle: 'Currency Markets',     icon: '💱', desc: 'Exchange rates, pairs & macro drivers',          unlocks: 'FX pairs in Simulator',    lesson: null, illustration: 'illustrations/map-destination.png' },
-  { id: 5, name: 'Commodities',  subtitle: 'Real Assets',          icon: '🛢️', desc: 'Gold, oil, agriculture & futures',               unlocks: 'commodities in Simulator', lesson: null, illustration: 'illustrations/shopping.png' },
-  { id: 6, name: 'ETFs',         subtitle: 'Passive Funds',        icon: '📊', desc: 'Index funds, expense ratios & passive investing',  unlocks: 'ETFs in Simulator',         lesson: null, illustration: 'illustrations/project.png' },
-  { id: 7, name: 'Mutual Funds', subtitle: 'Managed Portfolios',   icon: '🏦', desc: 'Active management, NAV & fund selection',         unlocks: 'mutual funds in Simulator', lesson: null, illustration: 'illustrations/contract.png' },
-  { id: 8, name: 'Topicality',   subtitle: 'AI Live News',         icon: '✦',  desc: 'Real market events turned into adaptive lessons',  unlocks: 'full market access',        lesson: null, illustration: 'illustrations/ai.png', isAI: true },
+  { id: 4, name: 'Forex',        subtitle: 'Currency Markets',     icon: '💱', desc: 'Exchange rates, pairs & macro drivers',          unlocks: 'FX pairs in Simulator',    lesson: null, animation: CurrencyExchange },
+  { id: 5, name: 'Commodities',  subtitle: 'Real Assets',          icon: '🛢️', desc: 'Gold, oil, agriculture & futures',               unlocks: 'commodities in Simulator', lesson: null, animation: Gold },
+  { id: 6, name: 'ETFs',         subtitle: 'Passive Funds',        icon: '📊', desc: 'Index funds, expense ratios & passive investing',  unlocks: 'ETFs in Simulator',         lesson: null, animation: Charts },
+  { id: 7, name: 'Mutual Funds', subtitle: 'Managed Portfolios',   icon: '🏦', desc: 'Active management, NAV & fund selection',         unlocks: 'mutual funds in Simulator', lesson: null, animation: Money },
+  { id: 8, name: 'Topicality',   subtitle: 'AI Live News',         icon: '✦',  desc: 'Real market events turned into adaptive lessons',  unlocks: 'full market access',        lesson: null, animation: ArtificialIntelligence, isAI: true },
 ]
 
 export const MARKET_ASSETS: MarketAsset[] = [

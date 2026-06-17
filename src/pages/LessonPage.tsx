@@ -1,5 +1,9 @@
 import type { ReactNode } from 'react'
 import { useState, useRef, useEffect } from 'react'
+import LottieAnimation from '../components/LottieAnimation'
+import TrophyWinner from '../assets/animations/Trophy_Winner.json'
+import ThinkingAnim from '../assets/animations/Thinking.json'
+import MoneyAnim from '../assets/animations/money_1.json'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import Chip from '@mui/material/Chip'
@@ -12,7 +16,7 @@ import Alert from '@mui/material/Alert'
 import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
 import {
-  IconCircleCheck, IconCircleX, IconTrophy, IconArrowBack, IconFlagExclamation, IconMountain,
+  IconCircleCheck, IconCircleX, IconArrowBack, IconFlagExclamation, IconMountain,
   IconArrowLeft, IconBooks, IconBookmark, IconBookmarkFilled, IconBookmarkOff, IconX,
 } from '@tabler/icons-react'
 import { LEVELS } from '../data/gameData'
@@ -36,6 +40,7 @@ export default function LessonPage({ levelId, gameState, showToast, onBack }: Le
   const lesson = level.lesson!
 
   const [glossaryOpen, setGlossaryOpen] = useState(false)
+  const [isContentLoading, setIsContentLoading] = useState(true)
   const [phase, setPhase] = useState<Phase>('round1')
   const [r1Index, setR1Index] = useState(0)
   const [r1Results, setR1Results] = useState<boolean[]>([])
@@ -47,9 +52,13 @@ export default function LessonPage({ levelId, gameState, showToast, onBack }: Le
   const t1 = useRef<ReturnType<typeof setTimeout> | null>(null)
   const t2 = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  useEffect(() => () => {
-    if (t1.current) clearTimeout(t1.current)
-    if (t2.current) clearTimeout(t2.current)
+  useEffect(() => {
+    const t = setTimeout(() => setIsContentLoading(false), 600)
+    return () => {
+      clearTimeout(t)
+      if (t1.current) clearTimeout(t1.current)
+      if (t2.current) clearTimeout(t2.current)
+    }
   }, [])
 
   const totalQ = lesson.quiz.length
@@ -136,11 +145,10 @@ export default function LessonPage({ levelId, gameState, showToast, onBack }: Le
       setPhase('done')
       showToast(
         <Stack direction="row" sx={{ alignItems: 'center', gap: 0.75 }}>
-          <IconTrophy size={16} strokeWidth={1.5} />
+          <LottieAnimation animationData={MoneyAnim} height={20} width={20} loop={false} />
           <span>Level complete! +50 XP · €100 virtual cash added!</span>
         </Stack>
       )
-      setTimeout(() => onBack(), 2000)
       return
     }
     if (phase === 'round1') setR1Index(i => i + 1)
@@ -199,30 +207,29 @@ export default function LessonPage({ levelId, gameState, showToast, onBack }: Le
         )}
       </Stack>
 
-      {/* Illustration */}
-      {level.illustration && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-          <Box
-            component="img"
-            src={`${import.meta.env.BASE_URL}${level.illustration}`}
-            alt={level.name}
-            sx={{ height: 180, objectFit: 'contain' }}
-          />
-        </Box>
-      )}
-
       {/* Success state */}
       {phase === 'done' && (
-        <Box sx={{ textAlign: 'center', py: 6 }}>
-          <IconTrophy size={64} strokeWidth={1} color="#F59E0B" />
-          <Typography variant="h5" sx={{ fontWeight: 700, mt: 2 }}>Level Complete!</Typography>
-          <Typography color="text.secondary" sx={{ mt: 1 }}>
-            +50 XP · €100 virtual cash added
-          </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 6 }}>
+          <LottieAnimation
+            animationData={TrophyWinner}
+            height={200}
+            width={200}
+            loop={false}
+            onComplete={() => setTimeout(onBack, 1000)}
+          />
+          <Typography variant="h5" sx={{ fontWeight: 700, fontFamily: 'var(--font-display)', mt: 1 }}>Level Complete!</Typography>
+          <Typography color="text.secondary" sx={{ mt: 0.5 }}>+50 XP · €100 virtual cash added</Typography>
         </Box>
       )}
 
-      {phase !== 'done' && (
+      {/* Thinking loading state */}
+      {phase !== 'done' && isContentLoading && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+          <LottieAnimation animationData={ThinkingAnim} height={160} width={160} />
+        </Box>
+      )}
+
+      {phase !== 'done' && !isContentLoading && (
         <>
           <Typography variant="h6" color="var(--teal-600)" sx={{ fontSize: 16, fontWeight: 700, mb: 1.75 }}>
             {lesson.title}
@@ -364,7 +371,7 @@ export default function LessonPage({ levelId, gameState, showToast, onBack }: Le
                     onClick={handleNext}
                     variant={isCompletionPoint ? 'contained' : 'outlined'}
                     color="primary"
-                    endIcon={isCompletionPoint ? <IconTrophy size={16} strokeWidth={1.5} /> : undefined}
+                    endIcon={isCompletionPoint ? <IconCircleCheck size={16} strokeWidth={1.5} /> : undefined}
                     sx={{
                       borderRadius: '10px', px: 3, py: 1.5, fontSize: 13, fontWeight: 700, textTransform: 'none',
                       ...(!isCompletionPoint && { borderColor: 'var(--border)', color: 'var(--text)', '&:hover': { borderColor: 'var(--text)' } }),

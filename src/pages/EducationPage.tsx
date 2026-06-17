@@ -10,6 +10,8 @@ import Stack from '@mui/material/Stack'
 import Grid from '@mui/material/Grid'
 import { IconCircleCheck, IconLock, IconSparkles } from '@tabler/icons-react'
 import { LEVELS } from '../data/gameData'
+import LottieAnimation from '../components/LottieAnimation'
+import LockAnim from '../assets/animations/Lock.json'
 import type { GameState, Level, LevelStatus } from '../types'
 
 interface EducationPageProps {
@@ -145,18 +147,13 @@ function LevelCard({ level, status, onClick }: LevelCardProps) {
             {level.id}
           </Box>
 
-          {level.illustration && (
-            <Box
-              component="img"
-              src={`${import.meta.env.BASE_URL}${level.illustration}`}
-              alt={level.name}
-              sx={{
-                height: 120,
-                objectFit: 'contain',
-                ...(isLocked && { opacity: 0.4, filter: 'grayscale(100%)' }),
-              }}
-            />
-          )}
+          {isLocked ? (
+            <Box sx={{ opacity: 0.4, filter: 'grayscale(100%)' }}>
+              <LottieAnimation animationData={LockAnim} height={100} width={100} />
+            </Box>
+          ) : level.animation ? (
+            <LottieAnimation animationData={level.animation} height={120} width={120} />
+          ) : null}
         </Box>
 
         <CardContent sx={{ flex: 1, pb: '12px !important' }}>
