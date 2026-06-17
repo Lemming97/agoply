@@ -9,6 +9,7 @@ import RealWorldPage from './pages/RealWorldPage'
 import LoginPage from './pages/LoginPage'
 import EditProfilePage from './pages/EditProfilePage'
 import GlossaryPage from './pages/GlossaryPage'
+import FlashcardPage from './pages/FlashcardPage'
 import LevelDetailPage from './pages/LevelDetailPage'
 import SubLessonPage from './pages/SubLessonPage'
 import QuizPage from './pages/QuizPage'
@@ -18,9 +19,9 @@ import { useGameState } from './hooks/useGameState'
 import { useAuth } from './hooks/useAuth'
 import { useUserProfile } from './hooks/useUserProfile'
 import theme from './theme'
-import type { NavTab, User } from './types'
+import type { NavTab, User, GlossaryEntry } from './types'
 
-type AppView = 'main' | 'editProfile' | 'glossary' | 'levelDetail' | 'subLesson' | 'quiz'
+type AppView = 'main' | 'editProfile' | 'glossary' | 'flashcard' | 'levelDetail' | 'subLesson' | 'quiz'
 
 export default function App() {
   const { user, login, logout, register } = useAuth()
@@ -42,6 +43,8 @@ function AuthenticatedApp({ user, onLogout }: { user: User; onLogout: () => void
   const [view, setView] = useState<AppView>('main')
   const [selectedLevelId, setSelectedLevelId] = useState<number | null>(null)
   const [selectedSubLessonId, setSelectedSubLessonId] = useState<string | null>(null)
+  const [flashcardTerms, setFlashcardTerms] = useState<GlossaryEntry[]>([])
+  const [flashcardScope, setFlashcardScope] = useState('')
   const { toast, showToast } = useToast()
   const gameState = useGameState(user.email)
   const { profile, updateProfile } = useUserProfile(user.name, user.email)
@@ -62,6 +65,12 @@ function AuthenticatedApp({ user, onLogout }: { user: User; onLogout: () => void
     } else {
       setView('levelDetail')
     }
+  }
+
+  function handleStartFlashcards(terms: GlossaryEntry[], scopeLabel: string) {
+    setFlashcardTerms(terms)
+    setFlashcardScope(scopeLabel)
+    setView('flashcard')
   }
 
   return (
@@ -91,6 +100,15 @@ function AuthenticatedApp({ user, onLogout }: { user: User; onLogout: () => void
             onBack={() => setView('main')}
             showToast={showToast}
             onGoToLearn={() => { setView('main'); setTab('education') }}
+            onStartFlashcards={handleStartFlashcards}
+          />
+        ) : view === 'flashcard' ? (
+          <FlashcardPage
+            terms={flashcardTerms}
+            scopeLabel={flashcardScope}
+            gameState={gameState}
+            showToast={showToast}
+            onBack={() => setView('glossary')}
           />
         ) : view === 'levelDetail' && selectedLevelId !== null ? (
           <LevelDetailPage

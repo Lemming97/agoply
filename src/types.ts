@@ -115,6 +115,7 @@ export interface GameState extends GameStateData {
   completeSubLesson: (id: string) => void
   buyAsset: (asset: MarketAsset, quantity: number) => void
   sellAsset: (holdingId: string, quantity: number) => void
+  addXP: (amount: number) => void
   resetState: () => void
   savedGlossary: GlossaryEntry[]
   saveGlossaryTerm: (entry: GlossaryEntry) => void
