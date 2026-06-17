@@ -7,7 +7,7 @@ import LinearProgress from '@mui/material/LinearProgress'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import {
-  IconBuildingBank, IconChartPie, IconCoins, IconCurrencyBitcoin, IconCurrencyEuro, IconBarrel, IconShield, IconNews,
+  IconBuildingBank, IconChartLine, IconCoins, IconCurrencyBitcoin, IconCurrencyEuro, IconBarrel, IconShield, IconNews,
   IconCircleCheck, IconLock,
 } from '@tabler/icons-react'
 import type { GameState } from '../types'
@@ -47,9 +47,9 @@ const GAMES: GameEntry[] = [
     levelId: 2,
     levelName: 'Stocks',
     levelColor: '#2E86AB',
-    title: 'Portfolio Builder',
-    description: 'Pick 3 stocks with €1,000 and see your simulated 1-year return',
-    Icon: IconChartPie,
+    title: 'Stock Market Tycoon',
+    description: 'IPOs, earnings reports, and live trading — 3 phases of real market action',
+    Icon: IconChartLine,
     xp: 20,
   },
   {
