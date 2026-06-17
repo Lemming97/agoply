@@ -11,6 +11,7 @@ import EditProfilePage from './pages/EditProfilePage'
 import GlossaryPage from './pages/GlossaryPage'
 import FlashcardPage from './pages/FlashcardPage'
 import DragDropPage from './pages/DragDropPage'
+import GamePage from './pages/GamePage'
 import LevelDetailPage from './pages/LevelDetailPage'
 import SubLessonPage from './pages/SubLessonPage'
 import QuizPage from './pages/QuizPage'
@@ -22,7 +23,7 @@ import { useUserProfile } from './hooks/useUserProfile'
 import theme from './theme'
 import type { NavTab, User, GlossaryEntry } from './types'
 
-type AppView = 'main' | 'editProfile' | 'glossary' | 'flashcard' | 'dragdrop' | 'levelDetail' | 'subLesson' | 'quiz'
+type AppView = 'main' | 'editProfile' | 'glossary' | 'flashcard' | 'dragdrop' | 'gamePage' | 'levelDetail' | 'subLesson' | 'quiz'
 
 export default function App() {
   const { user, login, logout, register } = useAuth()
@@ -46,6 +47,7 @@ function AuthenticatedApp({ user, onLogout }: { user: User; onLogout: () => void
   const [selectedSubLessonId, setSelectedSubLessonId] = useState<string | null>(null)
   const [flashcardTerms, setFlashcardTerms] = useState<GlossaryEntry[]>([])
   const [flashcardScope, setFlashcardScope] = useState('')
+  const [selectedGameId, setSelectedGameId] = useState<string | null>(null)
   const { toast, showToast } = useToast()
   const gameState = useGameState(user.email)
   const { profile, updateProfile } = useUserProfile(user.name, user.email)
@@ -66,6 +68,11 @@ function AuthenticatedApp({ user, onLogout }: { user: User; onLogout: () => void
     } else {
       setView('levelDetail')
     }
+  }
+
+  function handleOpenGame(gameId: string) {
+    setSelectedGameId(gameId)
+    setView('gamePage')
   }
 
   function handleOpenDragDrop(levelId: number) {
@@ -116,6 +123,13 @@ function AuthenticatedApp({ user, onLogout }: { user: User; onLogout: () => void
             showToast={showToast}
             onBack={() => setView('glossary')}
           />
+        ) : view === 'gamePage' && selectedGameId !== null ? (
+          <GamePage
+            gameId={selectedGameId}
+            gameState={gameState}
+            showToast={showToast}
+            onBack={() => setView('main')}
+          />
         ) : view === 'dragdrop' && selectedLevelId !== null ? (
           <DragDropPage
             levelId={selectedLevelId}
@@ -151,7 +165,7 @@ function AuthenticatedApp({ user, onLogout }: { user: User; onLogout: () => void
           />
         ) : (
           <>
-            {tab === 'education'  && <EducationPage  gameState={gameState} showToast={showToast} onOpenLesson={openLevel} />}
+            {tab === 'education'  && <EducationPage  gameState={gameState} showToast={showToast} onOpenLesson={openLevel} onOpenGame={handleOpenGame} />}
             {tab === 'simulation' && <SimulationPage gameState={gameState} showToast={showToast} profile={profile} onEditProfile={() => setView('editProfile')} />}
             {tab === 'realworld'  && <RealWorldPage  gameState={gameState} showToast={showToast} />}
           </>

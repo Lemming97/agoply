@@ -14,12 +14,15 @@ import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import {
   IconArrowLeft, IconBookmark, IconBookmarkFilled, IconBookmarkOff,
-  IconFlagExclamation, IconX, IconCircleCheck,
+  IconFlagExclamation, IconX, IconCircleCheck, IconDeviceGamepad2,
 } from '@tabler/icons-react'
 import { LEVELS } from '../data/gameData'
 import { getEmbeddedExercise } from '../data/dragDropExercises'
 import { useDragDropState } from '../hooks/useDragDropState'
 import DragDropGame from '../components/DragDropGame'
+import BondsYieldCalculator from '../components/games/BondsYieldCalculator'
+import StocksPortfolioBuilder from '../components/games/StocksPortfolioBuilder'
+import ETFsFeeCalculator from '../components/games/ETFsFeeCalculator'
 import type { GameState } from '../types'
 
 interface SubLessonPageProps {
@@ -245,6 +248,40 @@ export default function SubLessonPage({
           isCompleted={isCompleted(embeddedExercise.id)}
           onComplete={handleGameComplete}
         />
+      )}
+
+      {/* Embedded interactive games */}
+      {(['bonds-2', 'stocks-3', 'etfs-3'] as const).includes(subLessonId as 'bonds-2' | 'stocks-3' | 'etfs-3') && (
+        <>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, my: 3 }}>
+            <Divider sx={{ flex: 1 }} />
+            <Stack direction="row" sx={{ alignItems: 'center', gap: 0.75, px: 1 }}>
+              <IconDeviceGamepad2 size={15} strokeWidth={1.5} color="var(--teal-400)" />
+              <Typography sx={{ fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 600, color: 'var(--teal-600)' }}>
+                Try It Yourself
+              </Typography>
+            </Stack>
+            <Divider sx={{ flex: 1 }} />
+          </Box>
+          {subLessonId === 'bonds-2' && (
+            <BondsYieldCalculator
+              isCompleted={gameState.isGameComplete('game-bonds-yield')}
+              onComplete={() => { gameState.completeGame('game-bonds-yield', 20); showToast('+20 XP · Game complete!') }}
+            />
+          )}
+          {subLessonId === 'stocks-3' && (
+            <StocksPortfolioBuilder
+              isCompleted={gameState.isGameComplete('game-stocks-portfolio')}
+              onComplete={() => { gameState.completeGame('game-stocks-portfolio', 20); showToast('+20 XP · Game complete!') }}
+            />
+          )}
+          {subLessonId === 'etfs-3' && (
+            <ETFsFeeCalculator
+              isCompleted={gameState.isGameComplete('game-etfs-fees')}
+              onComplete={() => { gameState.completeGame('game-etfs-fees', 20); showToast('+20 XP · Game complete!') }}
+            />
+          )}
+        </>
       )}
 
       <Divider sx={{ my: 3 }} />

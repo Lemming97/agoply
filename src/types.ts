@@ -107,6 +107,8 @@ export interface GameStateData {
   activeLesson: number
   portfolio: Portfolio
   riskProfile: string
+  completedGames: string[]
+  earnedGameXP: Record<string, number>
 }
 
 export interface GameState extends GameStateData {
@@ -116,6 +118,8 @@ export interface GameState extends GameStateData {
   buyAsset: (asset: MarketAsset, quantity: number) => void
   sellAsset: (holdingId: string, quantity: number) => void
   addXP: (amount: number) => void
+  completeGame: (gameId: string, xp: number) => void
+  isGameComplete: (gameId: string) => boolean
   resetState: () => void
   savedGlossary: GlossaryEntry[]
   saveGlossaryTerm: (entry: GlossaryEntry) => void
