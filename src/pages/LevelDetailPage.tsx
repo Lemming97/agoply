@@ -9,10 +9,12 @@ import LinearProgress from '@mui/material/LinearProgress'
 import {
   IconArrowLeft, IconCircleCheck, IconLock, IconSparkles,
   IconBuildingBank, IconTrendingUp, IconCurrencyBitcoin, IconCurrencyEuro,
-  IconBarrel, IconChartPie, IconBuildingStore, IconTrophy,
+  IconBarrel, IconChartPie, IconBuildingStore, IconTrophy, IconDragDrop,
 } from '@tabler/icons-react'
 import LottieAnimation from '../components/LottieAnimation'
 import { LEVELS } from '../data/gameData'
+import { getStandaloneExercise } from '../data/dragDropExercises'
+import { useDragDropState } from '../hooks/useDragDropState'
 import type { GameState } from '../types'
 
 interface LevelDetailPageProps {
@@ -22,6 +24,7 @@ interface LevelDetailPageProps {
   onBack: () => void
   onOpenSubLesson: (subLessonId: string) => void
   onStartQuiz: () => void
+  onOpenDragDrop: () => void
 }
 
 type IconComponent = React.ComponentType<{ size: number; strokeWidth: number; color: string }>
@@ -37,7 +40,7 @@ const LEVEL_CONFIG: Record<number, { color: string; Icon: IconComponent }> = {
   8: { color: '#0F6E56', Icon: IconSparkles        },
 }
 
-export default function LevelDetailPage({ levelId, gameState, onBack, onOpenSubLesson, onStartQuiz }: LevelDetailPageProps) {
+export default function LevelDetailPage({ levelId, gameState, onBack, onOpenSubLesson, onStartQuiz, onOpenDragDrop }: LevelDetailPageProps) {
   const level = LEVELS.find(l => l.id === levelId)!
   const cfg = LEVEL_CONFIG[level.id]
   const color = cfg?.color ?? '#1D9E75'
@@ -46,6 +49,9 @@ export default function LevelDetailPage({ levelId, gameState, onBack, onOpenSubL
   const allSubsDone = completedSubs.length === level.subLessons.length && level.subLessons.length > 0
   const levelAlreadyCompleted = gameState.completedLevels.includes(level.id)
   const pct = level.subLessons.length === 0 ? 0 : Math.round((completedSubs.length / level.subLessons.length) * 100)
+
+  const standaloneExercise = getStandaloneExercise(levelId)
+  const { isCompleted } = useDragDropState()
 
   return (
     <Box sx={{ maxWidth: 640, mx: 'auto' }}>
@@ -210,6 +216,47 @@ export default function LevelDetailPage({ levelId, gameState, onBack, onOpenSubL
           )
         })}
       </Stack>
+
+      {/* Drag & Drop practice row */}
+      {standaloneExercise && (
+        <Box
+          onClick={onOpenDragDrop}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            p: '14px 16px',
+            mb: 3,
+            borderRadius: '12px',
+            border: '1.5px solid #DDD6FE',
+            bgcolor: '#FAF5FF',
+            cursor: 'pointer',
+            transition: 'box-shadow 0.15s, transform 0.15s',
+            '&:hover': { boxShadow: '0 2px 12px rgba(124,58,237,0.12)', transform: 'translateY(-1px)' },
+          }}
+        >
+          <Box
+            sx={{
+              width: 36, height: 36, borderRadius: '50%',
+              bgcolor: '#EDE9FE',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+            }}
+          >
+            {isCompleted(standaloneExercise.id)
+              ? <IconCircleCheck size={20} strokeWidth={2} color="#7C3AED" />
+              : <IconDragDrop size={18} strokeWidth={1.5} color="#7C3AED" />
+            }
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography sx={{ fontWeight: 600, fontSize: 14, lineHeight: 1.3, color: '#5B21B6' }}>
+              Drag & Drop Practice
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#7C3AED', opacity: 0.75 }}>
+              {isCompleted(standaloneExercise.id) ? 'Completed · Practice again' : 'Test your ranking & ordering skills'}
+            </Typography>
+          </Box>
+        </Box>
+      )}
 
       {/* Quiz CTA */}
       <Box

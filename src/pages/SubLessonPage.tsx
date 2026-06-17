@@ -17,6 +17,9 @@ import {
   IconFlagExclamation, IconX, IconCircleCheck,
 } from '@tabler/icons-react'
 import { LEVELS } from '../data/gameData'
+import { getEmbeddedExercise } from '../data/dragDropExercises'
+import { useDragDropState } from '../hooks/useDragDropState'
+import DragDropGame from '../components/DragDropGame'
 import type { GameState } from '../types'
 
 interface SubLessonPageProps {
@@ -107,6 +110,15 @@ export default function SubLessonPage({
   const isAlreadyDone = gameState.completedSubLessons.includes(subLessonId)
 
   const [termDialog, setTermDialog] = useState<TermClickState | null>(null)
+  const embeddedExercise = getEmbeddedExercise(subLessonId)
+  const { isCompleted, markCompleted } = useDragDropState()
+
+  function handleGameComplete(xp: number) {
+    if (!embeddedExercise) return
+    markCompleted(embeddedExercise.id, xp)
+    gameState.addXP(xp)
+    showToast(`+${xp} XP earned!`)
+  }
 
   function handleComplete() {
     if (!isAlreadyDone) {
@@ -226,6 +238,14 @@ export default function SubLessonPage({
         }
         return null
       })}
+
+      {embeddedExercise && (
+        <DragDropGame
+          exercise={embeddedExercise}
+          isCompleted={isCompleted(embeddedExercise.id)}
+          onComplete={handleGameComplete}
+        />
+      )}
 
       <Divider sx={{ my: 3 }} />
 
