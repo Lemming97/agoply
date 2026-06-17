@@ -7,7 +7,7 @@ import LinearProgress from '@mui/material/LinearProgress'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import {
-  IconCalculator, IconChartPie, IconCoins,
+  IconCalculator, IconChartPie, IconCoins, IconCurrencyBitcoin,
   IconCircleCheck, IconLock,
 } from '@tabler/icons-react'
 import type { GameState } from '../types'
@@ -62,12 +62,23 @@ const GAMES: GameEntry[] = [
     Icon: IconCoins,
     xp: 20,
   },
+  {
+    id: 'game-crypto-rollercoaster',
+    levelId: 3,
+    levelName: 'Crypto',
+    levelColor: '#7B5FD4',
+    title: 'Crypto Rollercoaster',
+    description: 'Buy low, sell high — time the market or get wrecked by volatility',
+    Icon: IconCurrencyBitcoin,
+    xp: 20,
+  },
 ]
 
 // Group games by level (they're already in level order)
 const LEVEL_GROUPS = [
   { levelId: 1, levelName: 'Bonds',  levelColor: '#1D9E75', games: GAMES.filter(g => g.levelId === 1) },
   { levelId: 2, levelName: 'Stocks', levelColor: '#2E86AB', games: GAMES.filter(g => g.levelId === 2) },
+  { levelId: 3, levelName: 'Crypto', levelColor: '#7B5FD4', games: GAMES.filter(g => g.levelId === 3) },
   { levelId: 6, levelName: 'ETFs',   levelColor: '#3AAFA9', games: GAMES.filter(g => g.levelId === 6) },
 ]
 
