@@ -10,6 +10,7 @@ import LoginPage from './pages/LoginPage'
 import EditProfilePage from './pages/EditProfilePage'
 import GlossaryPage from './pages/GlossaryPage'
 import FlashcardPage from './pages/FlashcardPage'
+import DragDropPage from './pages/DragDropPage'
 import LevelDetailPage from './pages/LevelDetailPage'
 import SubLessonPage from './pages/SubLessonPage'
 import QuizPage from './pages/QuizPage'
@@ -21,7 +22,7 @@ import { useUserProfile } from './hooks/useUserProfile'
 import theme from './theme'
 import type { NavTab, User, GlossaryEntry } from './types'
 
-type AppView = 'main' | 'editProfile' | 'glossary' | 'flashcard' | 'levelDetail' | 'subLesson' | 'quiz'
+type AppView = 'main' | 'editProfile' | 'glossary' | 'flashcard' | 'dragdrop' | 'levelDetail' | 'subLesson' | 'quiz'
 
 export default function App() {
   const { user, login, logout, register } = useAuth()
@@ -67,6 +68,11 @@ function AuthenticatedApp({ user, onLogout }: { user: User; onLogout: () => void
     }
   }
 
+  function handleOpenDragDrop(levelId: number) {
+    setSelectedLevelId(levelId)
+    setView('dragdrop')
+  }
+
   function handleStartFlashcards(terms: GlossaryEntry[], scopeLabel: string) {
     setFlashcardTerms(terms)
     setFlashcardScope(scopeLabel)
@@ -110,6 +116,13 @@ function AuthenticatedApp({ user, onLogout }: { user: User; onLogout: () => void
             showToast={showToast}
             onBack={() => setView('glossary')}
           />
+        ) : view === 'dragdrop' && selectedLevelId !== null ? (
+          <DragDropPage
+            levelId={selectedLevelId}
+            gameState={gameState}
+            showToast={showToast}
+            onBack={() => setView('levelDetail')}
+          />
         ) : view === 'levelDetail' && selectedLevelId !== null ? (
           <LevelDetailPage
             levelId={selectedLevelId}
@@ -118,6 +131,7 @@ function AuthenticatedApp({ user, onLogout }: { user: User; onLogout: () => void
             onBack={() => setView('main')}
             onOpenSubLesson={openSubLesson}
             onStartQuiz={() => setView('quiz')}
+            onOpenDragDrop={() => handleOpenDragDrop(selectedLevelId)}
           />
         ) : view === 'subLesson' && selectedLevelId !== null && selectedSubLessonId !== null ? (
           <SubLessonPage
