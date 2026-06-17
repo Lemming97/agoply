@@ -11,6 +11,9 @@ export interface UserProfile {
   email: string
   avatarType: 'initials' | 'icon' | 'upload'
   avatarValue: string | null
+  school: string | null
+  schoolUai: string | null
+  schoolCity: string | null
 }
 
 export interface GlossaryEntry {

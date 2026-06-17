@@ -125,6 +125,11 @@ export default function Header({ tab, setTab, xp, streak, profile, onEditProfile
             <Box sx={{ px: 2, py: 1.5, pointerEvents: 'none' }}>
               <Typography sx={{ fontWeight: 700, fontSize: 14, lineHeight: 1.35 }}>{displayName || 'User'}</Typography>
               <Typography sx={{ fontSize: 12, color: 'text.secondary', mt: 0.25 }}>{profile.email}</Typography>
+              {profile.school && (
+                <Typography sx={{ fontSize: 11, color: 'text.secondary', mt: 0.25, fontFamily: 'var(--font-body)' }}>
+                  {profile.school}{profile.schoolCity ? ` · ${profile.schoolCity}` : ''}
+                </Typography>
+              )}
             </Box>
             <Divider />
             <MenuItem

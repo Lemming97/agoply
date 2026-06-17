@@ -6,7 +6,15 @@ const KEY = 'agoply_profile'
 function initProfile(name: string, email: string): UserProfile {
   try {
     const raw = localStorage.getItem(KEY)
-    if (raw) return JSON.parse(raw) as UserProfile
+    if (raw) {
+      const parsed = JSON.parse(raw) as UserProfile
+      return {
+        ...parsed,
+        school: parsed.school ?? null,
+        schoolUai: parsed.schoolUai ?? null,
+        schoolCity: parsed.schoolCity ?? null,
+      }
+    }
   } catch {}
   const parts = name.trim().split(' ')
   return {
@@ -15,6 +23,9 @@ function initProfile(name: string, email: string): UserProfile {
     email,
     avatarType: 'initials',
     avatarValue: null,
+    school: null,
+    schoolUai: null,
+    schoolCity: null,
   }
 }
 

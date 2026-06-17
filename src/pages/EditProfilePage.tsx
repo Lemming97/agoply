@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { useState, useRef } from 'react'
+import Autocomplete from '@mui/material/Autocomplete'
 import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -12,9 +13,10 @@ import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import {
-  IconArrowLeft, IconUpload, IconGridDots, IconCircleCheck,
+  IconArrowLeft, IconUpload, IconGridDots, IconCircleCheck, IconX,
 } from '@tabler/icons-react'
 import type { UserProfile } from '../types'
+import { searchLycees, type School } from '../services/schoolApi'
 
 const AVATAR_SEEDS = [
   'Lindsey', 'Marcus', 'Sofia',  'James',
@@ -47,6 +49,16 @@ export default function EditProfilePage({ profile, onSave, onBack, showToast }: 
   const [pickerOpen, setPickerOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // School search state
+  const [schoolOptions, setSchoolOptions] = useState<School[]>([])
+  const [schoolLoading, setSchoolLoading] = useState(false)
+  const [schoolInputValue, setSchoolInputValue] = useState(profile.school ?? '')
+  const [selectedSchool, setSelectedSchool] = useState<School | null>(
+    profile.school ? { uai: profile.schoolUai ?? '', name: profile.school, city: profile.schoolCity ?? '', department: '', departmentCode: '', type: '' } : null
+  )
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   const errors = {
     firstName: draft.firstName.trim().length < 1 ? 'Required' : '',
     lastName:  draft.lastName.trim().length < 1  ? 'Required' : '',
@@ -58,7 +70,9 @@ export default function EditProfilePage({ profile, onSave, onBack, showToast }: 
     draft.lastName    !== profile.lastName    ||
     draft.email       !== profile.email       ||
     draft.avatarType  !== profile.avatarType  ||
-    draft.avatarValue !== profile.avatarValue
+    draft.avatarValue !== profile.avatarValue ||
+    draft.school      !== profile.school      ||
+    draft.schoolUai   !== profile.schoolUai
 
   const isValid = !errors.firstName && !errors.lastName && !errors.email
   const canSave = isChanged && isValid
@@ -75,8 +89,39 @@ export default function EditProfilePage({ profile, onSave, onBack, showToast }: 
         Profile updated
       </Stack>
     )
-    onBack()
   }
+
+  function handleSchoolInputChange(_: unknown, value: string, reason: string) {
+    setSchoolInputValue(value)
+    if (reason !== 'input') return
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (!value || value.length < 2) {
+      setSchoolOptions([])
+      return
+    }
+    debounceRef.current = setTimeout(async () => {
+      setSchoolLoading(true)
+      const results = await searchLycees(value)
+      setSchoolOptions(results)
+      setSchoolLoading(false)
+    }, 300)
+  }
+
+  function handleSchoolChange(_: unknown, newValue: School | null) {
+    setSelectedSchool(newValue)
+    setDraft(d => ({
+      ...d,
+      school:     newValue?.name ?? null,
+      schoolUai:  newValue?.uai  ?? null,
+      schoolCity: newValue?.city ?? null,
+    }))
+  }
+
+  const noOptionsText = !schoolInputValue || schoolInputValue.length < 2
+    ? 'Type to search for your lycée'
+    : schoolLoading
+    ? 'Searching…'
+    : 'No lycée found. Try a different search.'
 
   const draftSrc = getAvatarSrc(draft)
 
@@ -155,7 +200,58 @@ export default function EditProfilePage({ profile, onSave, onBack, showToast }: 
 
       <Divider sx={{ mb: 3 }} />
 
+      {/* School section */}
+      <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: '0.8px', color: 'text.secondary', display: 'block', mb: 1.5, fontFamily: 'var(--font-body)' }}>
+        SCHOOL
+      </Typography>
+      <Autocomplete
+        value={selectedSchool}
+        inputValue={schoolInputValue}
+        options={schoolOptions}
+        loading={schoolLoading}
+        open={dropdownOpen && schoolInputValue.length >= 2}
+        onOpen={() => setDropdownOpen(true)}
+        onClose={() => setDropdownOpen(false)}
+        filterOptions={x => x}
+        getOptionLabel={option => option.name}
+        isOptionEqualToValue={(option, value) => option.uai === value.uai}
+        onChange={handleSchoolChange}
+        onInputChange={handleSchoolInputChange}
+        noOptionsText={noOptionsText}
+        clearIcon={<IconX size={14} strokeWidth={1.5} />}
+        sx={{ mb: 3 }}
+        renderInput={params => (
+          <TextField
+            {...params}
+            placeholder="Search for your lycée…"
+            size="small"
+            sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontFamily: 'var(--font-body)' } }}
+          />
+        )}
+        renderOption={(props, option) => {
+          const { key, ...rest } = props as React.HTMLAttributes<HTMLLIElement> & { key?: React.Key }
+          const sub = [option.city, option.departmentCode].filter(Boolean).join(' · ')
+          return (
+            <Box component="li" key={key ?? option.uai} {...rest} sx={{ py: '10px !important', px: '14px !important' }}>
+              <Box>
+                <Typography sx={{ fontWeight: 700, fontSize: 13, fontFamily: 'var(--font-body)', lineHeight: 1.3 }}>
+                  {option.name}
+                </Typography>
+                {sub && (
+                  <Typography sx={{ fontSize: 11, color: 'text.secondary', fontFamily: 'var(--font-body)', mt: 0.25 }}>
+                    {sub}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+          )
+        }}
+      />
+
       {/* Form fields */}
+      <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: '0.8px', color: 'text.secondary', display: 'block', mb: 1.5 }}>
+        PERSONAL INFO
+      </Typography>
       <Stack sx={{ gap: 2.5, mb: 4 }}>
         <TextField
           label="First Name"
