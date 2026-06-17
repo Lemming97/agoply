@@ -7,7 +7,7 @@ import LinearProgress from '@mui/material/LinearProgress'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import {
-  IconCalculator, IconChartPie, IconCoins, IconCurrencyBitcoin, IconCurrencyEuro, IconBarrel, IconShield,
+  IconCalculator, IconChartPie, IconCoins, IconCurrencyBitcoin, IconCurrencyEuro, IconBarrel, IconShield, IconNews,
   IconCircleCheck, IconLock,
 } from '@tabler/icons-react'
 import type { GameState } from '../types'
@@ -102,6 +102,16 @@ const GAMES: GameEntry[] = [
     Icon: IconShield,
     xp: 20,
   },
+  {
+    id: 'game-ai-newsflash',
+    levelId: 8,
+    levelName: 'AI Topicality',
+    levelColor: '#0F6E56',
+    title: 'News Flash',
+    description: 'Predict how real market headlines move assets — powered by live news and AI',
+    Icon: IconNews,
+    xp: 20,
+  },
 ]
 
 // Group games by level (they're already in level order)
@@ -112,7 +122,8 @@ const LEVEL_GROUPS = [
   { levelId: 4, levelName: 'Forex',  levelColor: '#C08B00', games: GAMES.filter(g => g.levelId === 4) },
   { levelId: 5, levelName: 'Commodities', levelColor: '#E07B39', games: GAMES.filter(g => g.levelId === 5) },
   { levelId: 6, levelName: 'ETFs',         levelColor: '#3AAFA9', games: GAMES.filter(g => g.levelId === 6) },
-  { levelId: 7, levelName: 'Mutual Funds', levelColor: '#D45F8A', games: GAMES.filter(g => g.levelId === 7) },
+  { levelId: 7, levelName: 'Mutual Funds',  levelColor: '#D45F8A', games: GAMES.filter(g => g.levelId === 7) },
+  { levelId: 8, levelName: 'AI Topicality', levelColor: '#0F6E56', games: GAMES.filter(g => g.levelId === 8) },
 ]
 
 export default function GamesPage({ gameState, showToast, onOpenGame }: GamesPageProps) {

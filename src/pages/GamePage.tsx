@@ -12,6 +12,7 @@ import CryptoRollercoaster from '../components/games/CryptoRollercoaster'
 import CurrencyTrader from '../components/games/CurrencyTrader'
 import OilBaron from '../components/games/OilBaron'
 import FeeDestroyer from '../components/games/FeeDestroyer'
+import NewsFlash from '../components/games/NewsFlash'
 import type { GameState } from '../types'
 
 interface GamePageProps {
@@ -28,7 +29,8 @@ const GAME_META: Record<string, { title: string; levelName: string; levelColor: 
   'game-crypto-rollercoaster':  { title: 'Crypto Rollercoaster',  levelName: 'Crypto', levelColor: '#7B5FD4' },
   'game-forex-currency-trader':  { title: 'Currency Trader', levelName: 'Forex',        levelColor: '#C08B00' },
   'game-commodities-oil-baron':      { title: 'Oil Baron',       levelName: 'Commodities',  levelColor: '#E07B39' },
-  'game-mutualfunds-fee-destroyer':  { title: 'Fee Destroyer',   levelName: 'Mutual Funds', levelColor: '#D45F8A' },
+  'game-mutualfunds-fee-destroyer':  { title: 'Fee Destroyer', levelName: 'Mutual Funds',  levelColor: '#D45F8A' },
+  'game-ai-newsflash':               { title: 'News Flash',    levelName: 'AI Topicality', levelColor: '#0F6E56' },
 }
 
 export default function GamePage({ gameId, gameState, showToast, onBack }: GamePageProps) {
@@ -66,7 +68,8 @@ export default function GamePage({ gameId, gameState, showToast, onBack }: GameP
       {gameId === 'game-crypto-rollercoaster' && <CryptoRollercoaster    {...gameProps} />}
       {gameId === 'game-forex-currency-trader'  && <CurrencyTrader {...gameProps} />}
       {gameId === 'game-commodities-oil-baron'     && <OilBaron      {...gameProps} />}
-      {gameId === 'game-mutualfunds-fee-destroyer' && <FeeDestroyer  {...gameProps} />}
+      {gameId === 'game-mutualfunds-fee-destroyer' && <FeeDestroyer {...gameProps} />}
+      {gameId === 'game-ai-newsflash'              && <NewsFlash    {...gameProps} />}
     </Box>
   )
 }

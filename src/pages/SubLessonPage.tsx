@@ -27,6 +27,7 @@ import CryptoRollercoaster from '../components/games/CryptoRollercoaster'
 import CurrencyTrader from '../components/games/CurrencyTrader'
 import OilBaron from '../components/games/OilBaron'
 import FeeDestroyer from '../components/games/FeeDestroyer'
+import NewsFlash from '../components/games/NewsFlash'
 import type { GameState } from '../types'
 
 interface SubLessonPageProps {
@@ -255,7 +256,7 @@ export default function SubLessonPage({
       )}
 
       {/* Embedded interactive games */}
-      {(['bonds-2', 'stocks-3', 'etfs-3', 'crypto-3', 'forex-2', 'commodities-3', 'mutual-funds-3'] as const).includes(subLessonId as 'bonds-2' | 'stocks-3' | 'etfs-3' | 'crypto-3' | 'forex-2' | 'commodities-3' | 'mutual-funds-3') && (
+      {(['bonds-2', 'stocks-3', 'etfs-3', 'crypto-3', 'forex-2', 'commodities-3', 'mutual-funds-3', 'topicality-1'] as const).includes(subLessonId as 'bonds-2' | 'stocks-3' | 'etfs-3' | 'crypto-3' | 'forex-2' | 'commodities-3' | 'mutual-funds-3' | 'topicality-1') && (
         <>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, my: 3 }}>
             <Divider sx={{ flex: 1 }} />
@@ -307,6 +308,12 @@ export default function SubLessonPage({
             <FeeDestroyer
               isCompleted={gameState.isGameComplete('game-mutualfunds-fee-destroyer')}
               onComplete={() => { gameState.completeGame('game-mutualfunds-fee-destroyer', 20); showToast('+20 XP · Game complete!') }}
+            />
+          )}
+          {subLessonId === 'topicality-1' && (
+            <NewsFlash
+              isCompleted={gameState.isGameComplete('game-ai-newsflash')}
+              onComplete={() => { gameState.completeGame('game-ai-newsflash', 20); showToast('+20 XP · Game complete!') }}
             />
           )}
         </>
