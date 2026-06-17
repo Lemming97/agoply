@@ -266,58 +266,6 @@ export default function BondsYieldCalculator({ isCompleted, onComplete }: Props)
     const ecb      = ECB_ROUNDS[currentRound]
     const newPrice = Math.round(BASE_BOND_PRICE * (1 + ecb.bondPriceChange / 100))
 
-    setCash(prevCash => {
-      setBondsHeld(prevBonds => {
-        setBondBuyPrice(prevBuyPx => {
-          let newCash  = prevCash
-          let newBonds = prevBonds
-          let newBuyPx = prevBuyPx
-          let pnl      = 0
-
-          if (decision === 'BUY' && prevBonds === 0 && prevCash >= BASE_BOND_PRICE) {
-            newBonds = Math.floor(prevCash / BASE_BOND_PRICE)
-            newCash  = prevCash - newBonds * BASE_BOND_PRICE
-            newBuyPx = BASE_BOND_PRICE
-          } else if (decision === 'SELL' && prevBonds > 0) {
-            pnl      = prevBonds * (newPrice - prevBuyPx)
-            newCash  = prevCash + prevBonds * newPrice
-            newBonds = 0
-            newBuyPx = 0
-          } else if (decision === 'HOLD' && prevBonds > 0) {
-            pnl = prevBonds * (newPrice - prevBuyPx)
-          }
-
-          const portfolioAfter = newCash + newBonds * newPrice
-
-          const result: RoundResult = {
-            round: currentRound + 1,
-            rateDecision: ecb.rateDecision,
-            ratePrediction,
-            pricePrediction,
-            bothCorrect: predictionResult?.both ?? false,
-            predictionPts: predictionResult?.pts ?? 0,
-            tradeDecision: decision,
-            tradingPnl: pnl,
-            portfolioAfter,
-          }
-
-          setTradeDecision(decision)
-          setRoundPnl(pnl)
-          setRoundHistory(prev => [...prev, result])
-          setPhase('roundresult')
-
-          setBondBuyPrice(newBuyPx)
-          return newBuyPx
-        })
-        setBondsHeld(newBonds => {
-          return newBonds
-        })
-        return prevBonds
-      })
-      return prevCash
-    })
-
-    // Simpler direct approach — recompute outside setState nesting
     let newCash  = cash
     let newBonds = bondsHeld
     let newBuyPx = bondBuyPrice
@@ -354,10 +302,7 @@ export default function BondsYieldCalculator({ isCompleted, onComplete }: Props)
     setBondBuyPrice(newBuyPx)
     setTradeDecision(decision)
     setRoundPnl(pnl)
-    setRoundHistory(prev => {
-      const filtered = prev.filter(r => r.round !== currentRound + 1)
-      return [...filtered, result]
-    })
+    setRoundHistory(prev => [...prev, result])
     setPhase('roundresult')
   }
 
