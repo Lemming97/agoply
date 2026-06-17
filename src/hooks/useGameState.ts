@@ -115,6 +115,10 @@ export function useGameState(userEmail: string): GameState {
     }))
   }
 
+  function addXP(amount: number): void {
+    setState(s => ({ ...s, xp: s.xp + amount }))
+  }
+
   function resetState(): void {
     setState(userEmail === TEST_EMAIL ? DEMO_STATE : FRESH_STATE)
   }
@@ -140,5 +144,5 @@ export function useGameState(userEmail: string): GameState {
     (sum, h) => sum + h.price * h.shares, 0
   ) + state.portfolio.cash
 
-  return { ...state, portfolioValue, completeLevel, completeSubLesson, buyAsset, sellAsset, resetState, savedGlossary, saveGlossaryTerm, removeSavedTerm }
+  return { ...state, portfolioValue, completeLevel, completeSubLesson, buyAsset, sellAsset, addXP, resetState, savedGlossary, saveGlossaryTerm, removeSavedTerm }
 }
