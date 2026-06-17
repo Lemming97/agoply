@@ -34,6 +34,7 @@ interface SimulationPageProps {
   gameState: GameState
   showToast: (msg: ReactNode) => void
   profile: UserProfile
+  onEditProfile: () => void
 }
 
 const CHART_DATA = [
@@ -57,7 +58,7 @@ function CategoryIcon({ category, size = 20 }: { category: AssetCategory; size?:
   }
 }
 
-export default function SimulationPage({ gameState, showToast, profile }: SimulationPageProps) {
+export default function SimulationPage({ gameState, showToast, profile, onEditProfile }: SimulationPageProps) {
   const [view, setView] = useState<SimView>('portfolio')
   const [buyModal, setBuyModal] = useState<MarketAsset | null>(null)
   const [sellModal, setSellModal] = useState<typeof gameState.portfolio.holdings[0] | null>(null)
@@ -147,7 +148,7 @@ export default function SimulationPage({ gameState, showToast, profile }: Simula
 
       {view === 'portfolio'   && <PortfolioView gameState={gameState} totalValue={totalValue} onSell={(h: Holding) => { setSellModal(h); setQty(1) }} />}
       {view === 'market'      && <MarketView assets={assets} loading={loading} onBuy={handleBuy} completedLevels={gameState.completedLevels} cash={gameState.portfolio.cash} />}
-      {view === 'leaderboard' && <LeaderboardView data={LEADERBOARD} myValue={Math.round(totalValue)} profile={profile} />}
+      {view === 'leaderboard' && <LeaderboardView data={LEADERBOARD} myValue={Math.round(totalValue)} profile={profile} onEditProfile={onEditProfile} />}
 
       {/* Buy dialog */}
       <Dialog
@@ -396,7 +397,7 @@ function MarketView({ assets, loading, onBuy, completedLevels, cash }: { assets:
   )
 }
 
-function LeaderboardView({ data, myValue, profile }: { data: LeaderboardEntry[]; myValue: number; profile: UserProfile }) {
+function LeaderboardView({ data, myValue, profile, onEditProfile }: { data: LeaderboardEntry[]; myValue: number; profile: UserProfile; onEditProfile: () => void }) {
   const updated = data
     .map(r => r.me ? { ...r, value: myValue } : r)
     .sort((a, b) => b.value - a.value)
@@ -429,7 +430,23 @@ function LeaderboardView({ data, myValue, profile }: { data: LeaderboardEntry[];
             )}
             <Box sx={{ flex: 1 }}>
               <Typography sx={{ fontWeight: r.me ? 700 : 500, fontSize: 13 }}>{r.name} {r.me && '(you)'}</Typography>
-              <Typography variant="caption" color="text.secondary">{r.school}</Typography>
+              {r.me ? (
+                profile.school ? (
+                  <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'var(--font-body)' }}>
+                    {profile.school}{profile.schoolCity ? ` · ${profile.schoolCity}` : ''}
+                  </Typography>
+                ) : (
+                  <Typography
+                    variant="caption"
+                    onClick={onEditProfile}
+                    sx={{ color: 'var(--teal-600)', cursor: 'pointer', fontFamily: 'var(--font-body)', '&:hover': { textDecoration: 'underline' } }}
+                  >
+                    Add your school →
+                  </Typography>
+                )
+              ) : (
+                <Typography variant="caption" color="text.secondary">{r.school}</Typography>
+              )}
             </Box>
             <Typography color={r.me ? 'primary.dark' : 'text.primary'} sx={{ fontWeight: 700, fontSize: 14 }}>€{r.value.toLocaleString()}</Typography>
           </Paper>
