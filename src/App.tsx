@@ -81,7 +81,7 @@ function AuthenticatedApp({ user, onLogout }: { user: User; onLogout: () => void
         ) : (
           <>
             {tab === 'education'  && <EducationPage  gameState={gameState} showToast={showToast} onOpenLesson={id => { setSelectedLevelId(id); setView('lesson') }} />}
-            {tab === 'simulation' && <SimulationPage gameState={gameState} showToast={showToast} />}
+            {tab === 'simulation' && <SimulationPage gameState={gameState} showToast={showToast} profile={profile} />}
             {tab === 'realworld'  && <RealWorldPage  gameState={gameState} showToast={showToast} />}
           </>
         )}

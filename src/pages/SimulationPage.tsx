@@ -28,11 +28,12 @@ import {
 } from '@tabler/icons-react'
 import { LEADERBOARD } from '../data/gameData'
 import { useLiveMarketData } from '../hooks/useLiveMarketData'
-import type { GameState, MarketAsset, Holding, LeaderboardEntry, AssetCategory } from '../types'
+import type { GameState, MarketAsset, Holding, LeaderboardEntry, AssetCategory, UserProfile } from '../types'
 
 interface SimulationPageProps {
   gameState: GameState
   showToast: (msg: ReactNode) => void
+  profile: UserProfile
 }
 
 const CHART_DATA = [
@@ -56,7 +57,7 @@ function CategoryIcon({ category, size = 20 }: { category: AssetCategory; size?:
   }
 }
 
-export default function SimulationPage({ gameState, showToast }: SimulationPageProps) {
+export default function SimulationPage({ gameState, showToast, profile }: SimulationPageProps) {
   const [view, setView] = useState<SimView>('portfolio')
   const [buyModal, setBuyModal] = useState<MarketAsset | null>(null)
   const [sellModal, setSellModal] = useState<typeof gameState.portfolio.holdings[0] | null>(null)
@@ -146,7 +147,7 @@ export default function SimulationPage({ gameState, showToast }: SimulationPageP
 
       {view === 'portfolio'   && <PortfolioView gameState={gameState} totalValue={totalValue} onSell={(h: Holding) => { setSellModal(h); setQty(1) }} />}
       {view === 'market'      && <MarketView assets={assets} loading={loading} onBuy={handleBuy} completedLevels={gameState.completedLevels} cash={gameState.portfolio.cash} />}
-      {view === 'leaderboard' && <LeaderboardView data={LEADERBOARD} myValue={Math.round(totalValue)} />}
+      {view === 'leaderboard' && <LeaderboardView data={LEADERBOARD} myValue={Math.round(totalValue)} profile={profile} />}
 
       {/* Buy dialog */}
       <Dialog
@@ -395,11 +396,17 @@ function MarketView({ assets, loading, onBuy, completedLevels, cash }: { assets:
   )
 }
 
-function LeaderboardView({ data, myValue }: { data: LeaderboardEntry[]; myValue: number }) {
+function LeaderboardView({ data, myValue, profile }: { data: LeaderboardEntry[]; myValue: number; profile: UserProfile }) {
   const updated = data
     .map(r => r.me ? { ...r, value: myValue } : r)
     .sort((a, b) => b.value - a.value)
     .map((r, i) => ({ ...r, rank: i + 1 }))
+
+  function myAvatarSrc() {
+    if (profile.avatarType === 'upload') return profile.avatarValue ?? undefined
+    if (profile.avatarType === 'icon') return `https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(profile.avatarValue ?? '')}`
+    return undefined
+  }
 
   return (
     <>
@@ -413,6 +420,11 @@ function LeaderboardView({ data, myValue }: { data: LeaderboardEntry[]; myValue:
         return (
           <Paper key={r.name} variant="outlined" sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: '10px 14px', mb: 0.75, borderRadius: 2, bgcolor: r.me ? 'var(--teal-50)' : 'background.paper', borderColor: r.me ? 'var(--teal-100)' : 'divider' }}>
             <Avatar sx={{ width: 28, height: 28, bgcolor: rankBg, fontSize: 12, fontWeight: 800, color: rankColor }}>{r.rank}</Avatar>
+            {r.me && (
+              <Avatar src={myAvatarSrc()} sx={{ width: 32, height: 32, bgcolor: 'var(--teal-100)', fontSize: 13, fontWeight: 700, color: '#0F6E56' }}>
+                {profile.avatarType === 'initials' ? (profile.firstName[0]?.toUpperCase() ?? '?') : undefined}
+              </Avatar>
+            )}
             <Box sx={{ flex: 1 }}>
               <Typography sx={{ fontWeight: r.me ? 700 : 500, fontSize: 13 }}>{r.name} {r.me && '(you)'}</Typography>
               <Typography variant="caption" color="text.secondary">{r.school}</Typography>
