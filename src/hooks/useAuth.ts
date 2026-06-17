@@ -37,7 +37,7 @@ export function useAuth() {
     return false
   }
 
-  function register(firstName: string, lastName: string, email: string, password: string): 'ok' | 'email_taken' {
+  function register(firstName: string, lastName: string, email: string, password: string, school: string | null = null, schoolUai: string | null = null, schoolCity: string | null = null): 'ok' | 'email_taken' {
     const normalizedEmail = email.trim().toLowerCase()
     if (normalizedEmail === TEST_USER.email) return 'email_taken'
     try {
@@ -45,6 +45,11 @@ export function useAuth() {
       if (users.some(u => u.email === normalizedEmail)) return 'email_taken'
       users.push({ email: normalizedEmail, name: `${firstName} ${lastName}`, password })
       localStorage.setItem(USERS_KEY, JSON.stringify(users))
+      localStorage.setItem('agoply_profile', JSON.stringify({
+        firstName, lastName, email: normalizedEmail,
+        avatarType: 'initials', avatarValue: null,
+        school, schoolUai, schoolCity,
+      }))
     } catch { /* ignore */ }
     return 'ok'
   }

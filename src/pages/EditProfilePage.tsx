@@ -220,6 +220,17 @@ export default function EditProfilePage({ profile, onSave, onBack, showToast }: 
         noOptionsText={noOptionsText}
         clearIcon={<IconX size={14} strokeWidth={1.5} />}
         sx={{ mb: 3 }}
+        slotProps={{
+          paper: {
+            sx: {
+              boxShadow: '0 8px 24px rgba(15, 110, 86, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)',
+              borderRadius: '12px',
+              border: '1px solid',
+              borderColor: 'var(--teal-100)',
+              mt: 0.5,
+            },
+          },
+        }}
         renderInput={params => (
           <TextField
             {...params}
