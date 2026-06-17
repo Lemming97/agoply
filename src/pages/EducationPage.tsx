@@ -9,7 +9,7 @@ import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
 import Grid from '@mui/material/Grid'
 import {
-  IconCircleCheck, IconLock, IconSparkles,
+  IconLock, IconSparkles,
   IconBuildingBank, IconTrendingUp, IconCurrencyBitcoin, IconCurrencyEuro,
   IconBarrel, IconChartPie, IconBuildingStore,
 } from '@tabler/icons-react'
@@ -20,6 +20,19 @@ interface EducationPageProps {
   gameState: GameState
   showToast: (msg: ReactNode) => void
   onOpenLesson: (levelId: number) => void
+}
+
+type IconComponent = React.ComponentType<{ size: number; strokeWidth: number; color: string }>
+
+const LEVEL_CONFIG: Record<number, { color: string; Icon: IconComponent }> = {
+  1: { color: '#1D9E75', Icon: IconBuildingBank    },
+  2: { color: '#2E86AB', Icon: IconTrendingUp      },
+  3: { color: '#7B5FD4', Icon: IconCurrencyBitcoin },
+  4: { color: '#C08B00', Icon: IconCurrencyEuro    },
+  5: { color: '#E07B39', Icon: IconBarrel          },
+  6: { color: '#3AAFA9', Icon: IconChartPie        },
+  7: { color: '#D45F8A', Icon: IconBuildingStore   },
+  8: { color: '#0F6E56', Icon: IconSparkles        },
 }
 
 export default function EducationPage({ gameState, showToast, onOpenLesson }: EducationPageProps) {
@@ -48,7 +61,7 @@ export default function EducationPage({ gameState, showToast, onOpenLesson }: Ed
         {LEVELS.map(level => {
           const status = getLevelStatus(level)
           return (
-            <Grid key={level.id} size={{ xs: 12, sm: 6 }}>
+            <Grid key={level.id} size={{ xs: 12, md: 6 }}>
               <LevelCard level={level} status={status} onClick={() => handleLevelClick(level)} />
             </Grid>
           )
@@ -56,22 +69,6 @@ export default function EducationPage({ gameState, showToast, onOpenLesson }: Ed
       </Grid>
     </Box>
   )
-}
-
-function LevelIcon({ levelId, isLocked }: { levelId: number; isLocked: boolean }) {
-  const color = isLocked ? '#ccc' : 'var(--teal-400)'
-  const props = { size: 48, strokeWidth: 1.5, color } as const
-  switch (levelId) {
-    case 1: return <IconBuildingBank   {...props} />
-    case 2: return <IconTrendingUp     {...props} />
-    case 3: return <IconCurrencyBitcoin {...props} />
-    case 4: return <IconCurrencyEuro   {...props} />
-    case 5: return <IconBarrel         {...props} />
-    case 6: return <IconChartPie       {...props} />
-    case 7: return <IconBuildingStore  {...props} />
-    case 8: return <IconSparkles       {...props} />
-    default: return null
-  }
 }
 
 interface LevelCardProps {
@@ -83,108 +80,123 @@ interface LevelCardProps {
 function LevelCard({ level, status, onClick }: LevelCardProps) {
   const isLocked = status === 'locked'
   const pct = status === 'completed' ? 100 : status === 'active' ? 45 : 0
+  const cfg = LEVEL_CONFIG[level.id]
+  const headerBg = isLocked ? '#DADDE3' : cfg?.color ?? '#1D9E75'
+  const Icon: IconComponent = isLocked ? IconLock : (cfg?.Icon ?? IconSparkles)
+  const iconColor = isLocked ? '#aaa' : headerBg
 
-  const chipContent: Record<LevelStatus, ReactNode> = {
-    completed: (
-      <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5 }}>
-        <IconCircleCheck size={15} strokeWidth={1.5} />
-        <span>Done</span>
-      </Stack>
-    ),
-    active: 'In Progress',
-    locked: (
-      <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5 }}>
-        <IconLock size={15} strokeWidth={1.5} />
-        <span>Locked</span>
-      </Stack>
-    ),
+  const isAILocked = level.isAI && isLocked
+  let chipLabel: string
+  let chipSx: object
+  if (isAILocked) {
+    chipLabel = '✦ AI Level'
+    chipSx = { bgcolor: 'var(--purple-50)', color: 'var(--purple-600)', fontWeight: 700, fontSize: 12 }
+  } else if (status === 'completed') {
+    chipLabel = '✓ Done'
+    chipSx = { bgcolor: 'var(--teal-50)', color: 'var(--teal-600)', fontWeight: 700, fontSize: 12 }
+  } else if (status === 'active') {
+    chipLabel = 'In Progress'
+    chipSx = { bgcolor: '#FFF8E1', color: 'var(--gold-400)', fontWeight: 700, fontSize: 12 }
+  } else {
+    chipLabel = '🔒 Locked'
+    chipSx = { bgcolor: '#f5f5f5', color: '#aaa', fontWeight: 700, fontSize: 12 }
   }
-
-  const chipSx: Record<LevelStatus, object> = {
-    completed: { bgcolor: 'var(--teal-50)', color: 'var(--teal-600)', fontWeight: 700, fontSize: 15 },
-    active:    { bgcolor: 'var(--gold-50)', color: 'var(--gold-400)', fontWeight: 700, fontSize: 15 },
-    locked:    { bgcolor: '#f5f5f5',        color: '#aaa',            fontWeight: 700, fontSize: 15 },
-  }
-
-  let chipLabel: ReactNode = chipContent[status]
-  let chipStyle = chipSx[status]
-  if (level.isAI && isLocked) {
-    chipLabel = (
-      <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5 }}>
-        <IconSparkles size={13} strokeWidth={1.5} />
-        <span>AI Level</span>
-      </Stack>
-    )
-    chipStyle = { ...chipStyle, bgcolor: 'var(--purple-50)', color: 'var(--purple-600)', fontWeight: 700 }
-  }
-
-  const badgeSx = isLocked
-    ? { bgcolor: '#e0e0e0', color: '#aaa' }
-    : status === 'completed'
-    ? { bgcolor: '#1D9E75', color: '#fff' }
-    : { bgcolor: 'var(--teal-400)', color: '#fff' }
 
   return (
     <Card
+      elevation={isLocked ? 0 : 2}
       sx={{
         height: '100%',
+        borderRadius: '16px',
+        overflow: 'hidden',
         border: '1px solid var(--border)',
         opacity: isLocked ? 0.7 : 1,
         transition: 'box-shadow 0.18s, transform 0.18s',
         ...(!isLocked && {
-          '&:hover': { boxShadow: 3, transform: 'translateY(-2px)' },
+          '&:hover': { boxShadow: 8, transform: 'translateY(-3px)' },
         }),
       }}
     >
       <CardActionArea
         onClick={onClick}
         disabled={isLocked}
+        disableRipple={isLocked}
         sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'stretch', cursor: isLocked ? 'default' : 'pointer' }}
       >
-        {/* Media area */}
+        {/* Illustration area */}
         <Box
           sx={{
-            height: 120,
-            background: 'linear-gradient(135deg, var(--teal-50) 0%, #ffffff 100%)',
+            height: 180,
+            bgcolor: headerBg,
+            position: 'relative',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            position: 'relative',
             flexShrink: 0,
+            overflow: 'hidden',
           }}
         >
-          <Box
+          {/* Giant watermark number */}
+          <Typography
             sx={{
-              position: 'absolute', top: 12, left: 12,
-              width: 28, height: 28, borderRadius: '50%',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-display)',
-              ...badgeSx,
+              position: 'absolute',
+              bottom: -18,
+              right: 12,
+              fontSize: 120,
+              fontWeight: 800,
+              fontFamily: 'var(--font-display)',
+              color: 'rgba(255,255,255,0.15)',
+              lineHeight: 1,
+              userSelect: 'none',
+              pointerEvents: 'none',
             }}
           >
             {level.id}
-          </Box>
+          </Typography>
 
-          <LevelIcon levelId={level.id} isLocked={isLocked} />
+          {/* Icon badge */}
+          <Box
+            sx={{
+              width: 80,
+              height: 80,
+              borderRadius: '50%',
+              bgcolor: '#fff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+              position: 'relative',
+              zIndex: 1,
+            }}
+          >
+            <Icon size={36} strokeWidth={1.5} color={iconColor} />
+          </Box>
         </Box>
 
-        <CardContent sx={{ flex: 1, pb: '12px !important' }}>
-          <Stack direction="row" sx={{ alignItems: 'flex-start', justifyContent: 'space-between', gap: 1, mb: 0.5 }}>
+        {/* Info area */}
+        <CardContent sx={{ flex: 1, pb: '14px !important', pt: 1.5 }}>
+          <Stack direction="row" sx={{ alignItems: 'flex-start', justifyContent: 'space-between', gap: 1, mb: 1 }}>
             <Box sx={{ minWidth: 0 }}>
               <Typography sx={{ fontWeight: 700, fontSize: 15, fontFamily: 'var(--font-display)', lineHeight: 1.3 }}>
-                {level.id} · {level.name}
+                {level.name}
               </Typography>
-              <Typography sx={{ fontSize: 12, color: 'text.secondary', fontFamily: 'var(--font-body)', mt: 0.25 }}>
+              <Typography sx={{ fontSize: 12, color: 'var(--muted)', fontFamily: 'var(--font-body)', mt: 0.25 }}>
                 {level.subtitle}
               </Typography>
             </Box>
-            <Chip label={chipLabel} sx={{ ...chipStyle, flexShrink: 0 }} />
+            <Chip label={chipLabel} sx={{ ...chipSx, flexShrink: 0, height: 24, fontSize: 11 }} />
           </Stack>
 
           <LinearProgress
             variant="determinate"
             value={pct}
-            sx={{ mt: 1.5, height: 4, borderRadius: 2, '& .MuiLinearProgress-bar': { background: 'linear-gradient(90deg, var(--teal-100), #1D9E75)', borderRadius: 2 } }}
+            sx={{
+              mt: 0.5,
+              height: 4,
+              borderRadius: 2,
+              bgcolor: '#f0f0f0',
+              '& .MuiLinearProgress-bar': { background: 'linear-gradient(90deg, var(--teal-100), #1D9E75)', borderRadius: 2 },
+            }}
           />
         </CardContent>
       </CardActionArea>
