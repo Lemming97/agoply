@@ -25,6 +25,8 @@ import StocksPortfolioBuilder from '../components/games/StocksPortfolioBuilder'
 import ETFsFeeCalculator from '../components/games/ETFsFeeCalculator'
 import CryptoRollercoaster from '../components/games/CryptoRollercoaster'
 import CurrencyTrader from '../components/games/CurrencyTrader'
+import OilBaron from '../components/games/OilBaron'
+import FeeDestroyer from '../components/games/FeeDestroyer'
 import type { GameState } from '../types'
 
 interface SubLessonPageProps {
@@ -253,7 +255,7 @@ export default function SubLessonPage({
       )}
 
       {/* Embedded interactive games */}
-      {(['bonds-2', 'stocks-3', 'etfs-3', 'crypto-3', 'forex-2'] as const).includes(subLessonId as 'bonds-2' | 'stocks-3' | 'etfs-3' | 'crypto-3' | 'forex-2') && (
+      {(['bonds-2', 'stocks-3', 'etfs-3', 'crypto-3', 'forex-2', 'commodities-3', 'mutual-funds-3'] as const).includes(subLessonId as 'bonds-2' | 'stocks-3' | 'etfs-3' | 'crypto-3' | 'forex-2' | 'commodities-3' | 'mutual-funds-3') && (
         <>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, my: 3 }}>
             <Divider sx={{ flex: 1 }} />
@@ -293,6 +295,18 @@ export default function SubLessonPage({
             <CurrencyTrader
               isCompleted={gameState.isGameComplete('game-forex-currency-trader')}
               onComplete={() => { gameState.completeGame('game-forex-currency-trader', 20); showToast('+20 XP · Game complete!') }}
+            />
+          )}
+          {subLessonId === 'commodities-3' && (
+            <OilBaron
+              isCompleted={gameState.isGameComplete('game-commodities-oil-baron')}
+              onComplete={() => { gameState.completeGame('game-commodities-oil-baron', 20); showToast('+20 XP · Game complete!') }}
+            />
+          )}
+          {subLessonId === 'mutual-funds-3' && (
+            <FeeDestroyer
+              isCompleted={gameState.isGameComplete('game-mutualfunds-fee-destroyer')}
+              onComplete={() => { gameState.completeGame('game-mutualfunds-fee-destroyer', 20); showToast('+20 XP · Game complete!') }}
             />
           )}
         </>

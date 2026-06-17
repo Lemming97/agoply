@@ -7,7 +7,7 @@ import LinearProgress from '@mui/material/LinearProgress'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import {
-  IconCalculator, IconChartPie, IconCoins, IconCurrencyBitcoin, IconCurrencyEuro,
+  IconCalculator, IconChartPie, IconCoins, IconCurrencyBitcoin, IconCurrencyEuro, IconBarrel, IconShield,
   IconCircleCheck, IconLock,
 } from '@tabler/icons-react'
 import type { GameState } from '../types'
@@ -82,6 +82,26 @@ const GAMES: GameEntry[] = [
     Icon: IconCurrencyEuro,
     xp: 20,
   },
+  {
+    id: 'game-commodities-oil-baron',
+    levelId: 5,
+    levelName: 'Commodities',
+    levelColor: '#E07B39',
+    title: 'Oil Baron',
+    description: 'Manage 10 oil wells across 6 months — balance supply, demand, and market shocks',
+    Icon: IconBarrel,
+    xp: 20,
+  },
+  {
+    id: 'game-mutualfunds-fee-destroyer',
+    levelId: 7,
+    levelName: 'Mutual Funds',
+    levelColor: '#D45F8A',
+    title: 'Fee Destroyer',
+    description: 'Block fee bullets before they destroy your portfolio in this arcade shooter',
+    Icon: IconShield,
+    xp: 20,
+  },
 ]
 
 // Group games by level (they're already in level order)
@@ -90,7 +110,9 @@ const LEVEL_GROUPS = [
   { levelId: 2, levelName: 'Stocks', levelColor: '#2E86AB', games: GAMES.filter(g => g.levelId === 2) },
   { levelId: 3, levelName: 'Crypto', levelColor: '#7B5FD4', games: GAMES.filter(g => g.levelId === 3) },
   { levelId: 4, levelName: 'Forex',  levelColor: '#C08B00', games: GAMES.filter(g => g.levelId === 4) },
-  { levelId: 6, levelName: 'ETFs',   levelColor: '#3AAFA9', games: GAMES.filter(g => g.levelId === 6) },
+  { levelId: 5, levelName: 'Commodities', levelColor: '#E07B39', games: GAMES.filter(g => g.levelId === 5) },
+  { levelId: 6, levelName: 'ETFs',         levelColor: '#3AAFA9', games: GAMES.filter(g => g.levelId === 6) },
+  { levelId: 7, levelName: 'Mutual Funds', levelColor: '#D45F8A', games: GAMES.filter(g => g.levelId === 7) },
 ]
 
 export default function GamesPage({ gameState, showToast, onOpenGame }: GamesPageProps) {
