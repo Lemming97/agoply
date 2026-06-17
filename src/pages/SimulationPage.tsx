@@ -403,9 +403,11 @@ function LeaderboardView({ data, myValue, profile }: { data: LeaderboardEntry[];
     .map((r, i) => ({ ...r, rank: i + 1 }))
 
   function myAvatarSrc() {
-    if (profile.avatarType === 'upload') return profile.avatarValue ?? undefined
-    if (profile.avatarType === 'icon') return `https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(profile.avatarValue ?? '')}`
-    return undefined
+    const dicebearUrl = (seed: string) =>
+      `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf&clothesColor=1D9E75,0F6E56,5DCAA5,085041,C08B00&mouth=default,eating,grimace,smile,tongue,twinkle&eyes=closed,default,happy,hearts,side,squint,surprised,wink,winkWacky&eyebrows=default,defaultNatural,flatNatural,raisedExcited,raisedExcitedNatural,unibrowNatural,upDownNatural`
+    if (profile.avatarType === 'upload') return profile.avatarValue ?? dicebearUrl(profile.firstName || 'default')
+    if (profile.avatarType === 'icon') return dicebearUrl(profile.avatarValue ?? profile.firstName)
+    return dicebearUrl(profile.firstName || 'default')
   }
 
   return (

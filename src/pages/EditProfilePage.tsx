@@ -24,7 +24,7 @@ const AVATAR_SEEDS = [
 ]
 
 function dicebearUrl(seed: string) {
-  return `https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(seed)}`
+  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf&clothesColor=1D9E75,0F6E56,5DCAA5,085041,C08B00&mouth=default,eating,grimace,smile,tongue,twinkle&eyes=closed,default,happy,hearts,side,squint,surprised,wink,winkWacky&eyebrows=default,defaultNatural,flatNatural,raisedExcited,raisedExcitedNatural,unibrowNatural,upDownNatural`
 }
 
 interface Props {
@@ -37,7 +37,7 @@ interface Props {
 function getAvatarSrc(p: UserProfile): string | undefined {
   if (p.avatarType === 'upload') return p.avatarValue ?? undefined
   if (p.avatarType === 'icon') return dicebearUrl(p.avatarValue ?? '')
-  return undefined
+  return dicebearUrl(p.firstName || 'default')
 }
 
 export default function EditProfilePage({ profile, onSave, onBack, showToast }: Props) {
@@ -235,13 +235,14 @@ export default function EditProfilePage({ profile, onSave, onBack, showToast }: 
                     setPickerOpen(false)
                   }}
                   sx={{
-                    width: 70,
-                    height: 70,
+                    width: 72,
+                    height: 72,
                     borderRadius: '50%',
                     border: selected ? '3px solid var(--teal-400)' : '3px solid transparent',
                     overflow: 'hidden',
                     cursor: 'pointer',
                     boxSizing: 'border-box',
+                    bgcolor: 'var(--teal-50)',
                     transition: 'transform 0.15s, border-color 0.15s',
                     '&:hover': { transform: 'scale(1.05)' },
                   }}
