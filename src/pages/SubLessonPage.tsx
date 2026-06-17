@@ -24,6 +24,7 @@ import BondsYieldCalculator from '../components/games/BondsYieldCalculator'
 import StocksPortfolioBuilder from '../components/games/StocksPortfolioBuilder'
 import ETFsFeeCalculator from '../components/games/ETFsFeeCalculator'
 import CryptoRollercoaster from '../components/games/CryptoRollercoaster'
+import CurrencyTrader from '../components/games/CurrencyTrader'
 import type { GameState } from '../types'
 
 interface SubLessonPageProps {
@@ -252,7 +253,7 @@ export default function SubLessonPage({
       )}
 
       {/* Embedded interactive games */}
-      {(['bonds-2', 'stocks-3', 'etfs-3', 'crypto-3'] as const).includes(subLessonId as 'bonds-2' | 'stocks-3' | 'etfs-3' | 'crypto-3') && (
+      {(['bonds-2', 'stocks-3', 'etfs-3', 'crypto-3', 'forex-2'] as const).includes(subLessonId as 'bonds-2' | 'stocks-3' | 'etfs-3' | 'crypto-3' | 'forex-2') && (
         <>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, my: 3 }}>
             <Divider sx={{ flex: 1 }} />
@@ -286,6 +287,12 @@ export default function SubLessonPage({
             <CryptoRollercoaster
               isCompleted={gameState.isGameComplete('game-crypto-rollercoaster')}
               onComplete={() => { gameState.completeGame('game-crypto-rollercoaster', 20); showToast('+20 XP · Game complete!') }}
+            />
+          )}
+          {subLessonId === 'forex-2' && (
+            <CurrencyTrader
+              isCompleted={gameState.isGameComplete('game-forex-currency-trader')}
+              onComplete={() => { gameState.completeGame('game-forex-currency-trader', 20); showToast('+20 XP · Game complete!') }}
             />
           )}
         </>

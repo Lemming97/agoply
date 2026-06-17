@@ -9,6 +9,7 @@ import BondsYieldCalculator from '../components/games/BondsYieldCalculator'
 import StocksPortfolioBuilder from '../components/games/StocksPortfolioBuilder'
 import ETFsFeeCalculator from '../components/games/ETFsFeeCalculator'
 import CryptoRollercoaster from '../components/games/CryptoRollercoaster'
+import CurrencyTrader from '../components/games/CurrencyTrader'
 import type { GameState } from '../types'
 
 interface GamePageProps {
@@ -23,6 +24,7 @@ const GAME_META: Record<string, { title: string; levelName: string; levelColor: 
   'game-stocks-portfolio':  { title: 'Portfolio Builder',     levelName: 'Stocks', levelColor: '#2E86AB' },
   'game-etfs-fees':             { title: 'Fee Impact Calculator', levelName: 'ETFs',   levelColor: '#3AAFA9' },
   'game-crypto-rollercoaster':  { title: 'Crypto Rollercoaster',  levelName: 'Crypto', levelColor: '#7B5FD4' },
+  'game-forex-currency-trader': { title: 'Currency Trader',        levelName: 'Forex',  levelColor: '#C08B00' },
 }
 
 export default function GamePage({ gameId, gameState, showToast, onBack }: GamePageProps) {
@@ -58,6 +60,7 @@ export default function GamePage({ gameId, gameState, showToast, onBack }: GameP
       {gameId === 'game-stocks-portfolio' && <StocksPortfolioBuilder    {...gameProps} />}
       {gameId === 'game-etfs-fees'           && <ETFsFeeCalculator         {...gameProps} />}
       {gameId === 'game-crypto-rollercoaster' && <CryptoRollercoaster    {...gameProps} />}
+      {gameId === 'game-forex-currency-trader' && <CurrencyTrader        {...gameProps} />}
     </Box>
   )
 }

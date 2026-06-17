@@ -7,7 +7,7 @@ import LinearProgress from '@mui/material/LinearProgress'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import {
-  IconCalculator, IconChartPie, IconCoins, IconCurrencyBitcoin,
+  IconCalculator, IconChartPie, IconCoins, IconCurrencyBitcoin, IconCurrencyEuro,
   IconCircleCheck, IconLock,
 } from '@tabler/icons-react'
 import type { GameState } from '../types'
@@ -72,6 +72,16 @@ const GAMES: GameEntry[] = [
     Icon: IconCurrencyBitcoin,
     xp: 20,
   },
+  {
+    id: 'game-forex-currency-trader',
+    levelId: 4,
+    levelName: 'Forex',
+    levelColor: '#C08B00',
+    title: 'Currency Trader',
+    description: 'Run an airport currency booth — buy low, sell high across 5 rounds',
+    Icon: IconCurrencyEuro,
+    xp: 20,
+  },
 ]
 
 // Group games by level (they're already in level order)
@@ -79,6 +89,7 @@ const LEVEL_GROUPS = [
   { levelId: 1, levelName: 'Bonds',  levelColor: '#1D9E75', games: GAMES.filter(g => g.levelId === 1) },
   { levelId: 2, levelName: 'Stocks', levelColor: '#2E86AB', games: GAMES.filter(g => g.levelId === 2) },
   { levelId: 3, levelName: 'Crypto', levelColor: '#7B5FD4', games: GAMES.filter(g => g.levelId === 3) },
+  { levelId: 4, levelName: 'Forex',  levelColor: '#C08B00', games: GAMES.filter(g => g.levelId === 4) },
   { levelId: 6, levelName: 'ETFs',   levelColor: '#3AAFA9', games: GAMES.filter(g => g.levelId === 6) },
 ]
 
