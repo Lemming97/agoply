@@ -7,7 +7,7 @@ import LinearProgress from '@mui/material/LinearProgress'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import {
-  IconCalculator, IconChartPie, IconCoins, IconCurrencyBitcoin, IconCurrencyEuro, IconBarrel, IconShield, IconNews,
+  IconBuildingBank, IconChartPie, IconCoins, IconCurrencyBitcoin, IconCurrencyEuro, IconBarrel, IconShield, IconNews,
   IconCircleCheck, IconLock,
 } from '@tabler/icons-react'
 import type { GameState } from '../types'
@@ -37,9 +37,9 @@ const GAMES: GameEntry[] = [
     levelId: 1,
     levelName: 'Bonds',
     levelColor: '#1D9E75',
-    title: 'Yield Calculator',
-    description: 'Drag the interest rate slider and watch bond prices move in real time',
-    Icon: IconCalculator,
+    title: 'Bond Trader',
+    description: 'Predict ECB rate decisions and trade bonds before prices move — 6 rounds',
+    Icon: IconBuildingBank,
     xp: 20,
   },
   {
