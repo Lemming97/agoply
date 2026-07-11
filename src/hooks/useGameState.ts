@@ -1,9 +1,53 @@
 import { useState, useEffect } from 'react'
-import type { GameStateData, GameState, MarketAsset, GlossaryEntry } from '../types'
+import type { GameStateData, GameState, MarketAsset, GlossaryEntry, Portfolio, SimulationStats } from '../types'
 
 const GLOSSARY_KEY = 'agoply_glossary'
 
 const STATE_KEY = (email: string) => `agoply_state_${email}`
+
+const DEFAULT_SIMULATION_STATS: SimulationStats = {
+  totalTrades: 0,
+  buyCount: 0,
+  sellCount: 0,
+  assetCategoriesTraded: [],
+  largestSinglePosition: 0,
+  cashHeldPct: 100,
+  portfolioReturn: 0,
+  beatBenchmark: false,
+  wentBelowHalf: false,
+  diversificationScore: 0,
+}
+
+function calcPortfolioValue(portfolio: Portfolio): number {
+  return portfolio.holdings.reduce((sum, h) => sum + h.price * h.shares, 0) + portfolio.cash
+}
+
+function recalcSimulationStats(portfolio: Portfolio, prevStats: SimulationStats): SimulationStats {
+  const portfolioValue = calcPortfolioValue(portfolio)
+  const largestSinglePosition = portfolio.holdings.length === 0
+    ? 0
+    : Math.max(...portfolio.holdings.map(h => (h.price * h.shares / portfolioValue) * 100))
+  const diversificationScore = new Set(portfolio.holdings.map(h => h.category)).size
+  const portfolioReturn = ((portfolioValue - 1000) / 1000) * 100
+  return {
+    ...prevStats,
+    largestSinglePosition,
+    diversificationScore,
+    cashHeldPct: (portfolio.cash / portfolioValue) * 100,
+    portfolioReturn,
+    beatBenchmark: portfolioReturn > 5,
+    wentBelowHalf: prevStats.wentBelowHalf || portfolioValue < 500,
+  }
+}
+
+const DEMO_PORTFOLIO: Portfolio = {
+  cash: 200,
+  holdings: [
+    { id: 'aapl',  name: 'Apple Inc.',        ticker: 'AAPL',  icon: '🍎', shares: 2, price: 215.40, change: 2.3,  category: 'stock' },
+    { id: 'eurgb', name: 'EUR Gov Bond 2027',  ticker: 'EURGB', icon: '🏛️', shares: 5, price: 102.40, change: 0.4,  category: 'bond'  },
+    { id: 'lvmh',  name: 'LVMH',              ticker: 'MC',    icon: '💎', shares: 1, price: 694.50, change: -1.1, category: 'stock' },
+  ],
+}
 
 // Pre-loaded demo data for the test account
 const DEMO_STATE: GameStateData = {
@@ -12,17 +56,11 @@ const DEMO_STATE: GameStateData = {
   completedLevels: [1],
   completedSubLessons: ['bonds-1', 'bonds-2', 'bonds-3'],
   activeLesson: 2,
-  portfolio: {
-    cash: 200,
-    holdings: [
-      { id: 'aapl',  name: 'Apple Inc.',        ticker: 'AAPL',  icon: '🍎', shares: 2, price: 215.40, change: 2.3,  category: 'stock' },
-      { id: 'eurgb', name: 'EUR Gov Bond 2027',  ticker: 'EURGB', icon: '🏛️', shares: 5, price: 102.40, change: 0.4,  category: 'bond'  },
-      { id: 'lvmh',  name: 'LVMH',              ticker: 'MC',    icon: '💎', shares: 1, price: 694.50, change: -1.1, category: 'stock' },
-    ],
-  },
+  portfolio: DEMO_PORTFOLIO,
   riskProfile: 'Balanced Growth',
   completedGames: [],
   earnedGameXP: {},
+  simulationStats: recalcSimulationStats(DEMO_PORTFOLIO, DEFAULT_SIMULATION_STATS),
 }
 
 // Blank starting state for new registered users
@@ -36,6 +74,7 @@ const FRESH_STATE: GameStateData = {
   riskProfile: '',
   completedGames: [],
   earnedGameXP: {},
+  simulationStats: DEFAULT_SIMULATION_STATS,
 }
 
 const TEST_EMAIL = 'test@agoply.com'
@@ -57,6 +96,7 @@ export function useGameState(userEmail: string): GameState {
           completedSubLessons: parsed.completedSubLessons ?? [],
           completedGames: parsed.completedGames ?? [],
           earnedGameXP: parsed.earnedGameXP ?? {},
+          simulationStats: parsed.simulationStats ?? DEFAULT_SIMULATION_STATS,
         }
       }
     } catch { /* ignore */ }
@@ -94,9 +134,17 @@ export function useGameState(userEmail: string): GameState {
       } else {
         newHoldings = [...s.portfolio.holdings, { ...asset, shares: quantity }]
       }
+      const newPortfolio: Portfolio = { cash: s.portfolio.cash - cost, holdings: newHoldings }
+      const statsAfterTrade: SimulationStats = {
+        ...s.simulationStats,
+        totalTrades: s.simulationStats.totalTrades + 1,
+        buyCount: s.simulationStats.buyCount + 1,
+        assetCategoriesTraded: [...new Set([...s.simulationStats.assetCategoriesTraded, asset.category])],
+      }
       return {
         ...s,
-        portfolio: { cash: s.portfolio.cash - cost, holdings: newHoldings },
+        portfolio: newPortfolio,
+        simulationStats: recalcSimulationStats(newPortfolio, statsAfterTrade),
       }
     })
   }
@@ -110,9 +158,16 @@ export function useGameState(userEmail: string): GameState {
       const newHoldings = newShares <= 0
         ? s.portfolio.holdings.filter(h => h.id !== holdingId)
         : s.portfolio.holdings.map(h => h.id === holdingId ? { ...h, shares: newShares } : h)
+      const newPortfolio: Portfolio = { cash: s.portfolio.cash + proceeds, holdings: newHoldings }
+      const statsAfterTrade: SimulationStats = {
+        ...s.simulationStats,
+        totalTrades: s.simulationStats.totalTrades + 1,
+        sellCount: s.simulationStats.sellCount + 1,
+      }
       return {
         ...s,
-        portfolio: { cash: s.portfolio.cash + proceeds, holdings: newHoldings },
+        portfolio: newPortfolio,
+        simulationStats: recalcSimulationStats(newPortfolio, statsAfterTrade),
       }
     })
   }
