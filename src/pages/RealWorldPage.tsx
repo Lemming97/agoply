@@ -437,7 +437,7 @@ function RiskProfileHero({ riskProfile, isLowConfidence }: { riskProfile: RiskPr
             },
           }}
         >
-          <Box sx={{ cursor: isMobile ? 'pointer' : 'help', display: 'inline-block' }}>
+          <Box sx={{ cursor: isMobile ? 'pointer' : 'default', display: 'inline-block' }}>
             {labelBlock}
           </Box>
         </Tooltip>
