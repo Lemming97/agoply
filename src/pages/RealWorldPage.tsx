@@ -399,8 +399,8 @@ function RiskProfileHero({ riskProfile, isLowConfidence }: { riskProfile: RiskPr
       {!isLowConfidence && (() => {
         const HeroIcon = RISK_LABEL_ICON[riskProfile.label]
         return (
-          <Box sx={{ position: 'absolute', top: 10, right: 10, opacity: 0.07, color: riskProfile.color, pointerEvents: 'none' }}>
-            <HeroIcon size={56} strokeWidth={1.2} />
+          <Box sx={{ position: 'absolute', top: 10, right: 10, opacity: 0.18, color: riskProfile.color, pointerEvents: 'none' }}>
+            <HeroIcon size={56} strokeWidth={2} />
           </Box>
         )
       })()}
