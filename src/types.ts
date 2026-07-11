@@ -99,6 +99,19 @@ export interface Portfolio {
   holdings: Holding[]
 }
 
+export interface SimulationStats {
+  totalTrades: number
+  buyCount: number
+  sellCount: number
+  assetCategoriesTraded: AssetCategory[]
+  largestSinglePosition: number
+  cashHeldPct: number
+  portfolioReturn: number
+  beatBenchmark: boolean
+  wentBelowHalf: boolean
+  diversificationScore: number
+}
+
 export interface GameStateData {
   xp: number
   streak: number
@@ -109,6 +122,7 @@ export interface GameStateData {
   riskProfile: string
   completedGames: string[]
   earnedGameXP: Record<string, number>
+  simulationStats: SimulationStats
 }
 
 export interface GameState extends GameStateData {

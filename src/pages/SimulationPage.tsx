@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import Skeleton from '@mui/material/Skeleton'
@@ -24,17 +24,29 @@ import {
   IconWallet, IconChartBar, IconTrophy, IconShoppingCart,
   IconArrowUpRight, IconArrowDownRight, IconLock, IconCircleCheck,
   IconBuildingBank, IconTrendingUp, IconCurrencyBitcoin,
-  IconCurrencyEuro, IconBarrel, IconChartPie,
+  IconCurrencyEuro, IconBarrel, IconChartPie, IconArrowRight,
+  IconSnowflake, IconShieldCheck, IconScale, IconRocket,
 } from '@tabler/icons-react'
 import { LEADERBOARD } from '../data/gameData'
 import { useLiveMarketData } from '../hooks/useLiveMarketData'
+import { calculateRiskProfile } from '../utils/riskProfile'
+import type { RiskLabel, RiskProfileResult } from '../utils/riskProfile'
 import type { GameState, MarketAsset, Holding, LeaderboardEntry, AssetCategory, UserProfile } from '../types'
+
+const TRADING_STYLE_STYLES: Record<RiskLabel, { bg: string; border: string; labelColor: string; icon: typeof IconRocket }> = {
+  'Very Cautious':    { bg: '#E3F2FD', border: '#3B8FD4', labelColor: '#3B8FD4', icon: IconSnowflake },
+  'Cautious':         { bg: '#E8F5E9', border: '#43A047', labelColor: '#2E7D32', icon: IconShieldCheck },
+  'Balanced Growth':  { bg: 'var(--teal-50)', border: 'var(--teal-400)', labelColor: 'var(--teal-600)', icon: IconScale },
+  'Growth':           { bg: '#FFF8E1', border: '#FFB300', labelColor: '#E65100', icon: IconTrendingUp },
+  'Aggressive Growth': { bg: '#FEECEC', border: 'var(--red-400)', labelColor: 'var(--red-400)', icon: IconRocket },
+}
 
 interface SimulationPageProps {
   gameState: GameState
   showToast: (msg: ReactNode) => void
   profile: UserProfile
   onEditProfile: () => void
+  onGoToInvest: () => void
 }
 
 const CHART_DATA = [
@@ -58,14 +70,28 @@ function CategoryIcon({ category, size = 20 }: { category: AssetCategory; size?:
   }
 }
 
-export default function SimulationPage({ gameState, showToast, profile, onEditProfile }: SimulationPageProps) {
+export default function SimulationPage({ gameState, showToast, profile, onEditProfile, onGoToInvest }: SimulationPageProps) {
   const [view, setView] = useState<SimView>('portfolio')
   const [buyModal, setBuyModal] = useState<MarketAsset | null>(null)
   const [sellModal, setSellModal] = useState<typeof gameState.portfolio.holdings[0] | null>(null)
   const [qty, setQty] = useState(1)
+  const [labelJustChanged, setLabelJustChanged] = useState(false)
   const { assets, loading, isLive } = useLiveMarketData()
 
   const totalValue = gameState.portfolioValue
+  const riskProfile = calculateRiskProfile(gameState.simulationStats, gameState.completedLevels)
+
+  const prevLabelRef = useRef<RiskLabel | null>(null)
+  useEffect(() => {
+    const prevLabel = prevLabelRef.current
+    prevLabelRef.current = riskProfile.label
+    if (prevLabel === null || prevLabel === riskProfile.label) return
+    showToast(`Your risk profile updated: ${riskProfile.label}`)
+    setLabelJustChanged(true)
+    const t = setTimeout(() => setLabelJustChanged(false), 300)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [riskProfile.label])
 
   function handleBuy(asset: MarketAsset) {
     if (!gameState.completedLevels.includes(asset.requiredLevel)) {
@@ -146,7 +172,7 @@ export default function SimulationPage({ gameState, showToast, profile, onEditPr
         <MuiTab icon={<IconTrophy  size={18} strokeWidth={1.5} />} iconPosition="start" label="Rankings"     value="leaderboard" />
       </Tabs>
 
-      {view === 'portfolio'   && <PortfolioView gameState={gameState} totalValue={totalValue} onSell={(h: Holding) => { setSellModal(h); setQty(1) }} />}
+      {view === 'portfolio'   && <PortfolioView gameState={gameState} totalValue={totalValue} onSell={(h: Holding) => { setSellModal(h); setQty(1) }} onGoToInvest={onGoToInvest} riskProfile={riskProfile} labelJustChanged={labelJustChanged} />}
       {view === 'market'      && <MarketView assets={assets} loading={loading} onBuy={handleBuy} completedLevels={gameState.completedLevels} cash={gameState.portfolio.cash} />}
       {view === 'leaderboard' && <LeaderboardView data={LEADERBOARD} myValue={Math.round(totalValue)} profile={profile} onEditProfile={onEditProfile} />}
 
@@ -223,7 +249,51 @@ export default function SimulationPage({ gameState, showToast, profile, onEditPr
   )
 }
 
-function PortfolioView({ gameState, totalValue, onSell }: { gameState: GameState; totalValue: number; onSell: (h: Holding) => void }) {
+function TradingStyleBanner({ riskProfile, justChanged, onGoToInvest }: { riskProfile: RiskProfileResult; justChanged: boolean; onGoToInvest: () => void }) {
+  const styles = TRADING_STYLE_STYLES[riskProfile.label]
+  const Icon = styles.icon
+  const displayLabel = riskProfile.confidence === 'low' ? 'Not enough data yet' : riskProfile.label
+
+  return (
+    <Paper
+      variant="outlined"
+      onClick={onGoToInvest}
+      sx={{
+        p: '12px 14px', mb: 2, borderRadius: 2, cursor: 'pointer',
+        bgcolor: styles.bg, borderColor: styles.border, borderWidth: '1.5px',
+        transition: 'background-color 250ms ease, border-color 250ms ease',
+        '&:hover': { filter: 'brightness(0.98)' },
+      }}
+    >
+      <Stack direction="row" sx={{ alignItems: 'center', gap: 0.75, mb: 0.5 }}>
+        <Icon size={20} strokeWidth={1.5} color={styles.labelColor} />
+        <Typography sx={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.6px', textTransform: 'uppercase', color: 'text.secondary', fontFamily: 'var(--font-body)' }}>
+          Your trading style
+        </Typography>
+      </Stack>
+      <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+        <Typography
+          sx={{
+            fontSize: 15, fontWeight: 700, color: styles.labelColor, fontFamily: "'Syne', var(--font-display)",
+            display: 'inline-block', transformOrigin: 'left center',
+            transform: justChanged ? 'scale(1.08)' : 'scale(1)',
+            transition: 'transform 300ms ease',
+          }}
+        >
+          {displayLabel}
+        </Typography>
+        <Stack direction="row" sx={{ alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+          <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'var(--teal-600)', fontFamily: 'var(--font-body)' }}>
+            Analysis
+          </Typography>
+          <IconArrowRight size={14} strokeWidth={1.5} color="var(--teal-600)" />
+        </Stack>
+      </Stack>
+    </Paper>
+  )
+}
+
+function PortfolioView({ gameState, totalValue, onSell, onGoToInvest, riskProfile, labelJustChanged }: { gameState: GameState; totalValue: number; onSell: (h: Holding) => void; onGoToInvest: () => void; riskProfile: RiskProfileResult; labelJustChanged: boolean }) {
   const gain = totalValue - 1000
   const gainPct = ((gain / 1000) * 100).toFixed(2)
   const isUp = gain >= 0
@@ -254,6 +324,8 @@ function PortfolioView({ gameState, totalValue, onSell }: { gameState: GameState
           </Stack>
         </CardContent>
       </Card>
+
+      <TradingStyleBanner riskProfile={riskProfile} justChanged={labelJustChanged} onGoToInvest={onGoToInvest} />
 
       <Card sx={{ mb: 2 }}>
         <CardContent>
