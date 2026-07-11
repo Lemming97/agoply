@@ -25,7 +25,7 @@ interface GamePageProps {
 const GAME_META: Record<string, { title: string; levelName: string; levelColor: string }> = {
   'game-bonds-yield':       { title: 'Yield Calculator',      levelName: 'Bonds',  levelColor: '#1D9E75' },
   'game-stocks-portfolio':  { title: 'Portfolio Builder',     levelName: 'Stocks', levelColor: '#2E86AB' },
-  'game-etfs-fees':             { title: 'Fee Impact Calculator', levelName: 'ETFs',   levelColor: '#3AAFA9' },
+  'game-etfs-fees':             { title: 'The Fee Race',          levelName: 'ETFs',   levelColor: '#3AAFA9' },
   'game-crypto-rollercoaster':  { title: 'Crypto Rollercoaster',  levelName: 'Crypto', levelColor: '#7B5FD4' },
   'game-forex-currency-trader':  { title: 'Currency Trader', levelName: 'Forex',        levelColor: '#C08B00' },
   'game-commodities-oil-baron':      { title: 'Oil Baron',       levelName: 'Commodities',  levelColor: '#E07B39' },
