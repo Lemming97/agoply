@@ -96,6 +96,7 @@ Practice with €1,000 of virtual cash. Browse a live-style market across all un
 - Portfolio performance tracked on an interactive Recharts line chart (1D / 1W / 1M / 1Y views)
 - Weekly leaderboard against other students
 - Assets locked until the corresponding level is completed in Education
+- Live "trading style" banner shows your current risk profile as it updates after every trade, with a one-tap link to the full breakdown on the Invest tab
 
 ---
 
@@ -103,8 +104,12 @@ Practice with €1,000 of virtual cash. Browse a live-style market across all un
 
 Analyse your simulation behaviour and take the next step into real investing.
 
-- Risk profile calculated from simulator activity (conservative / balanced / growth)
-- Recommended asset allocation (stocks / bonds / alternatives %) based on risk profile
+- **Real behavior-based risk profile** — every buy/sell, asset category traded, cash allocation, position concentration, and return is tracked and scored into one of five profiles (Very Cautious → Aggressive Growth), replacing the old "levels completed" heuristic
+- **Confidence badge** shows how much trading data the profile is based on (limited activity / your trades / detailed analysis), with a "Build your profile" prompt below 3 trades
+- **What shaped your profile** — tappable behavior chips (e.g. "Crypto investor," "Bond-focused," "Active trader") explain exactly which trading habits drove the score, with a popover description on tap
+- **Profile explainer** — hover (desktop) or tap (mobile) the risk profile card for a plain-language definition of what that profile means and what it'd translate to in a real portfolio
+- Recommended asset allocation (stocks / bonds / ETFs / crypto / commodities %) based on risk profile, shown as colored allocation bars
+- A toast notification fires whenever a trade changes your risk profile label, so the feedback loop is immediate
 - Broker comparison cards: Revolut, eToro, Trade Republic, BNP Paribas — with fees, minimums, and strengths
 - Yahoo Finance-powered search: look up any stock, ETF, or crypto in real time
 
@@ -172,8 +177,10 @@ src/
 │   ├── gameData.ts          # Curriculum content, levels, glossary, quiz questions
 │   └── dragDropExercises.ts # 10 sorting exercises
 ├── hooks/
-│   ├── useGameState.ts      # XP, progress, completions (localStorage)
+│   ├── useGameState.ts      # XP, progress, completions, simulation stats (localStorage)
 │   └── useDragDropState.ts  # Drag-and-drop completion tracking
+├── utils/
+│   └── riskProfile.ts       # Behavior-based risk profile scoring + explanations
 ├── pages/                   # One file per screen
 │   ├── EducationPage.tsx    # Learning Path / Games toggle
 │   ├── SubLessonPage.tsx    # Lesson content + embedded game
