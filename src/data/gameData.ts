@@ -30,6 +30,7 @@ export const LEVELS: Level[] = [
       {
         id: 'bonds-1',
         title: 'What Is a Bond?',
+        video: { videoId: 'Qh-M3_L4xYk', title: 'Introduction to Bonds', credit: 'Khan Academy' },
         content: [
           { type: 'text', value: 'A **bond** is a loan you give to a government or corporation. In return, they promise to pay you regular interest (called the **coupon**) and repay your original investment (the **principal**) on a set date known as the **maturity** date.' },
           { type: 'text', value: 'Governments issue bonds to fund public spending — roads, schools, hospitals. Companies issue them to raise capital for expansion. When you buy a bond, you become a creditor, not an owner.' },
@@ -44,6 +45,7 @@ export const LEVELS: Level[] = [
       {
         id: 'bonds-2',
         title: 'Bond Yields & Pricing',
+        video: { videoId: 'I7FDx4DPapw', title: 'Relationship Between Bond Prices and Interest Rates', credit: 'Khan Academy' },
         content: [
           { type: 'text', value: 'The **yield** of a bond is its annual return expressed as a percentage of its current price. When you buy a bond at its face value of €1,000 with a €40 annual coupon, your yield is 4%. But bond prices change constantly in the market — and that changes the yield.' },
           { type: 'text', value: 'Here\'s the crucial relationship: **bond prices and yields move in opposite directions**. If a bond\'s price rises from €1,000 to €1,100, the same €40 coupon is now only a 3.6% yield. The coupon is fixed — but the yield floats with the price.' },
@@ -57,6 +59,7 @@ export const LEVELS: Level[] = [
       {
         id: 'bonds-3',
         title: 'Credit Risk & Duration',
+        video: { videoId: 'tauVS3CKyfQ', title: 'What Are Bonds? Fixed Income Investing Explained', credit: 'YouTube' },
         content: [
           { type: 'text', value: 'Not all bonds are equally safe. **Credit ratings** assess the likelihood that an issuer will repay. Rating agencies like Moody\'s, S&P, and Fitch assign grades from AAA (ultra-safe) down to D (in default). Bonds rated BB or below are called "high yield" or junk bonds — they pay more because they\'re riskier.' },
           { type: 'text', value: '**Duration** measures how sensitive a bond\'s price is to interest rate changes. A bond with a duration of 10 years will lose approximately 10% of its value if rates rise by 1%. Longer-dated bonds have higher duration — and higher interest rate risk.' },
@@ -113,6 +116,7 @@ export const LEVELS: Level[] = [
       {
         id: 'stocks-1',
         title: 'What Is a Stock?',
+        video: { videoId: 'VirrBxclM4E', title: 'How the Stock Market Works', credit: 'YouTube' },
         content: [
           { type: 'text', value: 'A **stock** (also called a share or equity) represents partial ownership of a company. When you buy one Apple share, you own a tiny fraction of Apple — its products, patents, factories, and future profits.' },
           { type: 'text', value: 'Companies issue stocks to raise capital. Instead of borrowing (like with bonds), they sell ownership stakes. The first time a company sells shares publicly is called an **IPO** (Initial Public Offering). After that, shares trade freely on stock exchanges like Euronext Paris or the New York Stock Exchange.' },
@@ -127,6 +131,7 @@ export const LEVELS: Level[] = [
       {
         id: 'stocks-2',
         title: 'Valuing a Stock',
+        video: { videoId: 'effipLTUUl4', title: 'Stock Market Explained in 4 Minutes', credit: 'YouTube' },
         content: [
           { type: 'text', value: 'How do you know if a stock is cheap or expensive? The most common measure is the **P/E Ratio** (Price-to-Earnings). It divides the stock price by the company\'s annual **EPS** (Earnings Per Share).' },
           { type: 'text', value: 'A P/E of 20 means investors are paying €20 for every €1 of annual profit. A very high P/E (like 50+) means the market expects strong future growth. A low P/E might mean the company is undervalued — or struggling.' },
@@ -142,6 +147,7 @@ export const LEVELS: Level[] = [
       {
         id: 'stocks-3',
         title: 'Dividends & Market Cycles',
+        video: { videoId: 'dMOcrLMfDFM', title: 'How the Stock Market Actually Works', credit: 'YouTube' },
         content: [
           { type: 'text', value: 'Some companies distribute a portion of their profits to shareholders as **dividends** — typically paid quarterly. A stock paying €2/year with a price of €40 has a **dividend yield** of 5%. Dividends provide income even when stock prices aren\'t rising.' },
           { type: 'text', value: 'Stock markets move in cycles. A **bull market** is a sustained rise of 20%+ from recent lows, fuelled by economic growth and investor optimism. A **bear market** is a 20%+ decline, often driven by recession fears, rising rates, or crises.' },
@@ -197,6 +203,7 @@ export const LEVELS: Level[] = [
       {
         id: 'crypto-1',
         title: 'What Is Cryptocurrency?',
+        video: { videoId: 'Y-w7SnQWwVA', title: 'Bitcoin Overview', credit: 'Khan Academy' },
         content: [
           { type: 'text', value: '**Cryptocurrencies** are digital currencies that exist only online. Unlike euros or dollars, no government issues or controls them. They run on **blockchain** networks — decentralized systems where thousands of computers worldwide verify and record every transaction simultaneously.' },
           { type: 'text', value: '**Bitcoin** was the first cryptocurrency, created in 2009 by a pseudonymous developer called Satoshi Nakamoto. It was designed to be a peer-to-peer digital cash system that no single entity could control, inflate, or censor.' },
@@ -212,6 +219,7 @@ export const LEVELS: Level[] = [
       {
         id: 'crypto-2',
         title: 'How Crypto Works',
+        video: { videoId: '8zgvzmKZ5vo', title: 'Bitcoin: Security of Transaction Blockchains', credit: 'Khan Academy' },
         content: [
           { type: 'text', value: 'A **blockchain** is a chain of data "blocks," each containing a batch of verified transactions. Once a block is added, it\'s permanently recorded and nearly impossible to alter — because changing it would require redoing all subsequent blocks across thousands of computers at once.' },
           { type: 'text', value: '**Mining** is the process of adding new blocks to the Bitcoin blockchain. Miners compete to solve complex mathematical puzzles. The winner adds the next block and earns newly created Bitcoin as a reward. This is how new Bitcoin enters circulation — and why it uses so much energy.' },
@@ -227,6 +235,7 @@ export const LEVELS: Level[] = [
       {
         id: 'crypto-3',
         title: 'Crypto Risk & Opportunity',
+        video: { videoId: '0WiTaBI82Mc', title: 'Bitcoin: Cryptographic Hash Function', credit: 'Khan Academy' },
         content: [
           { type: 'text', value: 'Crypto is famous for extreme **volatility**. Bitcoin dropped 80% in 2018, 65% in 2022. Altcoins can fall 95%+ in a bear market. This volatility cuts both ways — Bitcoin also rose 10,000%+ over the 2010s. High risk, high potential reward.' },
           { type: 'text', value: 'Beyond Bitcoin, **Ethereum** is the largest altcoin — a programmable blockchain that powers **DeFi** (Decentralized Finance) apps, NFTs, and smart contracts. DeFi lets users lend, borrow, and trade without banks, using code-based "smart contracts" that execute automatically.' },
@@ -282,6 +291,7 @@ export const LEVELS: Level[] = [
       {
         id: 'forex-1',
         title: 'Currency Pairs Explained',
+        video: { videoId: 'gusjo9fB4vw', title: 'How Forex Really Works', credit: 'YouTube' },
         content: [
           { type: 'text', value: 'The **forex market** (foreign exchange) is the largest financial market in the world, with over $7.5 trillion traded every single day — dwarfing stocks, bonds, and crypto combined. It operates 24 hours a day, 5 days a week, across global banking centres.' },
           { type: 'text', value: 'Currencies are always traded in **pairs**. EUR/USD = 1.08 means that 1 euro (the **base currency**) buys 1.08 US dollars (the **quote currency**). If EUR/USD rises to 1.12, the euro has strengthened against the dollar.' },
@@ -296,6 +306,7 @@ export const LEVELS: Level[] = [
       {
         id: 'forex-2',
         title: 'What Moves Exchange Rates?',
+        video: { videoId: 'PFIHzHQjl2A', title: 'Interest Rates vs Bond Prices — The Inverse Explained', credit: 'YouTube' },
         content: [
           { type: 'text', value: 'Exchange rates are driven by the relative economic health and monetary policy of two countries. The most powerful driver is **interest rate differentials** — when a country raises rates, its currency attracts more capital, increasing demand and pushing the currency higher.' },
           { type: 'text', value: 'Other major drivers include **inflation** (higher inflation erodes purchasing power, weakening a currency), **GDP growth** (strong growth attracts investment), and **political stability** (uncertainty causes capital flight and currency weakness).' },
@@ -311,6 +322,7 @@ export const LEVELS: Level[] = [
       {
         id: 'forex-3',
         title: 'Forex Risk Management',
+        video: { videoId: 'yhAA9bmo9FY', title: 'Forex Trading for Beginners', credit: 'YouTube' },
         content: [
           { type: 'text', value: 'In forex trading, the **spread** is the difference between the buy and sell price — this is how brokers earn money. For EUR/USD, a typical spread is 0.5–2 pips. Exotic pairs have much wider spreads, meaning higher costs per trade.' },
           { type: 'text', value: '**Leverage** is what makes forex both powerful and dangerous. A broker offering 30:1 leverage means €1,000 controls a €30,000 position. A 1% move in your favour doubles your money. A 1% move against you wipes out €300 — 30% of your capital.' },
@@ -365,6 +377,7 @@ export const LEVELS: Level[] = [
       {
         id: 'commodities-1',
         title: 'Types of Commodities',
+        video: { videoId: 'KdyXtStPaRI', title: 'Bond Investing Made Simple', credit: 'YouTube' },
         content: [
           { type: 'text', value: '**Commodities** are physical goods that are largely interchangeable regardless of who produces them. A barrel of Brent crude from Norway is equivalent to one from the UK — they trade at the same price. This "fungibility" allows commodities to be traded on global exchanges.' },
           { type: 'text', value: 'Commodities split into two broad categories. **Hard commodities** are natural resources extracted through mining or drilling — gold, oil, copper, natural gas. **Soft commodities** are agricultural products grown or farmed — wheat, corn, coffee, soybeans, sugar.' },
@@ -380,6 +393,7 @@ export const LEVELS: Level[] = [
       {
         id: 'commodities-2',
         title: 'What Drives Commodity Prices?',
+        video: { videoId: 'vX8ha4cgjtY', title: 'Everything You Need to Know About Bonds', credit: 'YouTube' },
         content: [
           { type: 'text', value: 'Commodity prices are driven by fundamental **supply and demand**. When supply drops (drought reducing harvests, OPEC cutting oil production) and demand stays constant, prices rise. When supply surges or demand falls, prices collapse.' },
           { type: 'text', value: 'Geopolitics plays a huge role in energy markets. Wars or sanctions in oil-producing regions can spike crude prices within hours. For agriculture, a single weather report — drought in Brazil, flooding in the US corn belt — can move soft commodity prices by 5–10% in a day.' },
@@ -395,6 +409,7 @@ export const LEVELS: Level[] = [
       {
         id: 'commodities-3',
         title: 'How to Invest in Commodities',
+        video: { videoId: 'CsLSv_LKedw', title: 'Bond Investing for Beginners', credit: 'YouTube' },
         content: [
           { type: 'text', value: 'The most direct way to own a commodity is buying the physical asset — but that\'s impractical for most investors (imagine storing barrels of oil). Instead, retail investors typically access commodities through **futures contracts**, **commodity ETFs**, or **mining stocks**.' },
           { type: 'text', value: 'A **futures contract** is an agreement to buy or sell a specific amount of a commodity at a set price on a future date. Futures let producers hedge against price falls and speculators bet on direction — but they\'re complex and can expire worthless.' },
@@ -449,6 +464,7 @@ export const LEVELS: Level[] = [
       {
         id: 'etfs-1',
         title: 'What Is an ETF?',
+        video: { videoId: 'SFdsY9Rdh6w', title: 'Exchange Traded Funds (ETFs) Explained', credit: 'Khan Academy' },
         content: [
           { type: 'text', value: 'An **ETF** (Exchange-Traded Fund) is a basket of assets — stocks, bonds, commodities — packaged into a single investment that trades on a stock exchange just like a share. When you buy one unit of the MSCI World ETF, you instantly own tiny slices of 1,500+ companies across 23 countries.' },
           { type: 'text', value: 'ETFs were invented in 1993 and have revolutionized investing for ordinary people. Before ETFs, building a diversified global portfolio required buying hundreds of individual securities and paying steep commissions on each. Now you can do it in one click for fractions of a percent per year.' },
@@ -464,6 +480,7 @@ export const LEVELS: Level[] = [
       {
         id: 'etfs-2',
         title: 'Index Funds vs Active Funds',
+        video: { videoId: 'mIOEMLAc-bo', title: 'Index Funds and ETFs Explained', credit: 'YouTube' },
         content: [
           { type: 'text', value: 'An **index** is a basket of securities representing a market — the S&P 500 is the 500 largest US companies, equally weighted by market cap. A **passive** fund simply replicates that index, buying the same stocks in the same proportions. No stock-picking, no guesswork.' },
           { type: 'text', value: '**Active management** means a fund manager handpicks stocks trying to beat the index. It sounds appealing — but research consistently shows that roughly 80–90% of active funds underperform their benchmark index over a 10-year period, especially after fees.' },
@@ -478,6 +495,7 @@ export const LEVELS: Level[] = [
       {
         id: 'etfs-3',
         title: 'Building a Portfolio with ETFs',
+        video: { videoId: 'xaTNgDPbmH8', title: 'ETF Investing Explained', credit: 'YouTube' },
         content: [
           { type: 'text', value: 'One of the most effective investing strategies is **dollar-cost averaging** — investing a fixed amount at regular intervals (monthly) regardless of market conditions. This removes the temptation to time the market and automatically buys more shares when prices are low.' },
           { type: 'text', value: 'A simple "core-satellite" portfolio uses a broad global ETF as the core (80–90% of assets) providing wide diversification, then adds smaller "satellite" positions for specific exposures — a sector ETF, an emerging markets ETF, or a bond ETF for stability.' },
@@ -533,6 +551,7 @@ export const LEVELS: Level[] = [
       {
         id: 'mutual-funds-1',
         title: 'What Is a Mutual Fund?',
+        video: { videoId: 'DzYwB3uSU-c', title: 'Open-Ended Mutual Fund Explained', credit: 'Khan Academy' },
         content: [
           { type: 'text', value: 'A **mutual fund** is a pooled investment vehicle. Thousands of investors contribute money into a shared pot, and a professional **fund manager** invests it on their behalf — buying a diversified portfolio of stocks, bonds, or other assets according to the fund\'s stated strategy.' },
           { type: 'text', value: 'Unlike ETFs (which trade continuously on stock exchanges), mutual funds price once per day at their **NAV** (Net Asset Value). NAV is calculated as: (Total assets − Liabilities) ÷ Total shares outstanding. You buy and sell at the day\'s closing NAV.' },
@@ -548,6 +567,7 @@ export const LEVELS: Level[] = [
       {
         id: 'mutual-funds-2',
         title: 'Active Management',
+        video: { videoId: '-bLeRnOHq-8', title: 'Intro to Mutual Funds', credit: 'Investopedia' },
         content: [
           { type: 'text', value: 'An **active fund manager** analyses companies, economic trends, and market signals to pick specific securities they believe will outperform. Their goal is to generate **alpha** — returns above the benchmark index. If the MSCI World returns 8% and the fund returns 10%, the manager generated 2% alpha.' },
           { type: 'text', value: 'Active management sounds compelling, but the data tells a humbling story. Multiple long-term studies (SPIVA, S&P) consistently show that 70–85% of actively managed funds underperform their benchmark over 10 years. After fees, it\'s even harder to beat the market consistently.' },
@@ -563,6 +583,7 @@ export const LEVELS: Level[] = [
       {
         id: 'mutual-funds-3',
         title: 'Choosing a Mutual Fund',
+        video: { videoId: 'ro3v84swtZ4', title: 'How Do I Invest?', credit: 'Khan Academy' },
         content: [
           { type: 'text', value: 'When selecting a mutual fund, look beyond raw performance numbers. Start with the **expense ratio** — the total annual cost of owning the fund. This includes management fees, administrative costs, and sometimes distribution fees. Small differences compound dramatically over decades.' },
           { type: 'text', value: 'Check whether the fund is a **load** or **no-load** fund. A front-end load means you pay a commission (2–5% of your investment) when buying. A back-end load charges when selling. No-load funds have no such commissions. Most modern funds sold directly through platforms are no-load.' },
@@ -618,6 +639,7 @@ export const LEVELS: Level[] = [
       {
         id: 'topicality-1',
         title: 'Markets & the News',
+        video: { videoId: 'iGnRfvC3n8w', title: 'Understanding the Stock Market', credit: 'YouTube' },
         content: [
           { type: 'text', value: 'Financial markets are constantly absorbing new information. Every economic data release, every central bank statement, every earnings report — all of it moves prices. Understanding how news becomes price action is one of the most valuable skills an investor can develop.' },
           { type: 'text', value: 'Markets are forward-looking — prices reflect not what is happening, but what investors expect to happen. This is why a company can report record profits and its stock still falls. If analysts expected even better results, the "good" news is actually disappointing relative to expectations.' },
@@ -633,6 +655,7 @@ export const LEVELS: Level[] = [
       {
         id: 'topicality-2',
         title: 'AI & Algorithmic Trading',
+        video: { videoId: 'pmnMm1VIoGc', title: 'The Stock Market Explained in 13 Minutes', credit: 'YouTube' },
         content: [
           { type: 'text', value: 'Modern financial markets are dominated by algorithms. **Algorithmic trading** uses computer programs to execute trades automatically based on predefined rules — when a certain price is reached, when a technical pattern appears, or when a news event is detected. About 70% of US equity trading volume is now algorithmic.' },
           { type: 'text', value: '**High-frequency trading (HFT)** takes this further — firms use servers co-located next to exchange computers to execute thousands of trades per second, exploiting price differences of fractions of a cent that exist for milliseconds. HFT firms make tiny profits per trade but do it at massive scale.' },
@@ -648,6 +671,7 @@ export const LEVELS: Level[] = [
       {
         id: 'topicality-3',
         title: 'Investing in a Changing World',
+        video: { videoId: 'wRxt9_0nIls', title: 'Every Stock Market Term Explained', credit: 'YouTube' },
         content: [
           { type: 'text', value: 'Markets change. New asset classes emerge (crypto in the 2010s), old sectors decline (coal, print media), regulations shift, and technology disrupts every industry. The investor who thrives long-term is one who stays curious, keeps learning, and adapts their mental models as the world changes.' },
           { type: 'text', value: 'Staying informed doesn\'t mean reacting to every headline. It means building a strong foundation of financial knowledge — understanding how different assets behave, what drives valuations, how macro forces connect — so you can evaluate any new development rationally, not emotionally.' },
