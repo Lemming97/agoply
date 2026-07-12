@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { GameStateData, GameState, MarketAsset, GlossaryEntry, Portfolio, SimulationStats } from '../types'
+import { STREAK_REWARDS } from '../data/streakRewards'
 
 const GLOSSARY_KEY = 'agoply_glossary'
 
@@ -61,6 +62,8 @@ const DEMO_STATE: GameStateData = {
   completedGames: [],
   earnedGameXP: {},
   simulationStats: recalcSimulationStats(DEMO_PORTFOLIO, DEFAULT_SIMULATION_STATS),
+  lastLoginDate: null,
+  lastStreakRewardClaimed: 0,
 }
 
 // Blank starting state for new registered users
@@ -75,6 +78,8 @@ const FRESH_STATE: GameStateData = {
   completedGames: [],
   earnedGameXP: {},
   simulationStats: DEFAULT_SIMULATION_STATS,
+  lastLoginDate: null,
+  lastStreakRewardClaimed: 0,
 }
 
 const TEST_EMAIL = 'test@agoply.com'
@@ -97,6 +102,8 @@ export function useGameState(userEmail: string): GameState {
           completedGames: parsed.completedGames ?? [],
           earnedGameXP: parsed.earnedGameXP ?? {},
           simulationStats: parsed.simulationStats ?? DEFAULT_SIMULATION_STATS,
+          lastLoginDate: parsed.lastLoginDate ?? null,
+          lastStreakRewardClaimed: parsed.lastStreakRewardClaimed ?? 0,
         }
       }
     } catch { /* ignore */ }
@@ -107,11 +114,80 @@ export function useGameState(userEmail: string): GameState {
     localStorage.setItem(key, JSON.stringify(state))
   }, [state, key])
 
+  // Captures the streak resolved by checkDailyLogin so checkStreakReward can be
+  // chained immediately after — setState's updater runs synchronously, so the
+  // ref is populated before the follow-up call below.
+  const pendingNewStreakRef = useRef<number | null>(null)
+
+  function checkDailyLogin(): void {
+    const today = new Date().toISOString().split('T')[0] // e.g. "2026-07-11"
+
+    setState(s => {
+      const last = s.lastLoginDate
+
+      // First ever login
+      if (!last) {
+        pendingNewStreakRef.current = 1
+        return { ...s, lastLoginDate: today, streak: 1 }
+      }
+
+      // Same day — no change
+      if (last === today) {
+        pendingNewStreakRef.current = null
+        return s
+      }
+
+      const lastDate = new Date(last)
+      const todayDate = new Date(today)
+      const diffDays = Math.round(
+        (todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24)
+      )
+
+      if (diffDays === 1) {
+        // Consecutive day — increment streak
+        const newStreak = s.streak + 1
+        pendingNewStreakRef.current = newStreak
+        return { ...s, lastLoginDate: today, streak: newStreak }
+      } else {
+        // Streak broken — reset to 1 (today still counts as day 1)
+        pendingNewStreakRef.current = 1
+        return { ...s, lastLoginDate: today, streak: 1 }
+      }
+    })
+
+    if (pendingNewStreakRef.current !== null) {
+      checkStreakReward(pendingNewStreakRef.current)
+    }
+  }
+
+  function checkStreakReward(newStreak: number) {
+    const reward = STREAK_REWARDS.find(r => r.streak === newStreak)
+    if (!reward) return null
+
+    setState(s => {
+      // Don't double-award
+      if (s.lastStreakRewardClaimed >= newStreak) return s
+      return {
+        ...s,
+        portfolio: {
+          ...s.portfolio,
+          cash: s.portfolio.cash + reward.cashBonus,
+        },
+        lastStreakRewardClaimed: newStreak,
+      }
+    })
+    return reward
+  }
+
+  useEffect(() => {
+    checkDailyLogin()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // runs once on mount
+
   function completeLevel(levelId: number): void {
     setState(s => ({
       ...s,
       xp: s.xp + 50,
-      streak: s.streak + 1,
       completedLevels: [...new Set([...s.completedLevels, levelId])],
       activeLesson: levelId + 1,
       portfolio: {

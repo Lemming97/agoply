@@ -15,8 +15,10 @@ import {
   IconLock, IconSparkles,
   IconBuildingBank, IconTrendingUp, IconCurrencyBitcoin, IconCurrencyEuro,
   IconBarrel, IconChartPie, IconBuildingStore, IconDeviceGamepad2,
+  IconFlame, IconCircleCheck,
 } from '@tabler/icons-react'
 import { LEVELS } from '../data/gameData'
+import { STREAK_REWARDS } from '../data/streakRewards'
 import GamesPage from './GamesPage'
 import type { GameState, Level, LevelStatus } from '../types'
 
@@ -59,6 +61,10 @@ export default function EducationPage({ gameState, showToast, onOpenLesson, onOp
 
   return (
     <Box>
+      {gameState.streak >= 1 && (
+        <StreakCard streak={gameState.streak} lastStreakRewardClaimed={gameState.lastStreakRewardClaimed} />
+      )}
+
       {/* Toggle */}
       <ToggleButtonGroup
         value={mode}
@@ -120,6 +126,78 @@ export default function EducationPage({ gameState, showToast, onOpenLesson, onOp
             })}
           </Grid>
         </>
+      )}
+    </Box>
+  )
+}
+
+function StreakCard({ streak, lastStreakRewardClaimed }: { streak: number; lastStreakRewardClaimed: number }) {
+  const justClaimed = streak === lastStreakRewardClaimed
+  const claimedReward = justClaimed ? STREAK_REWARDS.find(r => r.streak === streak) : undefined
+  const nextReward = STREAK_REWARDS.find(r => r.streak > streak) ?? null
+
+  if (justClaimed && claimedReward) {
+    return (
+      <Box
+        sx={{
+          background: 'linear-gradient(135deg, #E8F5E9, #F1F8E9)',
+          border: '1px solid #66BB6A',
+          borderRadius: 'var(--radius)',
+          p: '14px 16px',
+          mb: 2,
+        }}
+      >
+        <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
+          <IconCircleCheck size={20} strokeWidth={1.5} color="#66BB6A" />
+          <Typography sx={{ fontWeight: 700, fontSize: 14, fontFamily: 'var(--font-display)' }}>
+            Day {streak} Streak
+          </Typography>
+        </Stack>
+        <Typography sx={{ fontSize: 13, color: '#2E7D32', fontFamily: 'var(--font-body)', mt: 0.75 }}>
+          Reward claimed! +€{claimedReward.cashBonus} added
+        </Typography>
+      </Box>
+    )
+  }
+
+  return (
+    <Box
+      sx={{
+        background: 'linear-gradient(135deg, #FFF8E1, #FFFDE7)',
+        border: '1px solid #FFD700',
+        borderRadius: 'var(--radius)',
+        p: '14px 16px',
+        mb: 2,
+      }}
+    >
+      <Stack direction="row" sx={{ alignItems: 'center', gap: 1, mb: nextReward ? 1 : 0 }}>
+        <IconFlame size={20} strokeWidth={1.5} color="#FFB300" />
+        <Typography sx={{ fontWeight: 700, fontSize: 14, fontFamily: 'var(--font-display)' }}>
+          Day {streak} Streak
+        </Typography>
+      </Stack>
+
+      {nextReward ? (
+        <>
+          <Typography sx={{ fontSize: 12, color: 'var(--muted)', fontFamily: 'var(--font-body)', mb: 0.5 }}>
+            Next reward: {nextReward.streak - streak} day{nextReward.streak - streak === 1 ? '' : 's'} away
+          </Typography>
+          <LinearProgress
+            variant="determinate"
+            value={(streak / nextReward.streak) * 100}
+            sx={{
+              height: 6, borderRadius: 3, bgcolor: 'rgba(255,179,0,0.15)',
+              '& .MuiLinearProgress-bar': { bgcolor: '#FFB300', borderRadius: 3 },
+            }}
+          />
+          <Typography sx={{ fontSize: 12, color: 'var(--muted)', fontFamily: 'var(--font-body)', mt: 0.5 }}>
+            {streak}/{nextReward.streak} · +€{nextReward.cashBonus} virtual cash
+          </Typography>
+        </>
+      ) : (
+        <Typography sx={{ fontSize: 13, fontFamily: 'var(--font-body)' }}>
+          Incredible! {streak} day streak
+        </Typography>
       )}
     </Box>
   )

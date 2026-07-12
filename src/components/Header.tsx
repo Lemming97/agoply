@@ -10,15 +10,18 @@ import MenuItem from '@mui/material/MenuItem'
 import Stack from '@mui/material/Stack'
 import Box from '@mui/material/Box'
 import Divider from '@mui/material/Divider'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { IconSchool, IconChartLine, IconWorld, IconFlame, IconBolt, IconEdit, IconBooks } from '@tabler/icons-react'
 import type { NavTab, UserProfile } from '../types'
+import type { StreakReward } from '../data/streakRewards'
 
 interface HeaderProps {
   tab: NavTab
   setTab: (tab: NavTab) => void
   xp: number
   streak: number
+  nextReward: StreakReward | null
   profile: UserProfile
   onEditProfile: () => void
   onShowGlossary: () => void
@@ -41,7 +44,7 @@ function avatarSrc(profile: UserProfile): string {
   return dicebearUrl(profile.firstName || 'default')
 }
 
-export default function Header({ tab, setTab, xp, streak, profile, onEditProfile, onShowGlossary, onLogout }: HeaderProps) {
+export default function Header({ tab, setTab, xp, streak, nextReward, profile, onEditProfile, onShowGlossary, onLogout }: HeaderProps) {
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null)
 
   const displayName = [profile.firstName, profile.lastName].filter(Boolean).join(' ')
@@ -74,15 +77,41 @@ export default function Header({ tab, setTab, xp, streak, profile, onEditProfile
         </Stack>
 
         <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
-          <Chip
-            label={
-              <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5 }}>
-                <IconFlame size={14} strokeWidth={1.5} />
-                <span>{streak}</span>
-              </Stack>
+          <Tooltip
+            title={
+              <Box sx={{ p: 0.5 }}>
+                <Typography variant="caption" sx={{ fontWeight: 700, display: 'block', fontFamily: 'var(--font-body)' }}>
+                  {streak} day streak
+                </Typography>
+                <Typography variant="caption" sx={{ opacity: 0.85, fontFamily: 'var(--font-body)' }}>
+                  {nextReward
+                    ? `${nextReward.streak - streak} days until +€${nextReward.cashBonus} bonus`
+                    : 'Keep logging in daily!'}
+                </Typography>
+              </Box>
             }
-            sx={{ bgcolor: 'rgba(255,179,0,0.25)', border: '1px solid rgba(255,179,0,0.4)', color: '#FFD54F', fontWeight: 700 }}
-          />
+            arrow
+            placement="bottom"
+            slotProps={{
+              tooltip: {
+                sx: {
+                  bgcolor: '#1a2e27',
+                  borderRadius: '8px',
+                  '& .MuiTooltip-arrow': { color: '#1a2e27' },
+                },
+              },
+            }}
+          >
+            <Chip
+              label={
+                <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5 }}>
+                  <IconFlame size={14} strokeWidth={1.5} />
+                  <span>{streak}</span>
+                </Stack>
+              }
+              sx={{ bgcolor: 'rgba(255,179,0,0.25)', border: '1px solid rgba(255,179,0,0.4)', color: '#FFD54F', fontWeight: 700, cursor: 'default' }}
+            />
+          </Tooltip>
           <Chip
             label={
               <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5 }}>

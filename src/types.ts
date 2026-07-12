@@ -130,6 +130,8 @@ export interface GameStateData {
   completedGames: string[]
   earnedGameXP: Record<string, number>
   simulationStats: SimulationStats
+  lastLoginDate: string | null
+  lastStreakRewardClaimed: number
 }
 
 export interface GameState extends GameStateData {
