@@ -794,7 +794,7 @@ export const PLATFORMS: Platform[] = [
       'Search for a fund or stock, review the fee schedule (€1.95–€9.95 per order), and place your first order.',
     ],
     article: {
-      title: 'Pourquoi et comment investir en bourse',
+      title: 'Investir en Bourse : Guide Complet pour Débuter',
       source: 'BNP Paribas',
       url: 'https://mabanque.bnpparibas/fr/bourse/nos-offres-et-services-bourse/pourquoi-et-comment-investir-en-bourse',
     },
