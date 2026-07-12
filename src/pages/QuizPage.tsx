@@ -12,6 +12,7 @@ import {
   IconMountain, IconSparkles, IconTrophy,
   IconBuildingBank, IconTrendingUp, IconCurrencyBitcoin, IconCurrencyEuro,
   IconBarrel, IconChartPie, IconBuildingStore,
+  IconHelp, IconBolt, IconCoin,
 } from '@tabler/icons-react'
 import LottieAnimation from '../components/LottieAnimation'
 import TrophyWinner from '../assets/animations/Trophy_Winner.json'
@@ -249,12 +250,12 @@ export default function QuizPage({ levelId, gameState, showToast, onBack }: Quiz
 
         <Stack sx={{ gap: 1.5, mb: 3 }}>
           {[
-            { icon: '❓', label: `${totalQ} questions` },
-            { icon: '⚡', label: '+50 XP on completion' },
-            { icon: '💶', label: '€100 virtual cash added to your portfolio' },
+            { icon: <IconHelp size={18} strokeWidth={1.5} color="var(--muted)" />, label: `${totalQ} questions` },
+            { icon: <IconBolt size={18} strokeWidth={1.5} color="var(--gold-400)" />, label: '+50 XP on completion' },
+            { icon: <IconCoin size={18} strokeWidth={1.5} color="var(--teal-400)" />, label: '€100 virtual cash added to your portfolio' },
           ].map(({ icon, label }) => (
             <Stack key={label} direction="row" sx={{ alignItems: 'center', gap: 1.5, p: '12px 16px', borderRadius: '10px', bgcolor: 'var(--surface)', border: '1px solid var(--border)' }}>
-              <Typography sx={{ fontSize: 18 }}>{icon}</Typography>
+              {icon}
               <Typography sx={{ fontSize: 14, fontWeight: 600 }}>{label}</Typography>
             </Stack>
           ))}
