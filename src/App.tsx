@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import Box from '@mui/material/Box'
+import Stack from '@mui/material/Stack'
+import { IconFlame } from '@tabler/icons-react'
 import Header from './components/Header'
 import EducationPage from './pages/EducationPage'
 import SimulationPage from './pages/SimulationPage'
@@ -20,6 +22,7 @@ import { useToast } from './hooks/useToast'
 import { useGameState } from './hooks/useGameState'
 import { useAuth } from './hooks/useAuth'
 import { useUserProfile } from './hooks/useUserProfile'
+import { STREAK_REWARDS } from './data/streakRewards'
 import theme from './theme'
 import type { NavTab, User, GlossaryEntry } from './types'
 
@@ -51,6 +54,55 @@ function AuthenticatedApp({ user, onLogout }: { user: User; onLogout: () => void
   const { toast, showToast } = useToast()
   const gameState = useGameState(user.email)
   const { profile, updateProfile } = useUserProfile(user.name, user.email)
+
+  const nextReward = STREAK_REWARDS.find(r => r.streak > gameState.streak) ?? null
+
+  // Tracks whether lastLoginDate was already "today" before this mount's
+  // checkDailyLogin() ran, so the notification only fires on a genuine
+  // day-transition — not on every reopen within the same day.
+  const initialLoginDateRef = useRef<string | null | undefined>(undefined)
+  const notifiedRef = useRef(false)
+
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0]
+
+    if (initialLoginDateRef.current === undefined) {
+      initialLoginDateRef.current = gameState.lastLoginDate
+    }
+
+    if (gameState.lastLoginDate !== today) return // checkDailyLogin hasn't settled state yet
+    if (notifiedRef.current) return
+
+    const wasAlreadyToday = initialLoginDateRef.current === today
+    notifiedRef.current = true
+    if (wasAlreadyToday) return // already greeted earlier today
+
+    const timer = setTimeout(() => {
+      const newStreak = gameState.streak
+      const reward = STREAK_REWARDS.find(
+        r => r.streak === newStreak && gameState.lastStreakRewardClaimed >= newStreak
+      )
+
+      if (reward) {
+        showToast(
+          <Stack direction="row" sx={{ alignItems: 'center', gap: 0.75 }}>
+            <IconFlame size={16} color="#FFD700" />
+            <span>{reward.label} +€{reward.cashBonus} virtual cash bonus!</span>
+          </Stack>
+        )
+      } else if (newStreak > 1) {
+        showToast(
+          <Stack direction="row" sx={{ alignItems: 'center', gap: 0.75 }}>
+            <IconFlame size={16} color="#FFD700" />
+            <span>Day {newStreak} streak! Keep it up</span>
+          </Stack>
+        )
+      }
+      // first login or streak reset to 1 — no toast
+    }, 800)
+
+    return () => clearTimeout(timer)
+  }, [gameState.lastLoginDate, gameState.streak, gameState.lastStreakRewardClaimed, showToast])
 
   function openLevel(levelId: number) {
     setSelectedLevelId(levelId)
@@ -93,6 +145,7 @@ function AuthenticatedApp({ user, onLogout }: { user: User; onLogout: () => void
         setTab={setTab}
         xp={gameState.xp}
         streak={gameState.streak}
+        nextReward={nextReward}
         profile={profile}
         onEditProfile={() => setView('editProfile')}
         onShowGlossary={() => setView('glossary')}
