@@ -20,6 +20,7 @@ import { LEVELS } from '../data/gameData'
 import { getEmbeddedExercise } from '../data/dragDropExercises'
 import { useDragDropState } from '../hooks/useDragDropState'
 import DragDropGame from '../components/DragDropGame'
+import YouTubeEmbed from '../components/YouTubeEmbed'
 import BondsYieldCalculator from '../components/games/BondsYieldCalculator'
 import StocksPortfolioBuilder from '../components/games/StocksPortfolioBuilder'
 import ETFsFeeCalculator from '../components/games/ETFsFeeCalculator'
@@ -197,6 +198,14 @@ export default function SubLessonPage({
         <Typography variant="caption" sx={{ color: 'var(--teal-600)', display: 'block', mb: 2, fontStyle: 'italic' }}>
           Tap underlined terms to learn more
         </Typography>
+      )}
+
+      {subLesson.video && (
+        <YouTubeEmbed
+          videoId={subLesson.video.videoId}
+          title={subLesson.video.title}
+          credit={subLesson.video.credit}
+        />
       )}
 
       {/* Content blocks */}

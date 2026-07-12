@@ -42,6 +42,12 @@ export interface ImportantBlock {
   value: string
 }
 
+export interface VideoBlock {
+  type: 'video'
+  videoId: string
+  title: string
+}
+
 export type ContentBlock = TextBlock | CalloutBlock | ImportantBlock
 
 export interface Quiz {
@@ -55,6 +61,7 @@ export interface SubLesson {
   id: string
   title: string
   content: ContentBlock[]
+  video?: { videoId: string; title: string; credit: string }
 }
 
 export interface Level {
